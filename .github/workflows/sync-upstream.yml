@@ -1,0 +1,40 @@
+name: Sync with upstream
+
+on:
+  schedule:
+    - cron: "*/5 * * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: sync-upstream
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      max-parallel: 1
+      matrix:
+        branch: [main, zahra]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ matrix.branch }}
+          fetch-depth: 0
+
+      - name: Merge upstream/${{ matrix.branch }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git remote add upstream https://github.com/ALi-Hosseinzad/sana-panel-admin.git
+          git fetch upstream ${{ matrix.branch }}
+          if git merge-base --is-ancestor upstream/${{ matrix.branch }} HEAD; then
+            echo "Already up to date."
+            exit 0
+          fi
+          git merge --no-edit upstream/${{ matrix.branch }}
+          git push origin HEAD:${{ matrix.branch }}
