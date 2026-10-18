@@ -1,5 +1,11 @@
 import { type LoanStatus } from '@/constant/loanStatus';
 
+export type {
+  DecisionFormValues,
+  DecisionRequestInfo,
+  DecisionType,
+} from '@/component/decision-modal';
+
 /** درخواست در انتظار تأیید مدیر شرکت */
 export interface PendingRequest {
   id: string;
@@ -10,8 +16,6 @@ export interface PendingRequest {
   note?: string;
   status: LoanStatus;
 }
-
-export type DecisionType = 'approve' | 'reject';
 
 /** بدنه تأیید/رد (تکی یا گروهی) */
 export interface DecisionPayload {
@@ -24,20 +28,4 @@ export interface DecisionPayload {
   stageId?: string;
   /** علت عدم اعطای تسهیلات غیرحضوری (برای مرحله‌ای که علت می‌خواهد) */
   noGrantReasonId?: string;
-}
-
-export interface DecisionFormValues {
-  note?: string;
-  file?: File | null;
-  reasonId?: string;
-  stageId?: string;
-  noGrantReasonId?: string;
-}
-
-/** حداقل اطلاعات درخواست برای نمایش در مودال تصمیم */
-export interface DecisionRequestInfo {
-  id: string;
-  staffName: string;
-  planTitle: string;
-  amount: number;
 }

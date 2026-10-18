@@ -9,7 +9,7 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 @theme inline {
-  --font-sans: 'Vazirmatn Variable', 'Vazirmatn', 'IRANSansX', Tahoma, sans-serif;
+  --font-sans: 'Sana Digits', 'Vazirmatn Variable', 'Vazirmatn', 'IRANSansX', Tahoma, sans-serif;
 
   --color-primary: var(--sana-primary);
   --color-primary-hover: var(--sana-primary-hover);

@@ -8,9 +8,10 @@ import { PanelCard } from '@/component/card';
 import { Form } from '@/component/form';
 import { Skeleton } from '@/component/loading';
 import { QUERY_KEYS } from '@/constant/queryKeys';
+import { removeEmpty } from '@/utils/object';
 
 import { createScheme, getScheme, updateScheme } from '../api';
-import { type Scheme, type SchemePayload } from '../types';
+import { type Scheme, type SchemePayload, type SchemeTextList } from '../types';
 
 import { GeneralFields } from './GeneralFields';
 import { NumberListFields } from './NumberListFields';
@@ -46,6 +47,28 @@ const toFormValues = ({ id: _id, ...scheme }: Scheme): SchemePayload => ({
   noGrantReasons: withRow(scheme.noGrantReasons),
   avgDocTypes: withRow(scheme.avgDocTypes),
 });
+
+const TEXT_LISTS: SchemeTextList[] = [
+  'cancelReasons',
+  'rejectReasons',
+  'noGrantReasons',
+  'avgDocTypes',
+];
+
+/**
+ * مقادیر خالی فرستاده نمی‌شوند؛ ردیف‌های خالی لیست‌های متنی حذف می‌شوند (لیست خالی = []).
+ * ضریب سپه فقط وقتی «حقوق‌بگیر بانک سپه» روشن است فرستاده می‌شود.
+ */
+const toPayload = ({ sepahMultiplier, ...values }: SchemePayload) =>
+  ({
+    ...removeEmpty(values.sepahEnabled ? { ...values, sepahMultiplier } : values),
+    ...Object.fromEntries(
+      TEXT_LISTS.map((key) => [
+        key,
+        (values[key] ?? []).map((item) => item?.trim()).filter(Boolean),
+      ]),
+    ),
+  }) as SchemePayload;
 
 const LOOKUP_KEYS = [
   QUERY_KEYS.LOOKUPS.PLANS,
@@ -118,7 +141,7 @@ export const SchemeForm = ({ schemeId, onBack }: SchemeFormProps) => {
           form={form}
           layout="vertical"
           initialValues={initialValues}
-          onFinish={(values) => mutate(values)}
+          onFinish={(values) => mutate(toPayload(values))}
         >
           <GeneralFields />
           <NumberListFields

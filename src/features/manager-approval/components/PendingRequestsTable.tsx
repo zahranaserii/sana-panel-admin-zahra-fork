@@ -5,6 +5,7 @@ import { useState } from 'react';
 import { toast } from 'sonner';
 
 import { Button } from '@/component/button';
+import { DecisionModal, type DecisionTarget } from '@/component/decision-modal';
 import { StatusChip } from '@/component/status-chip';
 import { Table } from '@/component/table';
 import { LOAN_STATUS } from '@/constant/loanStatus';
@@ -15,8 +16,6 @@ import { formatRial } from '@/utils/number';
 
 import { getPendingRequests, submitDecision } from '../api';
 import { type DecisionFormValues, type DecisionType, type PendingRequest } from '../types';
-
-import { DecisionModal, type DecisionTarget } from './DecisionModal';
 
 const PAGE_SIZE = 10;
 

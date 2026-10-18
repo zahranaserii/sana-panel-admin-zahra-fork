@@ -1,6 +1,7 @@
 export * from './button';
 export * from './card';
 export * from './checkbox';
+export * from './decision-modal';
 export * from './form';
 export * from './info-tooltip';
 export * from './input';

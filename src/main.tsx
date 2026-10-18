@@ -1,4 +1,5 @@
 import '@fontsource-variable/vazirmatn';
+import './styles/digits.css';
 import './styles/index.css';
 
 import { StrictMode } from 'react';

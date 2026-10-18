@@ -9,11 +9,13 @@ import { defineConfig, loadEnv } from 'vite';
 
 // const packageJson = JSON.parse(readFileSync(new URL('./package.json', import.meta.url), 'utf-8'));
 
-export default defineConfig(({ mode }) => {
+export default defineConfig(({ mode, command }) => {
   const env = loadEnv(mode, process.cwd(), '');
   const isProduction = mode === 'production';
+  const useHttps = command === 'serve' && env.HTTPS === 'true';
+
   return {
-    plugins: [react(), tailwindcss(), ...(env.HTTPS === 'true' ? [basicSsl()] : [])],
+    plugins: [react(), tailwindcss(), ...(useHttps ? [basicSsl()] : [])],
     resolve: {
       alias: {
         '@': fileURLToPath(new URL('./src', import.meta.url)),

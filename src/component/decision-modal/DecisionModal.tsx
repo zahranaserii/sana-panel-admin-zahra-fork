@@ -1,21 +1,38 @@
 import { type ReactNode } from 'react';
 
-import { FormItem } from '@/component/form';
-import { FileInput, SelectInput, TextAreaInput } from '@/component/input';
-import { FormModal } from '@/component/modal';
 import { type LookupItem } from '@/types/common';
 import { toPersianDigits } from '@/utils/date';
 import { formatRial } from '@/utils/number';
 import { rialToTomanWords } from '@/utils/numberToWords';
 
-import { type DecisionFormValues, type DecisionRequestInfo, type DecisionType } from '../types';
+import { FormItem } from '../form';
+import { FileInput, SelectInput, TextAreaInput } from '../input';
+import { FormModal } from '../modal';
+
+export type DecisionType = 'approve' | 'reject';
+
+export interface DecisionFormValues {
+  note?: string;
+  file?: File | null;
+  reasonId?: string;
+  stageId?: string;
+  noGrantReasonId?: string;
+}
+
+/** حداقل اطلاعات درخواست برای نمایش در مودال تصمیم */
+export interface DecisionRequestInfo {
+  id: string;
+  staffName: string;
+  planTitle: string;
+  amount: number;
+}
 
 export interface DecisionTarget {
   type: DecisionType;
   requests: DecisionRequestInfo[];
 }
 
-interface DecisionModalProps {
+export interface DecisionModalProps {
   target: DecisionTarget | null;
   /** اگر داده شود، در حالت رد انتخاب دلیل اجباری است */
   rejectReasons?: LookupItem[];

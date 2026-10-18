@@ -14,5 +14,6 @@ export const TYPOGRAPHY_SCALE: Record<TypographySize, TypographyScale> = {
   sm: { fontSize: 12, fontWeight: 600, lineHeight: 1.7 },
 };
 
+/** «Sana Digits» فقط ارقام 0-9 را با شکل فارسی نمایش می‌دهد (styles/digits.css) */
 export const FONT_FAMILY =
-  "'Vazirmatn Variable', 'Vazirmatn', 'IRANSansX', 'IRANSans', 'Segoe UI', Tahoma, sans-serif";
+  "'Sana Digits', 'Vazirmatn Variable', 'Vazirmatn', 'IRANSansX', 'IRANSans', 'Segoe UI', Tahoma, sans-serif";

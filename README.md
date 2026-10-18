@@ -6,14 +6,14 @@
 
 ```bash
 npm install
-npm run dev          # محیط development  (http://localhost:3005)
+npm run dev          # محیط development  (https://localhost:3005)
 npm run dev:stage    # محیط staging
 npm run build        # بیلد production
 npm run build:stage  # بیلد staging
 ```
 
-> **HTTPS فعلاً غیرفعال است** و پروژه روی `http://localhost:3005` اجرا می‌شود.
-> برای اجرای محلی با https کافی است `HTTPS=true` در فایل env باشد (گواهی self-signed با plugin-basic-ssl).
+> سرور توسعه با `HTTPS=true` در `.env.development` روی `https://localhost:3005` و گواهی self-signed (plugin-basic-ssl) اجرا می‌شود؛
+> بار اول مرورگر هشدار گواهی می‌دهد که باید تأیید شود. https فقط روی `vite` (serve) اعمال می‌شود و روی build اثری ندارد.
 > پورت با متغیر `PORT` قابل تغییر است (پیش‌فرض ۳۰۰۵).
 > بیلد production با terser فشرده می‌شود و `console` و `debugger` حذف می‌شوند؛ بقیه محیط‌ها sourcemap دارند.
 
@@ -117,6 +117,12 @@ interceptor و بقیه بخش‌ها توکن را فقط از همین است�
   <FormItem name="from" label="از تاریخ"><DateInput /></FormItem>
 </Form>
 ```
+
+### ارقام فارسی
+
+ارقام با فونت فارسی نمایش داده می‌شوند و **هیچ تبدیلی روی مقدار انجام نمی‌شود**: فونت «Sana Digits»
+(نسخه Farsi-Digits وزیرمتن، `src/styles/digits.css`) فقط برای کاراکترهای 0 تا 9 بارگذاری می‌شود.
+پس مقدار ورودی‌ها و داده‌های ارسالی به API انگلیسی می‌ماند ولی همه‌جا (ورودی‌ها، جدول، چارت) فارسی دیده می‌شود.
 
 ### تاریخ
 

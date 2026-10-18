@@ -1,0 +1,68 @@
+/*
+ * ارقام فارسی فقط با فونت: نسخه Farsi-Digits وزیرمتن برای کاراکترهای 0 تا 9 شکل فارسی دارد.
+ * با unicode-range فقط ارقام از این فونت خوانده می‌شوند و مقدار داده‌ها (ورودی‌ها، API) انگلیسی می‌ماند.
+ */
+
+@font-face {
+  font-family: 'Sana Digits';
+  src: url('vazirmatn/misc/Farsi-Digits/fonts/webfonts/Vazirmatn-FD-Light.woff2') format('woff2');
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+0030-0039;
+}
+
+@font-face {
+  font-family: 'Sana Digits';
+  src: url('vazirmatn/misc/Farsi-Digits/fonts/webfonts/Vazirmatn-FD-Regular.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+0030-0039;
+}
+
+@font-face {
+  font-family: 'Sana Digits';
+  src: url('vazirmatn/misc/Farsi-Digits/fonts/webfonts/Vazirmatn-FD-Medium.woff2') format('woff2');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+0030-0039;
+}
+
+@font-face {
+  font-family: 'Sana Digits';
+  src: url('vazirmatn/misc/Farsi-Digits/fonts/webfonts/Vazirmatn-FD-SemiBold.woff2') format('woff2');
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+0030-0039;
+}
+
+@font-face {
+  font-family: 'Sana Digits';
+  src: url('vazirmatn/misc/Farsi-Digits/fonts/webfonts/Vazirmatn-FD-Bold.woff2') format('woff2');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+0030-0039;
+}
+
+@font-face {
+  font-family: 'Sana Digits';
+  src: url('vazirmatn/misc/Farsi-Digits/fonts/webfonts/Vazirmatn-FD-ExtraBold.woff2')
+    format('woff2');
+  font-weight: 800;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+0030-0039;
+}
+
+@font-face {
+  font-family: 'Sana Digits';
+  src: url('vazirmatn/misc/Farsi-Digits/fonts/webfonts/Vazirmatn-FD-Black.woff2') format('woff2');
+  font-weight: 900;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+0030-0039;
+}

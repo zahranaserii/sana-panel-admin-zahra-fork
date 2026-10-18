@@ -1,7 +1,7 @@
 import { defineConfig, devices } from '@playwright/test';
 
-// HTTPS فعلاً غیرفعال است؛ هنگام فعال‌سازی، آدرس‌ها به https://localhost:3005 برگردند.
-const BASE_URL = 'http://localhost:3005';
+// سرور توسعه با HTTPS=true در .env.development روی https و گواهی self-signed اجرا می‌شود
+const BASE_URL = 'https://localhost:3005';
 
 export default defineConfig({
   testDir: './e2e',
@@ -11,7 +11,7 @@ export default defineConfig({
   reporter: 'html',
   use: {
     baseURL: BASE_URL,
-    // ignoreHTTPSErrors: true,
+    ignoreHTTPSErrors: true,
     locale: 'fa-IR',
     trace: 'on-first-retry',
     // در صورت نیاز مسیر کروم سیستم: PW_CHROMIUM_PATH=/path/to/chrome npm run test:e2e
@@ -25,7 +25,7 @@ export default defineConfig({
   webServer: {
     command: 'npm run dev',
     url: BASE_URL,
-    // ignoreHTTPSErrors: true,
+    ignoreHTTPSErrors: true,
     reuseExistingServer: !process.env.CI,
   },
 });

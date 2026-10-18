@@ -5,10 +5,10 @@ import { toast } from 'sonner';
 
 import { Button } from '@/component/button';
 import { PanelCard } from '@/component/card';
+import { DecisionModal, type DecisionTarget } from '@/component/decision-modal';
 import { SelectInput } from '@/component/input';
 import { Table } from '@/component/table';
 import { QUERY_KEYS } from '@/constant/queryKeys';
-import { DecisionModal, type DecisionTarget } from '@/features/manager-approval/components';
 import { type DecisionFormValues, type DecisionType } from '@/features/manager-approval/types';
 import { resolveFile } from '@/services/file';
 import { getAllCompanyOptions, getRejectReasons } from '@/services/lookup';

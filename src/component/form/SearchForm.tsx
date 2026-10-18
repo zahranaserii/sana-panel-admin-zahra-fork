@@ -3,21 +3,11 @@ import { Form as AntForm } from 'antd';
 import { useEffect, useRef } from 'react';
 
 import { useQueryParams, type QueryValue } from '@/hooks/useQueryParams';
+import { removeEmpty } from '@/utils/object';
 
 import { Button } from '../button';
 
 import { type SearchFormProps } from './types';
-
-const isEmptyValue = (value: unknown) =>
-  value === undefined ||
-  value === null ||
-  value === '' ||
-  (Array.isArray(value) && value.length === 0);
-
-const removeEmpty = <T,>(values: T) =>
-  Object.fromEntries(
-    Object.entries(values as Record<string, unknown>).filter(([, value]) => !isEmptyValue(value)),
-  ) as Partial<T>;
 
 const defaultParseQuery = (params: Record<string, string>) =>
   Object.fromEntries(
