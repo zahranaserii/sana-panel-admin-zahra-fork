@@ -1,0 +1,55 @@
+import { type Role } from '@/features/users/types';
+
+/** نقش‌ها (UserManagement/Roles) */
+export const MOCK_ROLES: Role[] = [
+  {
+    id: 1,
+    kind: 1,
+    persianTitle: 'مدیر سامانه',
+    title: 'Admin',
+    description: null,
+    isActive: true,
+    accessIds: null,
+    userNames: ['admin'],
+  },
+  {
+    id: 2,
+    kind: 1,
+    persianTitle: 'کاربر شعبه',
+    title: 'Branch',
+    description: null,
+    isActive: true,
+    accessIds: null,
+    userNames: ['branch'],
+  },
+  {
+    id: 3,
+    kind: 1,
+    persianTitle: 'مدیر شرکت',
+    title: 'CompanyManager',
+    description: null,
+    isActive: true,
+    accessIds: null,
+    userNames: [],
+  },
+  {
+    id: 4,
+    kind: 1,
+    persianTitle: 'تأییدکننده اعتبارات',
+    title: 'CreditApprover',
+    description: null,
+    isActive: true,
+    accessIds: null,
+    userNames: [],
+  },
+  {
+    id: 5,
+    kind: 1,
+    persianTitle: 'مشاهده‌گر گزارش‌ها',
+    title: 'ReportViewer',
+    description: null,
+    isActive: true,
+    accessIds: null,
+    userNames: [],
+  },
+];

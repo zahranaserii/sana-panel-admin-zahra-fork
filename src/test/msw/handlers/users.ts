@@ -1,20 +1,20 @@
-import { delay, http, HttpResponse } from 'msw';
+import { delay, http } from 'msw';
 
 import { ENDPOINTS } from '@/constant/endpoints';
-import { type MockManagedUser } from '@/constant/mock';
+import { MOCK_ROLES, type MockManagedUser } from '@/constant/mock';
 import { type UserPayload } from '@/features/users/types';
 import { toEnglishDigits } from '@/utils/date';
 
-import { db, nextId } from '../db';
-import { api } from '../utils';
+import { db } from '../db';
+import { api, json } from '../utils';
 import { logAction } from '../audit';
 
 const withoutPassword = ({ password: _password, ...user }: MockManagedUser) => user;
 
-const notFound = () => HttpResponse.json({ message: 'کاربر یافت نشد.' }, { status: 404 });
+const notFound = () => json({ message: 'کاربر یافت نشد.' }, { status: 404 });
 
 const duplicate = () =>
-  HttpResponse.json(
+  json(
     {
       message: 'این نام کاربری قبلاً ثبت شده است.',
       errors: { username: ['این نام کاربری قبلاً ثبت شده است.'] },
@@ -22,7 +22,7 @@ const duplicate = () =>
     { status: 409 },
   );
 
-const isTaken = (username: string, exceptId?: string) =>
+const isTaken = (username: string, exceptId?: number) =>
   db.users.some((user) => user.username === username && user.id !== exceptId);
 
 /** کدها با ارقام انگلیسی ذخیره می‌شوند */
@@ -33,43 +33,60 @@ const normalize = (body: UserPayload) => ({
   branchCode: toEnglishDigits(body.branchCode),
 });
 
+const paginate = <T>(list: T[], request: Request) => {
+  const url = new URL(request.url);
+  const page = Number(url.searchParams.get('page') ?? 1);
+  const pageSize = Number(url.searchParams.get('pageSize') ?? 10);
+  const start = (page - 1) * pageSize;
+  return { items: list.slice(start, start + pageSize), totalCount: list.length, page, pageSize };
+};
+
 export const userHandlers = [
-  http.get(api(ENDPOINTS.USERS.LIST), async ({ request }) => {
-    await delay(250);
-    const url = new URL(request.url);
-    const page = Number(url.searchParams.get('page') ?? 1);
-    const pageSize = Number(url.searchParams.get('pageSize') ?? 10);
-    const start = (page - 1) * pageSize;
-    return HttpResponse.json({
-      items: db.users.slice(start, start + pageSize).map(withoutPassword),
-      total: db.users.length,
-      page,
-      pageSize,
-    });
-  }),
-
-  http.get(api(ENDPOINTS.USERS.DETAIL(':id')), async ({ params }) => {
+  http.get(api(ENDPOINTS.USER_MANAGEMENT.ROLES), async ({ request }) => {
     await delay(200);
-    const user = db.users.find((item) => item.id === params.id);
-    return user ? HttpResponse.json(withoutPassword(user)) : notFound();
+    return json(paginate(MOCK_ROLES, request));
   }),
 
-  http.post(api(ENDPOINTS.USERS.LIST), async ({ request }) => {
+  http.put(api(ENDPOINTS.USER_MANAGEMENT.USER_ACTIVE(':id')), async ({ params, request }) => {
+    await delay(200);
+    const user = db.users.find((item) => item.id === Number(params.id));
+    if (!user) return notFound();
+    user.isActive = new URL(request.url).searchParams.get('isActive') === 'true';
+    return json(true);
+  }),
+
+  http.get(api(ENDPOINTS.USER_MANAGEMENT.USERS), async ({ request }) => {
+    await delay(250);
+    return json(paginate(db.users.map(withoutPassword), request));
+  }),
+
+  http.get(api(ENDPOINTS.USER_MANAGEMENT.USER(':id')), async ({ params }) => {
+    await delay(200);
+    const user = db.users.find((item) => item.id === Number(params.id));
+    return user ? json(withoutPassword(user)) : notFound();
+  }),
+
+  http.post(api(ENDPOINTS.USER_MANAGEMENT.USERS), async ({ request }) => {
     await delay(300);
     const body = normalize((await request.json()) as UserPayload);
     if (!body.password) {
-      return HttpResponse.json({ message: 'رمز عبور الزامی است.' }, { status: 422 });
+      return json({ message: 'رمز عبور الزامی است.' }, { status: 422 });
     }
     if (isTaken(body.username)) return duplicate();
-    const user = { ...body, id: nextId('u'), password: body.password };
+    const user = {
+      ...body,
+      id: Math.max(0, ...db.users.map((item) => item.id)) + 1,
+      password: body.password,
+      isActive: true,
+    };
     db.users.push(user);
     logAction(request, 'user', `ثبت کاربر جدید: ${user.fullName} (${user.username})`);
-    return HttpResponse.json(withoutPassword(user), { status: 201 });
+    return json(withoutPassword(user), { status: 201 });
   }),
 
-  http.put(api(ENDPOINTS.USERS.DETAIL(':id')), async ({ params, request }) => {
+  http.put(api(ENDPOINTS.USER_MANAGEMENT.USER(':id')), async ({ params, request }) => {
     await delay(300);
-    const user = db.users.find((item) => item.id === params.id);
+    const user = db.users.find((item) => item.id === Number(params.id));
     if (!user) return notFound();
     const { password, ...body } = normalize((await request.json()) as UserPayload);
     if (isTaken(body.username, user.id)) return duplicate();
@@ -77,23 +94,20 @@ export const userHandlers = [
     Object.assign(user, body, password ? { password } : {});
     logAction(request, 'user', `ویرایش کاربر: ${user.fullName} (${user.username})`, {
       entity: 'user',
-      id: user.id,
+      id: String(user.id),
       before,
     });
-    return HttpResponse.json(withoutPassword(user));
+    return json(withoutPassword(user));
   }),
 
-  http.delete(api(ENDPOINTS.USERS.DETAIL(':id')), async ({ params, request }) => {
+  http.delete(api(ENDPOINTS.USER_MANAGEMENT.USER(':id')), async ({ params, request }) => {
     await delay(250);
     if (db.users.length <= 1) {
-      return HttpResponse.json(
-        { message: 'حداقل یک کاربر باید در سامانه باقی بماند.' },
-        { status: 422 },
-      );
+      return json({ message: 'حداقل یک کاربر باید در سامانه باقی بماند.' }, { status: 422 });
     }
-    const removed = db.users.find((item) => item.id === params.id);
-    db.users = db.users.filter((item) => item.id !== params.id);
+    const removed = db.users.find((item) => item.id === Number(params.id));
+    db.users = db.users.filter((item) => item.id !== Number(params.id));
     if (removed) logAction(request, 'user', `حذف کاربر: ${removed.username}`);
-    return new HttpResponse(null, { status: 204 });
+    return json(null);
   }),
 ];

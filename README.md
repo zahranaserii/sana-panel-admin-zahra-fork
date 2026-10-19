@@ -85,6 +85,11 @@ http.get('/ping', { silent: true }); // بدون هیچ توست/ریدایرک�
 
 رفتارهای پیش‌فرض در `services/http/errorHandler.ts` هستند (مثلاً ۴۰۱ = خروج از حساب).
 
+همه پاسخ‌های بک‌اند (موفق و خطا) در قالب `{ data, statusCode, message, isSuccess }` هستند:
+توابع `http` فقط `data` را برمی‌گردانند، HTTP 200 همیشه موفق است و پیام خطا از `message` خوانده می‌شود.
+هدرهای ثابت (`x-api-version`، `AppId`، `DeviceId`، `DeviceTypeId`، `DeviceInfo`، `AppLanguage`، `DeviceVersion`)
+و توکن (`Authorization: Bearer`) در `services/http/client.ts` به همه درخواست‌ها اضافه می‌شوند.
+
 ### سرویس‌ها و ماک
 
 هر داده‌ای که در سلکت، جدول یا اکشن استفاده می‌شود یک سرویس و endpoint دارد؛ هیچ لیستی داخل کامپوننت تعریف نمی‌شود.
@@ -95,11 +100,15 @@ http.get('/ping', { silent: true }); // بدون هیچ توست/ریدایرک�
 - دیتای اولیه ماک: `src/constant/mock` · پاسخ‌دهنده‌های ماک (شبیه بک‌اند): `src/test/msw/handlers`
 - فایل `docs/design/panel-negin-misagh.html` راهنمای صفحات و سرویس‌های مورد نیاز است.
 
-### احراز هویت
+### احراز هویت و منو
 
 فقط `useAuthStore` با کوکی کار می‌کند: موقع لاگین `login(token)` و موقع خروج `logout()`.
 interceptor و بقیه بخش‌ها توکن را فقط از همین استور می‌خوانند.
-اطلاعات کاربر و نقش‌ها در `useProfileStore` هستند (`hasRole`). آیتم‌های سایدبار هم بر اساس نقش فیلتر می‌شوند.
+اطلاعات کاربر و نقش‌ها در `useProfileStore` هستند (`hasRole`). موقع خروج `resetSession()` توکن، پروفایل و همه کش (از جمله منو) را پاک می‌کند.
+
+سایدبار از سرویس منوی بک‌اند (`Authentication/MainMenu`) ساخته می‌شود؛ نمونه پاسخ تحویل‌شده به بک‌اند:
+`docs/api/main-menu.response.json`. فقط آیتم‌های `isActive` با `url` شناخته‌شده نمایش داده می‌شوند و
+مسیر و آیکون هر صفحه از `constant/menu.ts` (router خود ما) می‌آید. صفحه‌ای که در منوی کاربر نیست با آدرس مستقیم هم باز نمی‌شود.
 
 ### فرم
 

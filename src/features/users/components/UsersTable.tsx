@@ -21,7 +21,7 @@ const PAGE_SIZE = 10;
 export const UsersTable = () => {
   const [page, setPage] = useState(1);
   const [modalOpen, setModalOpen] = useState(false);
-  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editingId, setEditingId] = useState<number | null>(null);
   const queryClient = useQueryClient();
   const { modal } = App.useApp();
 
@@ -38,7 +38,7 @@ export const UsersTable = () => {
     },
   });
 
-  const openModal = (id: string | null) => {
+  const openModal = (id: number | null) => {
     setEditingId(id);
     setModalOpen(true);
   };
@@ -109,7 +109,7 @@ export const UsersTable = () => {
         pagination={{
           current: page,
           pageSize: PAGE_SIZE,
-          total: data?.total ?? 0,
+          total: data?.totalCount ?? 0,
           onChange: setPage,
         }}
       />

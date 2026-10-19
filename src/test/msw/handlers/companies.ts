@@ -1,4 +1,4 @@
-import { delay, http, HttpResponse } from 'msw';
+import { delay, http } from 'msw';
 
 import { ENDPOINTS } from '@/constant/endpoints';
 import { type MockCompany } from '@/constant/mock';
@@ -21,13 +21,13 @@ import {
   primaryScheme,
   today,
 } from '../db';
-import { api } from '../utils';
+import { api, json } from '../utils';
 import { logAction } from '../audit';
 
 /** پسوند توضیحات برای متن لاگ */
 const noteSuffix = (note?: string) => (note ? ' — توضیحات: ' + note : '');
 
-const notFound = () => HttpResponse.json({ message: 'شرکت یافت نشد.' }, { status: 404 });
+const notFound = () => json({ message: 'شرکت یافت نشد.' }, { status: 404 });
 
 const findCompany = (id: unknown) => db.companies.find((item) => item.id === id && !item.deleted);
 
@@ -89,9 +89,9 @@ export const companyHandlers = [
     const pageSize = Number(url.searchParams.get('pageSize') ?? 10);
     const list = db.companies.filter((item) => !item.deleted);
     const start = (page - 1) * pageSize;
-    return HttpResponse.json({
+    return json({
       items: list.slice(start, start + pageSize).map(toListItem),
-      total: list.length,
+      totalCount: list.length,
       page,
       pageSize,
     });
@@ -113,13 +113,13 @@ export const companyHandlers = [
     };
     db.companies.unshift(company);
     logAction(request, 'company', `ثبت شرکت جدید: ${company.name}`);
-    return HttpResponse.json(toDetail(company), { status: 201 });
+    return json(toDetail(company), { status: 201 });
   }),
 
   http.get(api(ENDPOINTS.COMPANIES.DETAIL(':id')), async ({ params }) => {
     await delay(250);
     const company = findCompany(params.id);
-    return company ? HttpResponse.json(toDetail(company)) : notFound();
+    return company ? json(toDetail(company)) : notFound();
   }),
 
   http.put(api(ENDPOINTS.COMPANIES.DETAIL(':id')), async ({ params, request }) => {
@@ -137,7 +137,7 @@ export const companyHandlers = [
       id: company.id,
       before,
     });
-    return HttpResponse.json(toDetail(company));
+    return json(toDetail(company));
   }),
 
   http.delete(api(ENDPOINTS.COMPANIES.DETAIL(':id')), async ({ params, request }) => {
@@ -147,7 +147,7 @@ export const companyHandlers = [
     company.deleted = true;
     company.deletedAt = today();
     logAction(request, 'company', `حذف شرکت: ${company.name}`);
-    return new HttpResponse(null, { status: 204 });
+    return json(null);
   }),
 
   http.post(api(ENDPOINTS.COMPANIES.CANCEL(':id')), async ({ params, request }) => {
@@ -163,13 +163,13 @@ export const companyHandlers = [
       'company',
       `لغو قرارداد شرکت: ${company.name} — دلیل: ${company.cancelReason ?? '—'}${noteSuffix(body.note)}`,
     );
-    return new HttpResponse(null, { status: 204 });
+    return json(null);
   }),
 
   http.get(api(ENDPOINTS.COMPANIES.AVERAGES(':id')), async ({ params }) => {
     await delay(250);
     const company = findCompany(params.id);
-    return company ? HttpResponse.json(buildAverages(company)) : notFound();
+    return company ? json(buildAverages(company)) : notFound();
   }),
 
   http.post(api(ENDPOINTS.COMPANIES.AVERAGES(':id')), async ({ params, request }) => {
@@ -194,12 +194,12 @@ export const companyHandlers = [
       'company',
       `ثبت/ویرایش میانگین موجودی (ماه‌های ${body.items.map((item) => item.month).join('، ')}): ${company.name}`,
     );
-    return HttpResponse.json(buildAverages(company));
+    return json(buildAverages(company));
   }),
 
   http.get(api(ENDPOINTS.COMPANIES.AVERAGE_DOCS(':id')), async ({ params }) => {
     await delay(200);
     const company = findCompany(params.id);
-    return company ? HttpResponse.json(company.averageDocs) : notFound();
+    return company ? json(company.averageDocs) : notFound();
   }),
 ];

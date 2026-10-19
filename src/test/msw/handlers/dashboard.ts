@@ -1,4 +1,4 @@
-import { delay, http, HttpResponse, type JsonBodyType } from 'msw';
+import { delay, http, type JsonBodyType } from 'msw';
 
 import { ENDPOINTS } from '@/constant/endpoints';
 import { type MockCompany } from '@/constant/mock';
@@ -10,7 +10,7 @@ import {
 import { formatJalali, toPersianDigits } from '@/utils/date';
 
 import { db, today } from '../db';
-import { api } from '../utils';
+import { api, json } from '../utils';
 
 import { activeRequests, buildPlanCredits, monthKey } from './credit';
 
@@ -52,14 +52,14 @@ const SORT_FIELD: Record<RankingSort, keyof CompanyRank> = {
   staff: 'staffCount',
 };
 
-const json = async (data: JsonBodyType) => {
+const respond = async (data: JsonBodyType) => {
   await delay(250);
-  return HttpResponse.json(data);
+  return json(data);
 };
 
 export const dashboardHandlers = [
   http.get(api(ENDPOINTS.DASHBOARD.SUMMARY), () =>
-    json({
+    respond({
       activeCompanies: visibleCompanies().length,
       totalRequests: db.loanRequests.length,
       approvedAmount: sum(
@@ -73,7 +73,7 @@ export const dashboardHandlers = [
 
   http.get(api(ENDPOINTS.DASHBOARD.REQUEST_STATUS), () => {
     const count = (status: string) => db.loanRequests.filter((r) => r.status === status).length;
-    return json([
+    return respond([
       { key: 'approved', title: 'تأییدشده', count: count('approved') },
       { key: 'pending', title: 'در انتظار', count: count('pending_credit') },
       { key: 'rejected', title: 'ردشده', count: count('rejected') },
@@ -83,11 +83,11 @@ export const dashboardHandlers = [
   http.get(api(ENDPOINTS.DASHBOARD.PLAN_SHARE), () => {
     const counts = new Map<string, number>();
     db.loanRequests.forEach((r) => counts.set(r.planTitle, (counts.get(r.planTitle) ?? 0) + 1));
-    return json([...counts].map(([planTitle, count]) => ({ planTitle, count })));
+    return respond([...counts].map(([planTitle, count]) => ({ planTitle, count })));
   }),
 
   http.get(api(ENDPOINTS.DASHBOARD.COMPANY_CREDIT), () =>
-    json(
+    respond(
       visibleCompanies().map((company) => ({
         companyName: company.name,
         created: sum(buildPlanCredits(company, today()).map((plan) => plan.created)),
@@ -100,7 +100,7 @@ export const dashboardHandlers = [
     const months = [...new Set(db.loanRequests.map((r) => pad(monthKey(r.createdAt))))].sort(
       byText,
     );
-    return json(months.map((id) => ({ id, title: toPersianDigits(id) })));
+    return respond(months.map((id) => ({ id, title: toPersianDigits(id) })));
   }),
 
   http.get(api(ENDPOINTS.DASHBOARD.RANKING), ({ request }) => {
@@ -121,7 +121,7 @@ export const dashboardHandlers = [
     }));
     const field = SORT_FIELD[sortBy];
     rows.sort((a, b) => Number(b[field]) - Number(a[field]));
-    return json(rows.map((row, index) => ({ ...row, rank: index + 1 })));
+    return respond(rows.map((row, index) => ({ ...row, rank: index + 1 })));
   }),
 
   http.get(api(ENDPOINTS.DASHBOARD.CONTRACTS_BY_MONTH), () => {
@@ -131,7 +131,7 @@ export const dashboardHandlers = [
       const name = company.deleted ? `${company.name} (حذف‌شده)` : company.name;
       groups.set(key, [...(groups.get(key) ?? []), name]);
     });
-    return json(
+    return respond(
       [...groups]
         .sort(([a], [b]) => a.localeCompare(b))
         .map(([month, companies]) => ({
@@ -149,7 +149,7 @@ export const dashboardHandlers = [
         companies.flatMap((c) => companyRequests(c.id).map((r) => pad(monthKey(r.createdAt)))),
       ),
     ].sort(byText);
-    return json({
+    return respond({
       months,
       rows: companies.map((company) => ({
         companyName: company.name,
@@ -174,6 +174,6 @@ export const dashboardHandlers = [
           approvalRate: requests.length ? Math.round((approved / requests.length) * 100) : null,
         };
       });
-    return json(rows);
+    return respond(rows);
   }),
 ];

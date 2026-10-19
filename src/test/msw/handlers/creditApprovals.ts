@@ -1,4 +1,4 @@
-import { delay, http, HttpResponse } from 'msw';
+import { delay, http } from 'msw';
 
 import { ENDPOINTS } from '@/constant/endpoints';
 import { type LoanStatus } from '@/constant/loanStatus';
@@ -7,7 +7,7 @@ import { type DecisionPayload } from '@/features/manager-approval/types';
 import { formatRial } from '@/utils/number';
 
 import { db, fileOf, lookupTitle, today } from '../db';
-import { api } from '../utils';
+import { api, json } from '../utils';
 import { logAction } from '../audit';
 
 /** درخواست‌هایی که هنوز در مرحله مدیر شرکت هستند یا توسط او رد شده‌اند اینجا نمایش داده نمی‌شوند */
@@ -44,15 +44,15 @@ const decide = (path: string, nextStatus: LoanStatus) =>
     await delay(350);
     const body = (await request.json()) as DecisionPayload;
     if (nextStatus === 'rejected' && !body.reasonId) {
-      return HttpResponse.json({ message: 'انتخاب دلیل رد اجباری است.' }, { status: 422 });
+      return json({ message: 'انتخاب دلیل رد اجباری است.' }, { status: 422 });
     }
     const stageError = nextStatus === 'approved' ? validateStage(body) : null;
-    if (stageError) return HttpResponse.json({ message: stageError }, { status: 422 });
+    if (stageError) return json({ message: stageError }, { status: 422 });
     const targets = db.loanRequests.filter(
       (item) => body.requestIds.includes(item.id) && item.status === 'pending_credit',
     );
     if (!targets.length) {
-      return HttpResponse.json({ message: 'درخواستی در انتظار یافت نشد.' }, { status: 404 });
+      return json({ message: 'درخواستی در انتظار یافت نشد.' }, { status: 404 });
     }
     targets.forEach((item) => {
       item.status = nextStatus;
@@ -73,7 +73,7 @@ const decide = (path: string, nextStatus: LoanStatus) =>
         `${nextStatus === 'approved' ? 'تأیید' : 'رد'} درخواست وام ${item.staffName} — ${formatRial(item.amount)} — شرکت: ${companyName(item.companyId)}${reason}`,
       );
     });
-    return HttpResponse.json({ updated: targets.length });
+    return json({ updated: targets.length });
   });
 
 export const creditApprovalHandlers = [
@@ -87,9 +87,9 @@ export const creditApprovalHandlers = [
       (item) => !HIDDEN.includes(item.status) && (!companyId || item.companyId === companyId),
     );
     const start = (page - 1) * pageSize;
-    return HttpResponse.json({
+    return json({
       items: list.slice(start, start + pageSize).map(toItem),
-      total: list.length,
+      totalCount: list.length,
       page,
       pageSize,
     });

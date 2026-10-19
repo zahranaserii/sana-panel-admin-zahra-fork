@@ -1,16 +1,16 @@
-import { delay, http, HttpResponse } from 'msw';
+import { delay, http } from 'msw';
 
 import { ENDPOINTS } from '@/constant/endpoints';
 import { type SchemeTextList } from '@/features/base-info/types';
 
 import { buildPlanOptions, db, lookupItems, primaryScheme } from '../db';
-import { api } from '../utils';
+import { api, json } from '../utils';
 
 /** لیست ساده‌ای که از اطلاعات پایه طرح خوانده می‌شود */
 const lookupList = (path: string, name: SchemeTextList) =>
   http.get(api(path), async () => {
     await delay(150);
-    return HttpResponse.json(lookupItems(name));
+    return json(lookupItems(name));
   });
 
 export const lookupHandlers = [
@@ -21,7 +21,7 @@ export const lookupHandlers = [
 
   http.get(api(ENDPOINTS.LOOKUPS.PLANS), async () => {
     await delay(200);
-    return HttpResponse.json({ maxPlans: primaryScheme().maxPlans, items: buildPlanOptions() });
+    return json({ maxPlans: primaryScheme().maxPlans, items: buildPlanOptions() });
   }),
 
   http.get(api(ENDPOINTS.LOOKUPS.COMPANIES), async ({ request }) => {
@@ -30,11 +30,11 @@ export const lookupHandlers = [
     const list = db.companies.filter(
       (item) => !item.deleted && (includeInactive || item.status === 'active'),
     );
-    return HttpResponse.json(list.map((item) => ({ id: item.id, title: item.name })));
+    return json(list.map((item) => ({ id: item.id, title: item.name })));
   }),
 
   http.get(api(ENDPOINTS.LOOKUPS.POST_APPROVAL_STAGES), async () => {
     await delay(150);
-    return HttpResponse.json(db.postApprovalStages);
+    return json(db.postApprovalStages);
   }),
 ];

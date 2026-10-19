@@ -1,4 +1,4 @@
-import { delay, http, HttpResponse } from 'msw';
+import { delay, http } from 'msw';
 
 import { ENDPOINTS } from '@/constant/endpoints';
 import { type LoanStatus } from '@/constant/loanStatus';
@@ -6,7 +6,7 @@ import { type DecisionPayload } from '@/features/manager-approval/types';
 import { formatRial } from '@/utils/number';
 
 import { db, fileOf, today } from '../db';
-import { api } from '../utils';
+import { api, json } from '../utils';
 import { logAction } from '../audit';
 
 const companyName = (id: string) => db.companies.find((item) => item.id === id)?.name ?? '—';
@@ -29,7 +29,7 @@ const decide = (nextStatus: LoanStatus) =>
         .filter(isPending(params.companyId))
         .filter((item) => body.requestIds.includes(item.id));
       if (!targets.length) {
-        return HttpResponse.json({ message: 'درخواستی برای این تصمیم یافت نشد.' }, { status: 404 });
+        return json({ message: 'درخواستی برای این تصمیم یافت نشد.' }, { status: 404 });
       }
       targets.forEach((item) => {
         item.status = nextStatus;
@@ -43,7 +43,7 @@ const decide = (nextStatus: LoanStatus) =>
           `${action} توسط مدیر شرکت درخواست وام ${item.staffName} — ${formatRial(item.amount)} — شرکت: ${companyName(item.companyId)}${body.note ? ' — توضیحات: ' + body.note : ''}`,
         );
       });
-      return HttpResponse.json({ updated: targets.length });
+      return json({ updated: targets.length });
     },
   );
 
@@ -55,7 +55,7 @@ export const managerApprovalHandlers = [
     const pageSize = Number(url.searchParams.get('pageSize') ?? 10);
     const list = db.loanRequests.filter(isPending(params.companyId));
     const start = (page - 1) * pageSize;
-    return HttpResponse.json({
+    return json({
       items: list.slice(start, start + pageSize).map((item) => ({
         id: item.id,
         staffName: item.staffName,
@@ -65,7 +65,7 @@ export const managerApprovalHandlers = [
         note: item.note,
         status: item.status,
       })),
-      total: list.length,
+      totalCount: list.length,
       page,
       pageSize,
     });

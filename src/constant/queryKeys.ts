@@ -70,8 +70,10 @@ export const QUERY_KEYS = {
   USERS: {
     ALL: ['users'],
     LIST: (page: number) => ['users', 'list', page],
-    DETAIL: (id: string) => ['users', 'detail', id],
+    DETAIL: (id: number) => ['users', 'detail', id],
+    ROLES: ['users', 'roles'],
   },
+  MAIN_MENU: ['main-menu'],
   STAFF: {
     ALL: ['staff'],
     LIST: (companyId: string, filters: object, page: number) => [

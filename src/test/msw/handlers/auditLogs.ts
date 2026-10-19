@@ -7,7 +7,7 @@ import { dayjs } from '@/utils/date';
 
 import { logAction, restoreSnapshot } from '../audit';
 import { db } from '../db';
-import { api } from '../utils';
+import { api, json } from '../utils';
 
 const typeTitle = (type: MockAuditLog['type']) =>
   AUDIT_LOG_TYPES.find((item) => item.id === type)?.title.replace('مربوط به ', '') ?? type;
@@ -28,7 +28,7 @@ const jalaliDateTime = (iso: string) => dayjs(iso).formatJalali('YYYY/MM/DD HH:m
 export const auditLogHandlers = [
   http.get(api(ENDPOINTS.LOOKUPS.AUDIT_LOG_TYPES), async () => {
     await delay(150);
-    return HttpResponse.json(AUDIT_LOG_TYPES);
+    return json(AUDIT_LOG_TYPES);
   }),
 
   http.get(api(ENDPOINTS.AUDIT_LOGS.LIST), async ({ request }) => {
@@ -39,9 +39,9 @@ export const auditLogHandlers = [
     const pageSize = Number(url.searchParams.get('pageSize') ?? 20);
     const list = db.auditLogs.filter((log) => !type || log.type === type);
     const start = (page - 1) * pageSize;
-    return HttpResponse.json({
+    return json({
       items: list.slice(start, start + pageSize).map(toItem),
-      total: list.length,
+      totalCount: list.length,
       page,
       pageSize,
     });
@@ -51,20 +51,14 @@ export const auditLogHandlers = [
     await delay(350);
     const log = db.auditLogs.find((item) => item.id === params.id);
     if (!log?.snapshot || log.rolledBack) {
-      return HttpResponse.json(
-        { message: 'این عملیات اطلاعات کافی برای بازگردانی ندارد.' },
-        { status: 422 },
-      );
+      return json({ message: 'این عملیات اطلاعات کافی برای بازگردانی ندارد.' }, { status: 422 });
     }
     if (!restoreSnapshot(log.snapshot)) {
-      return HttpResponse.json(
-        { message: 'بازگردانی ناموفق بود؛ این رکورد دیگر وجود ندارد.' },
-        { status: 409 },
-      );
+      return json({ message: 'بازگردانی ناموفق بود؛ این رکورد دیگر وجود ندارد.' }, { status: 409 });
     }
     log.rolledBack = true;
     logAction(request, log.type, `بازگردانی به حالت قبل: ${log.details}`);
-    return HttpResponse.json(toItem(log));
+    return json(toItem(log));
   }),
 
   http.get(api(ENDPOINTS.REPORTS.AUDIT_LOGS), async () => {

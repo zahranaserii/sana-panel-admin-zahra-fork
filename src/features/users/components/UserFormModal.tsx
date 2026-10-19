@@ -4,22 +4,25 @@ import { useMemo } from 'react';
 import { toast } from 'sonner';
 
 import { Form, FormItem } from '@/component/form';
-import { PasswordInput, TextInput } from '@/component/input';
+import { PasswordInput, SelectInput, TextInput } from '@/component/input';
 import { FormModal } from '@/component/modal';
 import { QUERY_KEYS } from '@/constant/queryKeys';
 import { type ApiErrorBody } from '@/types/common';
 
-import { createUser, getUser, updateUser } from '../api';
+import { createUser, getRoles, getUser, updateUser } from '../api';
 import { type User, type UserPayload } from '../types';
 
 interface UserFormModalProps {
   open: boolean;
   /** شناسه کاربر برای ویرایش؛ خالی = افزودن */
-  userId?: string | null;
+  userId?: number | null;
   onClose: () => void;
 }
 
-const toFormValues = ({ id: _id, ...user }: User): UserPayload => user;
+const toFormValues = ({ id: _id, isActive: _isActive, ...user }: User): UserPayload => user;
+
+/** همه نقش‌ها برای سلکت (تعداد نقش‌ها کم است) */
+const ROLE_PARAMS = { page: 1, pageSize: 100 };
 
 /** ۴۰۹ (نام کاربری تکراری) به‌جای توست، کنار همان فیلد نمایش داده می‌شود */
 const DUPLICATE_HANDLED = { onError: { 409: () => undefined } };
@@ -30,9 +33,15 @@ export const UserFormModal = ({ open, userId, onClose }: UserFormModalProps) => 
   const isEdit = Boolean(userId);
 
   const { data: detail, isFetching } = useQuery({
-    queryKey: QUERY_KEYS.USERS.DETAIL(userId ?? ''),
-    queryFn: () => getUser(userId ?? ''),
+    queryKey: QUERY_KEYS.USERS.DETAIL(userId ?? 0),
+    queryFn: () => getUser(userId ?? 0),
     enabled: open && isEdit,
+  });
+
+  const { data: roles, isPending: rolesPending } = useQuery({
+    queryKey: QUERY_KEYS.USERS.ROLES,
+    queryFn: () => getRoles(ROLE_PARAMS),
+    enabled: open,
   });
 
   const { mutateAsync } = useMutation({
@@ -98,6 +107,16 @@ export const UserFormModal = ({ open, userId, onClose }: UserFormModalProps) => 
       </FormItem>
       <FormItem name="branchCode" label="کد شعبه" required>
         <TextInput inputMode="numeric" placeholder="مثلاً ۱۵۰۰۰۲" />
+      </FormItem>
+      <FormItem name="roleId" label="نقش کاربر" required requiredMessage="انتخاب نقش الزامی است.">
+        <SelectInput
+          loading={rolesPending}
+          placeholder="انتخاب نقش"
+          options={roles?.items.map((role) => ({
+            value: role.id,
+            label: role.persianTitle ?? role.title,
+          }))}
+        />
       </FormItem>
     </FormModal>
   );

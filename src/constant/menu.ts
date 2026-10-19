@@ -12,121 +12,71 @@ import {
 } from '@ant-design/icons';
 import { type ComponentType } from 'react';
 
-import { ROLES, type Role } from './roles';
+import { type MenuGroup, type MenuItem, type MenuItemDto } from '@/services/menu/types';
+
 import { ROUTES } from './routes';
 
-export interface MenuItem {
-  key: string;
-  label: string;
+interface PageConfig {
   path: string;
   icon: ComponentType;
-  /** نقش‌های مجاز؛ خالی = همه کاربران */
-  roles?: Role[];
 }
 
-export interface MenuGroup {
-  key: string;
-  title: string;
-  items: MenuItem[];
-}
+/**
+ * صفحه‌های فرانت به ازای `url` آیتم‌های منوی بک‌اند.
+ * مسیر و آیکون همیشه از همین‌جا (router خود ما) خوانده می‌شود؛ آیتمی که اینجا نباشد نمایش داده نمی‌شود.
+ */
+const PAGES: Record<string, PageConfig> = {
+  [ROUTES.HOME]: { path: ROUTES.HOME, icon: HomeOutlined },
+  [ROUTES.BASE_INFO]: { path: ROUTES.BASE_INFO, icon: ControlOutlined },
+  [ROUTES.COMPANIES]: { path: ROUTES.COMPANIES, icon: ShopOutlined },
+  [ROUTES.STAFF]: { path: ROUTES.STAFF, icon: TeamOutlined },
+  [ROUTES.CREDIT]: { path: ROUTES.CREDIT, icon: CreditCardOutlined },
+  [ROUTES.MANAGER_APPROVE]: { path: ROUTES.MANAGER_APPROVE, icon: AuditOutlined },
+  [ROUTES.CREDIT_APPROVE]: { path: ROUTES.CREDIT_APPROVE, icon: CheckCircleOutlined },
+  [ROUTES.DASHBOARD]: { path: ROUTES.DASHBOARD, icon: BarChartOutlined },
+  [ROUTES.USERS]: { path: ROUTES.USERS, icon: SafetyOutlined },
+  [ROUTES.CHANGE_LOG]: { path: ROUTES.CHANGE_LOG, icon: HistoryOutlined },
+};
 
-export const MENU: MenuGroup[] = [
-  {
-    key: 'home',
-    title: '',
-    items: [{ key: 'home', label: 'خانه', path: ROUTES.HOME, icon: HomeOutlined }],
-  },
-  {
-    key: 'settings',
-    title: 'تنظیمات',
-    items: [
-      {
-        key: 'base-info',
-        label: 'اطلاعات پایه طرح',
-        path: ROUTES.BASE_INFO,
-        icon: ControlOutlined,
-        roles: [ROLES.ADMIN],
-      },
-    ],
-  },
-  {
-    key: 'management',
-    title: 'مدیریت',
-    items: [
-      {
-        key: 'companies',
-        label: 'مدیریت شرکت‌ها',
-        path: ROUTES.COMPANIES,
-        icon: ShopOutlined,
-        roles: [ROLES.ADMIN, ROLES.BRANCH],
-      },
-      {
-        key: 'staff',
-        label: 'پرسنل شرکت',
-        path: ROUTES.STAFF,
-        icon: TeamOutlined,
-        roles: [ROLES.ADMIN, ROLES.BRANCH],
-      },
-    ],
-  },
-  {
-    key: 'credit-operations',
-    title: 'عملیات اعتباری',
-    items: [
-      {
-        key: 'credit',
-        label: 'تخصیص وام',
-        path: ROUTES.CREDIT,
-        icon: CreditCardOutlined,
-        roles: [ROLES.ADMIN, ROLES.BRANCH],
-      },
-      {
-        key: 'manager-approve',
-        label: 'تأیید مدیر شرکت',
-        path: ROUTES.MANAGER_APPROVE,
-        icon: AuditOutlined,
-        roles: [ROLES.ADMIN, ROLES.COMPANY_MANAGER],
-      },
-      {
-        key: 'credit-approve',
-        label: 'تأیید اعتبارات',
-        path: ROUTES.CREDIT_APPROVE,
-        icon: CheckCircleOutlined,
-        roles: [ROLES.ADMIN, ROLES.CREDIT_APPROVER],
-      },
-    ],
-  },
-  {
-    key: 'reports',
-    title: 'گزارش و کنترل',
-    items: [
-      {
-        key: 'dashboard',
-        label: 'داشبورد مدیریتی',
-        path: ROUTES.DASHBOARD,
-        icon: BarChartOutlined,
-        roles: [ROLES.ADMIN, ROLES.REPORT_VIEWER],
-      },
-      {
-        key: 'users',
-        label: 'مدیریت کاربران',
-        path: ROUTES.USERS,
-        icon: SafetyOutlined,
-        roles: [ROLES.ADMIN],
-      },
-      {
-        key: 'change-log',
-        label: 'گزارش تغییرات',
-        path: ROUTES.CHANGE_LOG,
-        icon: HistoryOutlined,
-        roles: [ROLES.ADMIN],
-      },
-    ],
-  },
-];
+const isRoot = (item: MenuItemDto) => item.parentId === null || item.parentId === item.id;
+
+/** آیتم فعال با url شناخته‌شده → آیتم سایدبار؛ بقیه نمایش داده نمی‌شوند */
+const toMenuItem = (item: MenuItemDto): MenuItem | null => {
+  const page = item.isActive && item.url ? PAGES[item.url] : undefined;
+  return page ? { key: String(item.id), label: item.title, ...page } : null;
+};
+
+/**
+ * ساخت گروه‌های سایدبار از لیست تخت بک‌اند:
+ * ریشه با url = آیتم بدون گروه (مثل خانه)، ریشه بدون url = گروه با زیرآیتم‌هایش.
+ * فقط آیتم‌های `isActive` نمایش داده می‌شوند و گروه بدون زیرآیتم حذف می‌شود.
+ */
+export const buildMenu = (items: MenuItemDto[]): MenuGroup[] => {
+  const groups: MenuGroup[] = [];
+  items.filter(isRoot).forEach((root) => {
+    if (root.url) {
+      const single = toMenuItem(root);
+      if (!single) return;
+      const last = groups.at(-1);
+      if (last && !last.title) last.items.push(single);
+      else groups.push({ key: `single-${root.id}`, title: '', items: [single] });
+      return;
+    }
+    if (!root.isActive) return;
+    const children = items
+      .filter((item) => item.parentId === root.id && item.id !== root.id)
+      .map(toMenuItem)
+      .filter((item): item is MenuItem => item !== null);
+    if (children.length) groups.push({ key: String(root.id), title: root.title, items: children });
+  });
+  return groups;
+};
+
+const matches = (item: MenuItem, pathname: string) =>
+  item.path === ROUTES.HOME
+    ? pathname === ROUTES.HOME
+    : pathname === item.path || pathname.startsWith(`${item.path}/`);
 
 /** آیتم منوی صفحه فعلی (دقیق یا زیرمسیر آن؛ /credit-approve با /credit اشتباه گرفته نمی‌شود) */
-export const findMenuItemByPath = (pathname: string) =>
-  MENU.flatMap((group) => group.items).find(
-    (item) => pathname === item.path || pathname.startsWith(`${item.path}/`),
-  );
+export const findMenuItemByPath = (groups: MenuGroup[], pathname: string) =>
+  groups.flatMap((group) => group.items).find((item) => matches(item, pathname));

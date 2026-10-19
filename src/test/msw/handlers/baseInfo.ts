@@ -1,10 +1,10 @@
-import { delay, http, HttpResponse } from 'msw';
+import { delay, http } from 'msw';
 
 import { ENDPOINTS } from '@/constant/endpoints';
 import { type Scheme, type SchemePayload } from '@/features/base-info/types';
 
 import { db, nextId, resizeUsable } from '../db';
-import { api } from '../utils';
+import { api, json } from '../utils';
 import { logAction } from '../audit';
 
 const toListItem = ({
@@ -25,7 +25,7 @@ const toListItem = ({
   maxPlans,
 });
 
-const notFound = () => HttpResponse.json({ message: 'طرح یافت نشد.' }, { status: 404 });
+const notFound = () => json({ message: 'طرح یافت نشد.' }, { status: 404 });
 
 const cleanTexts = (list: string[] = []) => list.map((item) => item.trim()).filter(Boolean);
 
@@ -47,9 +47,9 @@ export const baseInfoHandlers = [
     const page = Number(url.searchParams.get('page') ?? 1);
     const pageSize = Number(url.searchParams.get('pageSize') ?? 10);
     const start = (page - 1) * pageSize;
-    return HttpResponse.json({
+    return json({
       items: db.schemes.slice(start, start + pageSize).map(toListItem),
-      total: db.schemes.length,
+      totalCount: db.schemes.length,
       page,
       pageSize,
     });
@@ -58,7 +58,7 @@ export const baseInfoHandlers = [
   http.get(api(ENDPOINTS.BASE_INFO.SCHEME(':id')), async ({ params }) => {
     await delay(250);
     const scheme = db.schemes.find((item) => item.id === params.id);
-    return scheme ? HttpResponse.json(scheme) : notFound();
+    return scheme ? json(scheme) : notFound();
   }),
 
   http.post(api(ENDPOINTS.BASE_INFO.SCHEMES), async ({ request }) => {
@@ -66,7 +66,7 @@ export const baseInfoHandlers = [
     const scheme = { id: nextId('scheme'), ...normalize((await request.json()) as SchemePayload) };
     db.schemes.push(scheme);
     logAction(request, 'base', `ثبت طرح جدید: ${scheme.name}`);
-    return HttpResponse.json(scheme, { status: 201 });
+    return json(scheme, { status: 201 });
   }),
 
   http.put(api(ENDPOINTS.BASE_INFO.SCHEME(':id')), async ({ params, request }) => {
@@ -83,7 +83,7 @@ export const baseInfoHandlers = [
       before: db.schemes[index] ?? {},
     });
     db.schemes[index] = scheme;
-    return HttpResponse.json(scheme);
+    return json(scheme);
   }),
 
   http.delete(api(ENDPOINTS.BASE_INFO.SCHEME(':id')), async ({ params, request }) => {
@@ -91,13 +91,10 @@ export const baseInfoHandlers = [
     const removed = db.schemes.find((item) => item.id === params.id);
     if (!removed) return notFound();
     if (db.schemes.length === 1) {
-      return HttpResponse.json(
-        { message: 'حداقل یک طرح باید در سامانه باقی بماند.' },
-        { status: 422 },
-      );
+      return json({ message: 'حداقل یک طرح باید در سامانه باقی بماند.' }, { status: 422 });
     }
     logAction(request, 'base', `حذف طرح: ${removed.name}`);
     db.schemes = db.schemes.filter((item) => item.id !== params.id);
-    return new HttpResponse(null, { status: 204 });
+    return json(null);
   }),
 ];

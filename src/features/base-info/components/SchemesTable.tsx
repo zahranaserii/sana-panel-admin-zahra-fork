@@ -124,7 +124,7 @@ export const SchemesTable = () => {
         pagination={{
           current: page,
           pageSize: PAGE_SIZE,
-          total: data?.total ?? 0,
+          total: data?.totalCount ?? 0,
           onChange: setPage,
         }}
       />

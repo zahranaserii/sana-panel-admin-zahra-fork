@@ -7,7 +7,7 @@ import { type StaffPayload } from '@/features/staff/types';
 import { ISO_DATE_FORMAT, parseJalali, toEnglishDigits } from '@/utils/date';
 
 import { db, nextId } from '../db';
-import { api } from '../utils';
+import { api, json } from '../utils';
 import { logAction } from '../audit';
 
 const SAMPLE_HEADERS = [
@@ -22,7 +22,7 @@ const SAMPLE_ROW = ['علی محمدی', '0012345678', '09121234567', '101', '14
 
 const companyName = (id: string) => db.companies.find((item) => item.id === id)?.name ?? '—';
 
-const notFound = () => HttpResponse.json({ message: 'پرسنل یافت نشد.' }, { status: 404 });
+const notFound = () => json({ message: 'پرسنل یافت نشد.' }, { status: 404 });
 
 const findStaff = (companyId: unknown, id: unknown) =>
   db.staff.find((item) => item.companyId === companyId && item.id === id);
@@ -72,9 +72,9 @@ export const staffHandlers = [
       .filter((item) => matchesSearch(item, query) && inHireRange(item, from, to))
       .sort((a, b) => a.priority - b.priority);
     const start = (page - 1) * pageSize;
-    return HttpResponse.json({
+    return json({
       items: list.slice(start, start + pageSize),
-      total: list.length,
+      totalCount: list.length,
       page,
       pageSize,
     });
@@ -90,13 +90,13 @@ export const staffHandlers = [
       'staff',
       `ثبت پرسنل جدید: ${staff.fullName} (${companyName(staff.companyId)})`,
     );
-    return HttpResponse.json(staff, { status: 201 });
+    return json(staff, { status: 201 });
   }),
 
   http.get(api(ENDPOINTS.STAFF.DETAIL(':companyId', ':id')), async ({ params }) => {
     await delay(200);
     const staff = findStaff(params.companyId, params.id);
-    return staff ? HttpResponse.json(staff) : notFound();
+    return staff ? json(staff) : notFound();
   }),
 
   http.put(api(ENDPOINTS.STAFF.DETAIL(':companyId', ':id')), async ({ params, request }) => {
@@ -115,7 +115,7 @@ export const staffHandlers = [
         before,
       },
     );
-    return HttpResponse.json(staff);
+    return json(staff);
   }),
 
   http.delete(api(ENDPOINTS.STAFF.DETAIL(':companyId', ':id')), async ({ params, request }) => {
@@ -131,20 +131,20 @@ export const staffHandlers = [
         `حذف پرسنل: ${removed.fullName} (${companyName(removed.companyId)})`,
       );
     }
-    return new HttpResponse(null, { status: 204 });
+    return json(null);
   }),
 
   http.post(api(ENDPOINTS.STAFF.IMPORT(':companyId')), async ({ params, request }) => {
     await delay(500);
     const file = (await request.formData()).get('file');
     if (!(file instanceof File)) {
-      return HttpResponse.json({ message: 'فایل ارسال نشده است.' }, { status: 400 });
+      return json({ message: 'فایل ارسال نشده است.' }, { status: 400 });
     }
     const workbook = new ExcelJS.Workbook();
     try {
       await workbook.xlsx.load(await file.arrayBuffer());
     } catch {
-      return HttpResponse.json(
+      return json(
         { message: 'فایل قابل خواندن نیست؛ از فایل نمونه استفاده کنید.' },
         { status: 422 },
       );
@@ -162,7 +162,7 @@ export const staffHandlers = [
       'staff',
       `بارگذاری گروهی ${added} پرسنل از فایل اکسل (${companyName(String(params.companyId))})`,
     );
-    return HttpResponse.json({ added });
+    return json({ added });
   }),
 
   http.get(api(ENDPOINTS.STAFF.SAMPLE_FILE), async () => {

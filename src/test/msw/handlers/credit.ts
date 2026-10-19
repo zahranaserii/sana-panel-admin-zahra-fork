@@ -1,4 +1,4 @@
-import { delay, http, HttpResponse } from 'msw';
+import { delay, http } from 'msw';
 
 import { ENDPOINTS } from '@/constant/endpoints';
 import { type MockCompany } from '@/constant/mock';
@@ -12,7 +12,7 @@ import { dayjs, formatJalali, toPersianDigits } from '@/utils/date';
 import { formatAmount } from '@/utils/number';
 
 import { buildPlanOptions, db, nextId, primaryScheme, today } from '../db';
-import { api } from '../utils';
+import { api, json } from '../utils';
 import { logAction } from '../audit';
 
 /*
@@ -20,7 +20,7 @@ import { logAction } from '../audit';
  * اعتبار هر طرح، سقف اعتبار و تخصیص تکراری) اینجا محاسبه می‌شود و فرانت فقط نتیجه را نمایش می‌دهد.
  */
 
-const notFound = () => HttpResponse.json({ message: 'شرکت یافت نشد.' }, { status: 404 });
+const notFound = () => json({ message: 'شرکت یافت نشد.' }, { status: 404 });
 
 const findCompany = (id: unknown) => db.companies.find((item) => item.id === id && !item.deleted);
 
@@ -124,7 +124,7 @@ export const creditHandlers = [
     const company = findCompany(params.companyId);
     if (!company) return notFound();
     const date = new URL(request.url).searchParams.get('date') ?? today();
-    return HttpResponse.json(buildEligibility(company, date));
+    return json(buildEligibility(company, date));
   }),
 
   http.get(api(ENDPOINTS.CREDIT.SUMMARY(':companyId')), async ({ params, request }) => {
@@ -133,7 +133,7 @@ export const creditHandlers = [
     if (!company) return notFound();
     const date = new URL(request.url).searchParams.get('date') ?? today();
     const filled = company.averages.filter((value): value is number => value !== null);
-    return HttpResponse.json({
+    return json({
       totalAverage: filled.reduce((sum, value) => sum + value, 0),
       currentMonthAverage: filled.at(-1) ?? 0,
       plans: buildPlanCredits(company, date),
@@ -150,9 +150,9 @@ export const creditHandlers = [
       .slice()
       .reverse();
     const start = (page - 1) * pageSize;
-    return HttpResponse.json({
+    return json({
       items: list.slice(start, start + pageSize),
-      total: list.length,
+      totalCount: list.length,
       page,
       pageSize,
     });
@@ -165,17 +165,17 @@ export const creditHandlers = [
     const body = (await request.json()) as CreateLoanRequestPayload;
 
     if (!buildEligibility(company, body.date).canAllocate) {
-      return HttpResponse.json(
+      return json(
         { message: 'در تاریخ انتخاب‌شده امکان ثبت درخواست برای این شرکت وجود ندارد.' },
         { status: 422 },
       );
     }
     const plan = buildPlanCredits(company, body.date).find((item) => item.planId === body.planId);
-    if (!plan) return HttpResponse.json({ message: 'طرح انتخاب‌شده معتبر نیست.' }, { status: 422 });
+    if (!plan) return json({ message: 'طرح انتخاب‌شده معتبر نیست.' }, { status: 422 });
 
     const total = body.items.reduce((sum, item) => sum + item.amount, 0);
     if (total > plan.available) {
-      return HttpResponse.json(
+      return json(
         {
           message: `مجموع مبلغ درخواستی (${rial(total)}) بیشتر از اعتبار باقی‌مانده این طرح (${rial(plan.available)}) است.`,
         },
@@ -193,7 +193,7 @@ export const creditHandlers = [
       )
       .filter((item) => item !== undefined);
     if (duplicates.length && !body.confirmDuplicates) {
-      return HttpResponse.json(
+      return json(
         {
           message: 'برای برخی از پرسنل در همین ماه وام تخصیص داده شده است.',
           duplicates: duplicates.map((item) => ({
@@ -227,6 +227,6 @@ export const creditHandlers = [
       'loan',
       `ثبت درخواست وام جمعاً ${rial(total)} برای ${toPersianDigits(body.items.length)} نفر — شرکت: ${company.name}`,
     );
-    return HttpResponse.json({ created: body.items.length }, { status: 201 });
+    return json({ created: body.items.length }, { status: 201 });
   }),
 ];

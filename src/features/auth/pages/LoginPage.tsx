@@ -13,8 +13,8 @@ import { ROUTES } from '@/constant/routes';
 import { useAuthStore } from '@/store/useAuthStore';
 import { useProfileStore } from '@/store/useProfileStore';
 
-import { login } from '../api';
-import { type LoginRequest } from '../types';
+import { getProfile, login } from '../api';
+import { type LoginFormValues } from '../types';
 
 export const LoginPage = () => {
   const navigate = useNavigate();
@@ -22,9 +22,13 @@ export const LoginPage = () => {
   const setProfile = useProfileStore((state) => state.setProfile);
 
   const { mutate, isPending, error } = useMutation({
-    mutationFn: login,
-    onSuccess: ({ token, profile }) => {
+    mutationFn: async (values: LoginFormValues) => {
+      const { token } = await login(values);
+      // توکن در کوکی و استور ست می‌شود و از این به بعد همراه همه درخواست‌ها ارسال می‌شود
       setToken(token);
+      return getProfile();
+    },
+    onSuccess: (profile) => {
       setProfile(profile);
       toast.success(`${profile.fullName} خوش آمدید`);
       void navigate(ROUTES.HOME, { replace: true });
@@ -38,7 +42,7 @@ export const LoginPage = () => {
       <Typography as="title" level={2} size="xl" color="heading" align="center" className="mb-6">
         ورود به سامانه
       </Typography>
-      <Form<LoginRequest> onFinish={(values) => mutate(values)} requiredMark={false}>
+      <Form<LoginFormValues> onFinish={(values) => mutate(values)} requiredMark={false}>
         <FormItem name="username" label="نام کاربری" required>
           <TextInput prefix={<UserOutlined />} placeholder="نام کاربری" autoComplete="username" />
         </FormItem>

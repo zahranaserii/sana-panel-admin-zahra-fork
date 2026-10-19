@@ -1,11 +1,11 @@
 import axios from 'axios';
 import { toast } from 'sonner';
 
-import { useAuthStore } from '@/store/useAuthStore';
-import { useProfileStore } from '@/store/useProfileStore';
+import { resetSession } from '@/store/session';
 
 import { type HttpError, type StatusErrorHandler } from './types';
 
+/** پیام خطا از فیلد `message` پاسخ (همان قالب پاسخ‌های بک‌اند) خوانده می‌شود */
 export const getErrorMessage = (error: HttpError, fallback: string) => {
   const data = error.response?.data;
   if (data?.message) return data.message;
@@ -23,8 +23,7 @@ const showError =
 export const defaultErrorHandlers: Record<number | 'network' | 'default', StatusErrorHandler> = {
   400: showError('درخواست نامعتبر است.'),
   401: () => {
-    useAuthStore.getState().logout();
-    useProfileStore.getState().clearProfile();
+    resetSession();
     toast.error('نشست شما منقضی شده است؛ لطفاً دوباره وارد شوید.');
   },
   403: showError('شما به این بخش دسترسی ندارید.'),

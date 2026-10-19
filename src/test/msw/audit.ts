@@ -34,7 +34,9 @@ export const restoreSnapshot = ({ entity, id, before }: NonNullable<MockAuditLog
     user: db.users,
     scheme: db.schemes,
   } as const;
-  const target = (collections[entity] as { id: string }[]).find((item) => item.id === id);
+  const target = (collections[entity] as { id: string | number }[]).find(
+    (item) => String(item.id) === id,
+  );
   if (!target) return false;
   Object.assign(target, structuredClone(before));
   return true;
