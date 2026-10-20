@@ -1,7 +1,6 @@
-import { type MockAuditLog, type SnapshotEntity } from '@/constant/mock';
-import { type AuditLogType } from '@/features/change-log/types';
+import { type MockAuditLog, type MockLogType, type SnapshotEntity } from '@/constant/mock';
 
-import { db, findUserByToken, nextId } from './db';
+import { db, findUserByToken } from './db';
 
 /**
  * ثبت لاگ عملیات (شبیه‌ساز بک‌اند): هر ثبت، ویرایش، لغو یا حذف
@@ -9,15 +8,22 @@ import { db, findUserByToken, nextId } from './db';
  */
 export const logAction = (
   request: Request,
-  type: AuditLogType,
+  type: MockLogType,
   details: string,
   snapshot?: { entity: SnapshotEntity; id: string; before: object },
 ) => {
-  const user = findUserByToken(request.headers.get('Authorization'));
+  const username = findUserByToken(request.headers.get('Authorization'))?.username;
+  const panelUser = db.users.find((item) => item.username === username);
   const entry: MockAuditLog = {
-    id: nextId('log'),
+    id: Math.max(0, ...db.auditLogs.map((log) => log.id)) + 1,
     createdAt: new Date().toISOString(),
-    user: user ? `${user.profile.fullName} (${user.username})` : 'نامشخص',
+    user: {
+      panelUserId: panelUser?.id,
+      userName: username ?? 'نامشخص',
+      userCode: panelUser?.userCode ?? null,
+      branchName: panelUser?.branchName ?? null,
+      branchCode: panelUser?.branchCode ?? null,
+    },
     type,
     details,
     snapshot: snapshot && { ...snapshot, before: structuredClone(snapshot.before) },

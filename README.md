@@ -17,7 +17,7 @@ npm run build:stage  # بیلد staging
 > پورت با متغیر `PORT` قابل تغییر است (پیش‌فرض ۳۰۰۵).
 > بیلد production با terser فشرده می‌شود و `console` و `debugger` حذف می‌شوند؛ بقیه محیط‌ها sourcemap دارند.
 
-فعلاً در **همه محیط‌ها** (development، staging و production) دیتا از ماک خوانده می‌شود (`VITE_ENABLE_MOCK=true`). ماک مستقیماً روی axios وصل است و به Service Worker یا https نیاز ندارد، پس بعد از دیپلوی هم کار می‌کند. هنگام اتصال به API واقعی کافی است این متغیر در `.env.staging` و `.env.production` برابر `false` شود. کاربر نمونه: `admin / admin` یا `branch / branch`.
+ماک فقط در محیط **development** فعال است (`VITE_ENABLE_MOCK=true` در `.env.development`)؛ staging و production مستقیم به سرور وصل می‌شوند. ماک مستقیماً روی axios وصل است و به Service Worker نیاز ندارد. کاربر نمونه: `admin / admin` یا `branch / branch`.
 
 | فرمان                       | کار                                                    |
 | --------------------------- | ------------------------------------------------------ |
@@ -99,6 +99,24 @@ http.get('/ping', { silent: true }); // بدون هیچ توست/ریدایرک�
 - سرویس‌های مشترک: `src/services/lookup` (لیست‌های کشویی) و `src/services/file` (آپلود فایل)
 - دیتای اولیه ماک: `src/constant/mock` · پاسخ‌دهنده‌های ماک (شبیه بک‌اند): `src/test/msw/handlers`
 - فایل `docs/design/panel-negin-misagh.html` راهنمای صفحات و سرویس‌های مورد نیاز است.
+
+### OpenAPI و تولید خودکار سرویس‌ها
+
+فایل‌های سوئگر بک‌اند در پوشه `openapi/` قرار می‌گیرند (`facility.json` و `admin.json`). بعد از هر نسخه جدید:
+
+| فرمان                  | کار                                                                                     |
+| ---------------------- | --------------------------------------------------------------------------------------- |
+| `npm run api:diff`     | سرویس‌های اضافه‌شده، حذف‌شده و تغییرکرده نسبت به آخرین کامیت (یا `-- origin/main`)      |
+| `npm run api:generate` | تولید سرویس‌ها، هوک‌های React Query و ماک MSW در `src/api/generated` (دستی ویرایش نشود) |
+| `npm run api:unused`   | سرویس‌های تولیدشده‌ای که هنوز در UI استفاده نشده‌اند                                    |
+| `npm run api:check`    | تولید دوباره و خطا در صورت اختلاف با کد کامیت‌شده (برای CI)                             |
+
+- تنظیمات در `orval.config.ts` است: `GET` = useQuery و بقیه = useMutation؛ استثناها (مثل `Loans_Preview` و `Logout`) در `OPERATIONS`.
+- سرویس‌ها از همان `httpClient` پروژه استفاده می‌کنند (`services/http/apiClient.ts`): هدرها، توکن، `onError` و خروجی `data`.
+- `scripts/openapi/unwrap-envelope.mjs` قبل از تولید، پاسخ‌ها را به `data` باز می‌کند و ایرادهای spec بک‌اند (هدرهای بدون schema، پارامتر مسیر تعریف‌نشده، نبود operationId) را برطرف می‌کند.
+- ماک دولایه است: ماک دستی (`src/test/msw/handlers`، با رفتار واقعی) اول اجرا می‌شود و برای بقیه سرویس‌ها ماک تولیدشده با داده تصادفی در قالب پاسخ بک‌اند پاسخ می‌دهد.
+- سرویسی که فقط فرانت دارد و بک‌اند ندارد، دست‌نویس در `api.ts` همان فیچر با کامنت «بکند ندارد» می‌ماند.
+- ماک فقط در محیط development فعال است (`VITE_ENABLE_MOCK`).
 
 ### احراز هویت و منو
 

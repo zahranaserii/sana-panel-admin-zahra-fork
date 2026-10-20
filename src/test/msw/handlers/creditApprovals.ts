@@ -46,14 +46,18 @@ const decide = (path: string, nextStatus: LoanStatus) =>
     if (nextStatus === 'rejected' && !body.reasonId) {
       return json({ message: 'انتخاب دلیل رد اجباری است.' }, { status: 422 });
     }
+    if (nextStatus === 'rejected' && !body.note?.trim()) {
+      return json({ message: 'توضیحات رد الزامی است.' }, { status: 422 });
+    }
     const stageError = nextStatus === 'approved' ? validateStage(body) : null;
     if (stageError) return json({ message: stageError }, { status: 422 });
     const targets = db.loanRequests.filter(
       (item) => body.requestIds.includes(item.id) && item.status === 'pending_credit',
     );
-    if (!targets.length) {
-      return json({ message: 'درخواستی در انتظار یافت نشد.' }, { status: 404 });
-    }
+    // اجرای ناقص مجاز است: درخواستی که در این مرحله نیست با دلیل در skipped برمی‌گردد
+    const skipped = body.requestIds
+      .filter((id) => !targets.some((item) => item.id === id))
+      .map((requestId) => ({ requestId, reason: 'این درخواست در مرحلهٔ تأیید اعتبارات نیست.' }));
     targets.forEach((item) => {
       item.status = nextStatus;
       item.decidedAt = today();
@@ -73,7 +77,7 @@ const decide = (path: string, nextStatus: LoanStatus) =>
         `${nextStatus === 'approved' ? 'تأیید' : 'رد'} درخواست وام ${item.staffName} — ${formatRial(item.amount)} — شرکت: ${companyName(item.companyId)}${reason}`,
       );
     });
-    return json({ updated: targets.length });
+    return json({ processed: targets.length, skipped });
   });
 
 export const creditApprovalHandlers = [

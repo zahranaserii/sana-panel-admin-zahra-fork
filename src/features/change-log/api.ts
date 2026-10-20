@@ -1,17 +1,20 @@
 import { ENDPOINTS } from '@/constant/endpoints';
 import { http } from '@/services/http';
-import { type LookupItem, type PageParams, type PaginatedResponse } from '@/types/common';
 
-import { type AuditLog, type AuditLogFilters } from './types';
+import { type ChangeLogCategoryOption, type ChangeLogsSearchParams } from './types';
 
-export const getAuditLogs = (params: AuditLogFilters & PageParams) =>
-  http.get<PaginatedResponse<AuditLog>>(ENDPOINTS.AUDIT_LOGS.LIST, { params });
+/*
+ * لیست و بازگردانی از سرویس‌های تولیدشده استفاده می‌کنند:
+ * useChangeLogsSearch و useChangeLogsRestore در @/api/generated/facility
+ */
 
-export const getAuditLogTypes = () => http.get<LookupItem[]>(ENDPOINTS.LOOKUPS.AUDIT_LOG_TYPES);
+/** بکند ندارد — عنوان دسته‌های گزارش (Category عددی بدون عنوان است) */
+export const getChangeLogCategories = () =>
+  http.get<ChangeLogCategoryOption[]>(ENDPOINTS.LOOKUPS.AUDIT_LOG_TYPES);
 
-/** بازگردانی تغییر به حالت قبل (فقط برای ویرایش‌هایی که snapshot دارند) */
-export const rollbackAuditLog = (id: string) =>
-  http.post<AuditLog>(ENDPOINTS.AUDIT_LOGS.ROLLBACK(id));
-
-export const exportAuditLogs = () =>
-  http.download(ENDPOINTS.REPORTS.AUDIT_LOGS, 'گزارش-تغییرات.xlsx');
+/**
+ * خروجی اکسل: سرویس تولیدشده (changeLogsExport) نوع فایل پاسخ را نمی‌شناسد،
+ * پس دانلود با http.download انجام می‌شود.
+ */
+export const exportChangeLogs = (params: Omit<ChangeLogsSearchParams, 'Page' | 'PageSize'>) =>
+  http.download(ENDPOINTS.CHANGE_LOGS.EXPORT, 'گزارش-تغییرات.xlsx', { params });

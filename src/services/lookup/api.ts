@@ -12,7 +12,11 @@ export const getNoGrantReasons = () => http.get<LookupItem[]>(ENDPOINTS.LOOKUPS.
 export const getAvgDocTypes = () => http.get<LookupItem[]>(ENDPOINTS.LOOKUPS.AVG_DOC_TYPES);
 
 /** طرح‌های قابل انتخاب در قرارداد شرکت */
-export const getPlanOptions = () => http.get<PlanOptionsResponse>(ENDPOINTS.LOOKUPS.PLANS);
+export const getPlanOptions = (schemeId: string) =>
+  http.get<PlanOptionsResponse>(ENDPOINTS.LOOKUPS.PLANS, { params: { schemeId } });
+
+/** کشویی طرح‌های کلان (نگین میثاق، …) برای فرم شرکت */
+export const getSchemeOptions = () => http.get<LookupItem[]>(ENDPOINTS.LOOKUPS.SCHEMES);
 
 /** شرکت‌های فعال (برای سلکت انتخاب شرکت) */
 export const getCompanyOptions = () => http.get<LookupItem[]>(ENDPOINTS.LOOKUPS.COMPANIES);

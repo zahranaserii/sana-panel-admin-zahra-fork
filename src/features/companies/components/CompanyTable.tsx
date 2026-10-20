@@ -1,11 +1,11 @@
 import { DeleteOutlined, EditOutlined, PlusOutlined, StopOutlined } from '@ant-design/icons';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { App } from 'antd';
 import { type ColumnsType } from 'antd/es/table';
 import { useState } from 'react';
 import { toast } from 'sonner';
 
 import { Button } from '@/component/button';
+import { DeleteReasonModal, type DeleteReasonValues } from '@/component/delete-modal';
 import { PanelCard } from '@/component/card';
 import { StatusChip } from '@/component/status-chip';
 import { Table } from '@/component/table';
@@ -36,32 +36,22 @@ const renderStatus = (company: CompanyListItem) =>
 export const CompanyTable = ({ onCreate, onEdit, onCancelContract }: CompanyTableProps) => {
   const [page, setPage] = useState(1);
   const queryClient = useQueryClient();
-  const { modal } = App.useApp();
+  const [deleting, setDeleting] = useState<CompanyListItem | null>(null);
 
   const { data, isFetching } = useQuery({
     queryKey: QUERY_KEYS.COMPANIES.LIST(page, PAGE_SIZE),
     queryFn: () => getCompanies({ page, pageSize: PAGE_SIZE }),
   });
 
-  const { mutate: remove } = useMutation({
-    mutationFn: deleteCompany,
+  const { mutateAsync: remove } = useMutation({
+    mutationFn: ({ description }: DeleteReasonValues) =>
+      deleteCompany(deleting?.id ?? '', { description: description.trim() }),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: QUERY_KEYS.COMPANIES.ALL });
       void queryClient.invalidateQueries({ queryKey: QUERY_KEYS.LOOKUPS.COMPANIES });
       toast.success('شرکت حذف شد.');
     },
   });
-
-  const confirmDelete = (company: CompanyListItem) =>
-    modal.confirm({
-      title: `حذف شرکت «${company.name}»`,
-      content:
-        'اطلاعات این شرکت برای گزارش‌گیری نگه داشته می‌شود و در لیست‌های فعال دیگر نمایش داده نمی‌شود.',
-      okText: 'حذف',
-      okButtonProps: { danger: true },
-      cancelText: 'انصراف',
-      onOk: () => remove(company.id),
-    });
 
   const columns: ColumnsType<CompanyListItem> = [
     { title: 'نام شرکت', dataIndex: 'name' },
@@ -107,7 +97,7 @@ export const CompanyTable = ({ onCreate, onEdit, onCancelContract }: CompanyTabl
             variant="secondary"
             size="small"
             icon={<DeleteOutlined />}
-            onClick={() => confirmDelete(row)}
+            onClick={() => setDeleting(row)}
           >
             حذف
           </Button>
@@ -136,6 +126,13 @@ export const CompanyTable = ({ onCreate, onEdit, onCancelContract }: CompanyTabl
           total: data?.totalCount ?? 0,
           onChange: setPage,
         }}
+      />
+      <DeleteReasonModal
+        open={Boolean(deleting)}
+        title={`حذف شرکت «${deleting?.name ?? ''}»`}
+        message="اطلاعات این شرکت برای گزارش‌گیری نگه داشته می‌شود و در لیست‌های فعال دیگر نمایش داده نمی‌شود."
+        onSubmit={remove}
+        onClose={() => setDeleting(null)}
       />
     </PanelCard>
   );

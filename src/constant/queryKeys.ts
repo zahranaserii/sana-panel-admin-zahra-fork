@@ -11,6 +11,8 @@ export const QUERY_KEYS = {
     NO_GRANT_REASONS: ['lookups', 'no-grant-reasons'],
     AVG_DOC_TYPES: ['lookups', 'avg-doc-types'],
     PLANS: ['lookups', 'plans'],
+    PLANS_OF: (schemeId: string) => ['lookups', 'plans', schemeId],
+    SCHEMES: ['lookups', 'schemes'],
     COMPANIES: ['lookups', 'companies'],
     ALL_COMPANIES: ['lookups', 'companies', 'all'],
     POST_APPROVAL_STAGES: ['lookups', 'post-approval-stages'],
@@ -62,10 +64,6 @@ export const QUERY_KEYS = {
     CONTRACTS_BY_MONTH: ['dashboard', 'contracts-by-month'],
     MONTHLY_PERFORMANCE: ['dashboard', 'monthly-performance'],
     REMOVED_COMPANIES: ['dashboard', 'removed-companies'],
-  },
-  AUDIT_LOGS: {
-    ALL: ['audit-logs'],
-    LIST: (type: string | undefined, page: number) => ['audit-logs', type ?? 'all', page],
   },
   USERS: {
     ALL: ['users'],

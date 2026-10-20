@@ -8,6 +8,7 @@ export {
   AUDIT_LOG_TYPES,
   MOCK_AUDIT_LOGS,
   type MockAuditLog,
+  type MockLogType,
   type SnapshotEntity,
 } from './auditLogs';
 export { BRANCH_MENU_URLS, MOCK_MAIN_MENU } from './menu';

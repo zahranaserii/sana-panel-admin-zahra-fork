@@ -11,21 +11,30 @@ const planLabel = (plan: PlanOption) =>
     `${plan.typeTitle} | نرخ ${plan.rate}٪ | ${plan.term} ماه | اعتبار ${plan.usable}٪ میانگین ماهانه`,
   );
 
+interface PlanSelectProps extends SelectInputProps<string[]> {
+  /** طرح‌ها و سقف تعداد آن‌ها به طرح کلان وابسته‌اند */
+  schemeId?: string;
+}
+
 /** انتخاب چندتایی طرح‌های مندرج در قرارداد (حداکثر تعداد از سرور می‌آید) */
-export const PlanSelect = (props: SelectInputProps<string[]>) => {
-  const { data, isPending } = useQuery({
-    queryKey: QUERY_KEYS.LOOKUPS.PLANS,
-    queryFn: getPlanOptions,
+export const PlanSelect = ({ schemeId, ...props }: PlanSelectProps) => {
+  const { data, isFetching } = useQuery({
+    queryKey: QUERY_KEYS.LOOKUPS.PLANS_OF(schemeId ?? ''),
+    queryFn: () => getPlanOptions(schemeId ?? ''),
+    enabled: Boolean(schemeId),
   });
+
+  const placeholder = data
+    ? `حداکثر ${toPersianDigits(data.maxPlans)} طرح قابل انتخاب است`
+    : 'انتخاب طرح‌ها';
 
   return (
     <SelectInput<string[]>
       mode="multiple"
-      loading={isPending}
+      disabled={!schemeId}
+      loading={isFetching}
       maxCount={data?.maxPlans}
-      placeholder={
-        data ? `حداکثر ${toPersianDigits(data.maxPlans)} طرح قابل انتخاب است` : 'انتخاب طرح‌ها'
-      }
+      placeholder={schemeId ? placeholder : 'ابتدا طرح کلان را انتخاب کنید'}
       options={data?.items.map((plan) => ({ value: plan.id, label: planLabel(plan) }))}
       {...props}
     />

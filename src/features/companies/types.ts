@@ -19,6 +19,8 @@ export interface CompanyListItem {
 /** اطلاعات کامل شرکت (برای ویرایش) */
 export interface CompanyDetail {
   id: string;
+  /** طرح کلان (نگین میثاق، …) — الزامی در ثبت و در ویرایش قابل تغییر نیست */
+  schemeId: string;
   name: string;
   nationalId: string;
   agreementNo: string;
@@ -43,18 +45,24 @@ export interface CompanyPayload extends Omit<CompanyDetail, 'id' | 'agreementFil
   agreementFileId: string | null;
 }
 
+/** حذف شرکت: توضیح الزامی */
+export interface DeleteCompanyPayload {
+  description: string;
+}
+
+/** لغو قرارداد: تاریخ، دلیل، توضیح و فایل نامه همه الزامی */
 export interface CancelContractPayload {
   cancelDate: string;
   reasonId: string;
-  note?: string;
-  fileId?: string | null;
+  note: string;
+  fileId: string;
 }
 
 export interface CancelContractFormValues {
   cancelDate: string;
   reasonId: string;
-  note?: string;
-  file?: File | null;
+  note: string;
+  file: File | null;
 }
 
 /** میانگین موجودی یک ماه از سال جاری قرارداد */

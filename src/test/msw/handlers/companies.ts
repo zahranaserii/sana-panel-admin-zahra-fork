@@ -4,6 +4,7 @@ import { ENDPOINTS } from '@/constant/endpoints';
 import { type MockCompany } from '@/constant/mock';
 import {
   type CancelContractPayload,
+  type DeleteCompanyPayload,
   type CompanyDetail,
   type CompanyListItem,
   type CompanyPayload,
@@ -18,7 +19,7 @@ import {
   findUserByToken,
   lookupTitle,
   nextId,
-  primaryScheme,
+  schemeOf,
   today,
 } from '../db';
 import { api, json } from '../utils';
@@ -46,6 +47,7 @@ const toListItem = (company: MockCompany): CompanyListItem => ({
 
 const toDetail = (company: MockCompany): CompanyDetail => ({
   id: company.id,
+  schemeId: company.schemeId,
   name: company.name,
   nationalId: company.nationalId,
   agreementNo: company.agreementNo,
@@ -59,12 +61,14 @@ const toDetail = (company: MockCompany): CompanyDetail => ({
 
 /** محاسبه ساده مانده اعتبار (در بک‌اند واقعی بر اساس وام‌های تخصیص‌یافته محاسبه می‌شود) */
 const buildAverages = (company: MockCompany): MonthlyAverage[] => {
-  const plans = buildPlanOptions().filter((plan) => company.planIds.includes(plan.id));
+  const plans = buildPlanOptions(schemeOf(company.schemeId)).filter((plan) =>
+    company.planIds.includes(plan.id),
+  );
   const usablePercent = plans.length
     ? plans.reduce((sum, plan) => sum + plan.usable, 0) / plans.length
     : 0;
-  const multiplier =
-    primaryScheme().sepahEnabled && company.sepahSalary ? primaryScheme().sepahMultiplier : 1;
+  const scheme = schemeOf(company.schemeId);
+  const multiplier = scheme.sepahEnabled && company.sepahSalary ? scheme.sepahMultiplier : 1;
 
   let cumulative = 0;
   return company.averages.map((average, index) => {
@@ -100,6 +104,7 @@ export const companyHandlers = [
   http.post(api(ENDPOINTS.COMPANIES.LIST), async ({ request }) => {
     await delay(400);
     const body = (await request.json()) as CompanyPayload;
+    if (!body.schemeId) return json({ message: 'انتخاب طرح کلان الزامی است.' }, { status: 400 });
     const user = findUserByToken(request.headers.get('Authorization'));
     const company: MockCompany = {
       ...body,
@@ -126,7 +131,9 @@ export const companyHandlers = [
     await delay(400);
     const company = findCompany(params.id);
     if (!company) return notFound();
-    const { agreementFileId, ...body } = (await request.json()) as CompanyPayload;
+    // طرح کلان و شناسه ملی در ویرایش قابل تغییر نیستند (مثل بک‌اند)
+    const { agreementFileId, ...payload } = (await request.json()) as CompanyPayload;
+    const body = { ...payload, schemeId: company.schemeId, nationalId: company.nationalId };
     const before = structuredClone(company);
     Object.assign(company, body);
     if (agreementFileId && agreementFileId !== company.agreementFile?.id) {
@@ -144,9 +151,11 @@ export const companyHandlers = [
     await delay(300);
     const company = findCompany(params.id);
     if (!company) return notFound();
+    const { description } = ((await request.json()) ?? {}) as Partial<DeleteCompanyPayload>;
+    if (!description?.trim()) return json({ message: 'توضیحات حذف الزامی است.' }, { status: 400 });
     company.deleted = true;
     company.deletedAt = today();
-    logAction(request, 'company', `حذف شرکت: ${company.name}`);
+    logAction(request, 'company', `حذف شرکت: ${company.name} — ${description.trim()}`);
     return json(null);
   }),
 
@@ -155,6 +164,9 @@ export const companyHandlers = [
     const company = findCompany(params.id);
     if (!company) return notFound();
     const body = (await request.json()) as CancelContractPayload;
+    if ((body.note?.trim().length ?? 0) < 5 || !body.fileId) {
+      return json({ message: 'توضیحات (حداقل ۵ نویسه) و فایل نامه الزامی است.' }, { status: 400 });
+    }
     company.status = 'cancelled';
     company.cancelDate = body.cancelDate;
     company.cancelReason = lookupTitle('cancelReasons', body.reasonId);

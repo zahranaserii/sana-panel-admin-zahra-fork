@@ -3,7 +3,7 @@ import { delay, http, HttpResponse } from 'msw';
 
 import { ENDPOINTS } from '@/constant/endpoints';
 import { type MockStaff } from '@/constant/mock';
-import { type StaffPayload } from '@/features/staff/types';
+import { type DeleteStaffPayload, type StaffPayload } from '@/features/staff/types';
 import { ISO_DATE_FORMAT, parseJalali, toEnglishDigits } from '@/utils/date';
 
 import { db, nextId } from '../db';
@@ -57,6 +57,12 @@ const rowToStaff = (row: ExcelJS.Row, companyId: string): MockStaff | null => {
   };
 };
 
+const lastPriority = (companyId: string) =>
+  Math.max(
+    0,
+    ...db.staff.filter((item) => item.companyId === companyId).map((item) => item.priority),
+  );
+
 export const staffHandlers = [
   http.get(api(ENDPOINTS.STAFF.LIST(':companyId')), async ({ params, request }) => {
     await delay(300);
@@ -83,7 +89,14 @@ export const staffHandlers = [
   http.post(api(ENDPOINTS.STAFF.LIST(':companyId')), async ({ params, request }) => {
     await delay(300);
     const body = (await request.json()) as StaffPayload;
-    const staff = { ...body, id: nextId('s'), companyId: String(params.companyId) };
+    const companyId = String(params.companyId);
+    const staff = {
+      ...body,
+      id: nextId('s'),
+      companyId,
+      // اولویت اختیاری است؛ خالی = آخرین اولویت شرکت
+      priority: body.priority ?? lastPriority(companyId) + 1,
+    };
     db.staff.push(staff);
     logAction(
       request,
@@ -104,7 +117,8 @@ export const staffHandlers = [
     const staff = findStaff(params.companyId, params.id);
     if (!staff) return notFound();
     const before = structuredClone(staff);
-    Object.assign(staff, (await request.json()) as StaffPayload);
+    const body = (await request.json()) as StaffPayload;
+    Object.assign(staff, { ...body, priority: body.priority ?? staff.priority });
     logAction(
       request,
       'staff',
@@ -120,6 +134,10 @@ export const staffHandlers = [
 
   http.delete(api(ENDPOINTS.STAFF.DETAIL(':companyId', ':id')), async ({ params, request }) => {
     await delay(250);
+    const { description, fileId } = ((await request.json()) ?? {}) as Partial<DeleteStaffPayload>;
+    if (!description?.trim() || !fileId) {
+      return json({ message: 'توضیحات و فایل مستند حذف الزامی است.' }, { status: 400 });
+    }
     const removed = findStaff(params.companyId, params.id);
     db.staff = db.staff.filter(
       (item) => !(item.companyId === params.companyId && item.id === params.id),
@@ -128,7 +146,7 @@ export const staffHandlers = [
       logAction(
         request,
         'staff',
-        `حذف پرسنل: ${removed.fullName} (${companyName(removed.companyId)})`,
+        `حذف پرسنل: ${removed.fullName} (${companyName(removed.companyId)}) — ${description.trim()}`,
       );
     }
     return json(null);

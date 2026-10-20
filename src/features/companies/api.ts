@@ -8,6 +8,7 @@ import {
   type CompanyDetail,
   type CompanyListItem,
   type CompanyPayload,
+  type DeleteCompanyPayload,
   type MonthlyAverage,
   type SaveAveragesPayload,
 } from './types';
@@ -23,8 +24,9 @@ export const createCompany = (body: CompanyPayload) =>
 export const updateCompany = (id: string, body: CompanyPayload) =>
   http.put<CompanyDetail, CompanyPayload>(ENDPOINTS.COMPANIES.DETAIL(id), body);
 
-/** حذف شرکت (اطلاعات برای گزارش‌گیری نزد سرور باقی می‌ماند) */
-export const deleteCompany = (id: string) => http.delete<void>(ENDPOINTS.COMPANIES.DETAIL(id));
+/** حذف شرکت با توضیح الزامی (اطلاعات برای گزارش‌گیری نزد سرور باقی می‌ماند) */
+export const deleteCompany = (id: string, body: DeleteCompanyPayload) =>
+  http.delete<void>(ENDPOINTS.COMPANIES.DETAIL(id), { data: body });
 
 export const cancelContract = (id: string, body: CancelContractPayload) =>
   http.post<void, CancelContractPayload>(ENDPOINTS.COMPANIES.CANCEL(id), body);

@@ -36,6 +36,8 @@ export interface DecisionModalProps {
   target: DecisionTarget | null;
   /** اگر داده شود، در حالت رد انتخاب دلیل اجباری است */
   rejectReasons?: LookupItem[];
+  /** در حالت رد، توضیحات اجباری است (تأیید اعتبارات) */
+  requireRejectNote?: boolean;
   /** فیلدهای اضافه در حالت تأیید (مثل مرحله پس از تأیید) */
   approveFields?: ReactNode;
   onSubmit: (values: DecisionFormValues) => Promise<unknown>;
@@ -53,11 +55,13 @@ const describe = (requests: DecisionRequestInfo[]) => {
 export const DecisionModal = ({
   target,
   rejectReasons,
+  requireRejectNote,
   approveFields,
   onSubmit,
   onClose,
 }: DecisionModalProps) => {
   const isReject = target?.type === 'reject';
+  const noteRequired = isReject && Boolean(requireRejectNote);
   const isGroup = (target?.requests.length ?? 0) > 1;
 
   return (
@@ -85,7 +89,13 @@ export const DecisionModal = ({
         </FormItem>
       )}
       {!isReject && approveFields}
-      <FormItem name="note" label="توضیحات (اختیاری)">
+      <FormItem
+        name="note"
+        label={noteRequired ? 'توضیحات' : 'توضیحات (اختیاری)'}
+        required={noteRequired}
+        requiredMessage="توضیحات رد الزامی است."
+        rules={[{ whitespace: true, message: 'توضیحات رد الزامی است.' }]}
+      >
         <TextAreaInput maxLength={500} />
       </FormItem>
       <FormItem name="file" label="الصاق مستندات (اختیاری)">

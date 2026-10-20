@@ -1,20 +1,11 @@
-export type AuditLogType = 'company' | 'staff' | 'loan' | 'user' | 'base';
+export type {
+  ChangeLogCategory,
+  ChangeLogsSearchParams,
+  CommandResponsesChangeLogItemDto as ChangeLogItem,
+} from '@/api/generated/facility/facilityPanelAPI.schemas';
 
-export interface AuditLog {
-  id: string;
-  /** زمان عملیات (ISO) */
-  createdAt: string;
-  /** نام و نام کاربری انجام‌دهنده */
-  user: string;
-  type: AuditLogType;
-  typeTitle: string;
-  details: string;
-  /** این عملیات اطلاعات لازم برای بازگردانی را دارد */
-  canRollback: boolean;
-  rolledBack: boolean;
-}
-
-export interface AuditLogFilters {
-  /** خالی = همه انواع عملیات */
-  type?: AuditLogType;
+/** عنوان دسته‌های گزارش تغییرات (بکند ندارد) */
+export interface ChangeLogCategoryOption {
+  id: number;
+  title: string;
 }

@@ -1,18 +1,18 @@
 import { CheckOutlined, CloseOutlined } from '@ant-design/icons';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { App } from 'antd';
 import { useState } from 'react';
 import { toast } from 'sonner';
 
 import { Button } from '@/component/button';
 import { PanelCard } from '@/component/card';
-import { DecisionModal, type DecisionTarget } from '@/component/decision-modal';
+import { DecisionModal, showDecisionResult, type DecisionTarget } from '@/component/decision-modal';
 import { SelectInput } from '@/component/input';
 import { Table } from '@/component/table';
 import { QUERY_KEYS } from '@/constant/queryKeys';
 import { type DecisionFormValues, type DecisionType } from '@/features/manager-approval/types';
 import { resolveFile } from '@/services/file';
 import { getAllCompanyOptions, getRejectReasons } from '@/services/lookup';
-import { toPersianDigits } from '@/utils/date';
 
 import { getCreditApprovals, submitCreditDecision } from '../api';
 import { type CreditApprovalItem } from '../types';
@@ -32,6 +32,7 @@ const ALL = 'all';
 /** درخواست‌های ثبت‌شده در مرحله تأیید اعتبارات */
 export const CreditApprovalCard = ({ companyId, onCompanyChange }: CreditApprovalCardProps) => {
   const queryClient = useQueryClient();
+  const { modal } = App.useApp();
   const [page, setPage] = useState(1);
   const [selected, setSelected] = useState<CreditApprovalItem[]>([]);
   const [target, setTarget] = useState<DecisionTarget | null>(null);
@@ -58,12 +59,15 @@ export const CreditApprovalCard = ({ companyId, onCompanyChange }: CreditApprova
         fileId: uploaded?.id ?? null,
       });
     },
-    onSuccess: ({ updated }) => {
+    onSuccess: (result) => {
       void queryClient.invalidateQueries({ queryKey: QUERY_KEYS.CREDIT_APPROVALS.ALL });
       void queryClient.invalidateQueries({ queryKey: QUERY_KEYS.CREDIT.ALL });
       setSelected([]);
-      toast.success(
-        `${toPersianDigits(updated)} درخواست ${target?.type === 'reject' ? 'رد' : 'تأیید'} شد.`,
+      showDecisionResult(
+        modal,
+        result,
+        target?.requests ?? [],
+        target?.type === 'reject' ? 'رد شد' : 'تأیید شد',
       );
     },
   });
@@ -133,6 +137,7 @@ export const CreditApprovalCard = ({ companyId, onCompanyChange }: CreditApprova
       <DecisionModal
         target={target}
         rejectReasons={rejectReasons ?? []}
+        requireRejectNote
         approveFields={<PostStageFields />}
         onSubmit={decide}
         onClose={() => setTarget(null)}

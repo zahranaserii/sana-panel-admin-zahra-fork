@@ -1,4 +1,5 @@
 import { ENDPOINTS } from '@/constant/endpoints';
+import { type DecisionResult } from '@/component/decision-modal';
 import { http } from '@/services/http';
 import { type PageParams, type PaginatedResponse } from '@/types/common';
 
@@ -10,16 +11,10 @@ export const getPendingRequests = (companyId: string, params: PageParams) =>
   });
 
 export const approveRequests = (companyId: string, body: DecisionPayload) =>
-  http.post<{ updated: number }, DecisionPayload>(
-    ENDPOINTS.MANAGER_APPROVALS.APPROVE(companyId),
-    body,
-  );
+  http.post<DecisionResult, DecisionPayload>(ENDPOINTS.MANAGER_APPROVALS.APPROVE(companyId), body);
 
 export const rejectRequests = (companyId: string, body: DecisionPayload) =>
-  http.post<{ updated: number }, DecisionPayload>(
-    ENDPOINTS.MANAGER_APPROVALS.REJECT(companyId),
-    body,
-  );
+  http.post<DecisionResult, DecisionPayload>(ENDPOINTS.MANAGER_APPROVALS.REJECT(companyId), body);
 
 export const submitDecision = (type: DecisionType, companyId: string, body: DecisionPayload) =>
   type === 'approve' ? approveRequests(companyId, body) : rejectRequests(companyId, body);

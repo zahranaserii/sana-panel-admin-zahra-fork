@@ -84,8 +84,12 @@ export const resizeUsable = (scheme: SchemePayload): SchemePayload => ({
 });
 
 /** طرح‌های قابل انتخاب از روی اطلاعات پایه ساخته می‌شوند (همان کاری که بک‌اند انجام می‌دهد) */
-export const buildPlanOptions = (): PlanOption[] => {
-  const { terms, murabahaRates, usable, qarzRate } = primaryScheme();
+/** طرح کلان یک شرکت (شرکت‌های قدیمی بدون طرح = طرح اول) */
+export const schemeOf = (schemeId?: string) =>
+  db.schemes.find((scheme) => scheme.id === schemeId) ?? primaryScheme();
+
+export const buildPlanOptions = (scheme: Scheme = primaryScheme()): PlanOption[] => {
+  const { terms, murabahaRates, usable, qarzRate } = scheme;
   const qarz = terms.map((term, termIndex) => ({
     id: `qarz-${termIndex}`,
     type: 'qarz' as const,

@@ -1,10 +1,9 @@
 import { DownloadOutlined, RollbackOutlined } from '@ant-design/icons';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { App } from 'antd';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import { type ColumnsType } from 'antd/es/table';
-import { useState } from 'react';
-import { toast } from 'sonner';
+import { useMemo, useState } from 'react';
 
+import { useChangeLogsSearch } from '@/api/generated/facility';
 import { Button } from '@/component/button';
 import { PanelCard } from '@/component/card';
 import { SelectInput } from '@/component/input';
@@ -15,61 +14,51 @@ import { ROLES } from '@/constant/roles';
 import { useProfileStore } from '@/store/useProfileStore';
 import { dayjs, toPersianDigits } from '@/utils/date';
 
-import { exportAuditLogs, getAuditLogs, getAuditLogTypes, rollbackAuditLog } from '../api';
-import { type AuditLog, type AuditLogType } from '../types';
+import { exportChangeLogs, getChangeLogCategories } from '../api';
+import { type ChangeLogCategory, type ChangeLogItem } from '../types';
+
+import { RestoreModal } from './RestoreModal';
 
 const PAGE_SIZE = 20;
-const ALL = 'all';
+const ALL = 0;
 
-const toJalaliDateTime = (iso: string) =>
-  toPersianDigits(dayjs(iso).formatJalali('YYYY/MM/DD HH:mm'));
+const toJalaliDateTime = (iso?: string) =>
+  iso ? toPersianDigits(dayjs(iso).formatJalali('YYYY/MM/DD HH:mm')) : '—';
+
+const userLabel = ({ user }: ChangeLogItem) =>
+  [user?.userName, user?.branchName].filter(Boolean).join(' — ') || '—';
 
 export const ChangeLogTable = () => {
-  const [type, setType] = useState<string>(ALL);
+  const [category, setCategory] = useState<number>(ALL);
   const [page, setPage] = useState(1);
-  const queryClient = useQueryClient();
-  const { modal } = App.useApp();
-  const canRollback = useProfileStore((state) => state.hasRole(ROLES.ADMIN));
-  const typeParam = type === ALL ? undefined : (type as AuditLogType);
+  const [restoring, setRestoring] = useState<ChangeLogItem | null>(null);
+  const isAdmin = useProfileStore((state) => state.hasRole(ROLES.ADMIN));
 
-  const { data: types } = useQuery({
+  const { data: categories } = useQuery({
     queryKey: QUERY_KEYS.LOOKUPS.AUDIT_LOG_TYPES,
-    queryFn: getAuditLogTypes,
+    queryFn: getChangeLogCategories,
   });
-  const { data, isFetching } = useQuery({
-    queryKey: QUERY_KEYS.AUDIT_LOGS.LIST(typeParam, page),
-    queryFn: () => getAuditLogs({ type: typeParam, page, pageSize: PAGE_SIZE }),
-  });
+  const categoryTitle = useMemo(
+    () => new Map((categories ?? []).map((item) => [item.id, item.title])),
+    [categories],
+  );
 
-  const { mutate: rollback } = useMutation({
-    mutationFn: rollbackAuditLog,
-    onSuccess: () => {
-      // موجودیت بازگردانی‌شده ممکن است در هر صفحه‌ای نمایش داده شود
-      void queryClient.invalidateQueries();
-      toast.success('بازگردانی با موفقیت انجام شد.');
-    },
+  const filters = { Category: category === ALL ? undefined : (category as ChangeLogCategory) };
+  const { data, isFetching } = useChangeLogsSearch({ ...filters, Page: page, PageSize: PAGE_SIZE });
+
+  const { mutate: download, isPending: isExporting } = useMutation({
+    mutationFn: () => exportChangeLogs(filters),
   });
 
-  const { mutate: download, isPending: isExporting } = useMutation({ mutationFn: exportAuditLogs });
-
-  const confirmRollback = (log: AuditLog) =>
-    modal.confirm({
-      title: 'بازگردانی تغییر به حالت قبل',
-      content: log.details,
-      okText: 'بازگردانی',
-      cancelText: 'انصراف',
-      onOk: () => rollback(log.id),
-    });
-
-  const renderRollback = (log: AuditLog) => {
-    if (log.rolledBack) return <StatusChip tone="warning">بازگردانی‌شده</StatusChip>;
-    if (canRollback && log.canRollback) {
+  const renderRestore = (log: ChangeLogItem) => {
+    if (log.restoredAt) return <StatusChip tone="warning">بازگردانی‌شده</StatusChip>;
+    if (isAdmin && log.canRestore) {
       return (
         <Button
           variant="secondary"
           size="small"
           icon={<RollbackOutlined />}
-          onClick={() => confirmRollback(log)}
+          onClick={() => setRestoring(log)}
         >
           بازگردانی
         </Button>
@@ -78,21 +67,21 @@ export const ChangeLogTable = () => {
     return '—';
   };
 
-  const columns: ColumnsType<AuditLog> = [
-    { title: 'تاریخ و ساعت', dataIndex: 'createdAt', render: toJalaliDateTime, width: 150 },
-    { title: 'کاربر', dataIndex: 'user', width: 190 },
-    { title: 'نوع عملیات', dataIndex: 'typeTitle', width: 120 },
-    { title: 'جزئیات', dataIndex: 'details', className: 'whitespace-normal' },
+  const columns: ColumnsType<ChangeLogItem> = [
+    { title: 'تاریخ و ساعت', dataIndex: 'at', render: toJalaliDateTime, width: 150 },
+    { title: 'کاربر', key: 'user', render: (_value, row) => userLabel(row), width: 190 },
     {
-      title: 'بازگردانی',
-      key: 'rollback',
+      title: 'نوع عملیات',
+      dataIndex: 'category',
+      render: (value?: number) => (value ? (categoryTitle.get(value) ?? '—') : '—'),
       width: 130,
-      render: (_value, row) => renderRollback(row),
     },
+    { title: 'جزئیات', dataIndex: 'details', className: 'whitespace-normal' },
+    { title: 'بازگردانی', key: 'restore', width: 130, render: (_value, row) => renderRestore(row) },
   ];
 
-  const changeType = (value: string) => {
-    setType(value);
+  const changeCategory = (value: number) => {
+    setCategory(value);
     setPage(1);
   };
 
@@ -102,16 +91,16 @@ export const ChangeLogTable = () => {
       subtitle="هر ثبت، ویرایش، لغو یا حذف در سامانه همراه با نام کاربر و تاریخ در این فهرست ثبت می‌شود."
       extra={
         <>
-          <SelectInput
+          <SelectInput<number>
             size="small"
             allowClear={false}
             style={{ minWidth: 200 }}
             aria-label="نوع عملیات"
-            value={type}
-            onChange={changeType}
+            value={category}
+            onChange={changeCategory}
             options={[
               { value: ALL, label: 'همه انواع عملیات' },
-              ...(types ?? []).map((item) => ({ value: item.id, label: item.title })),
+              ...(categories ?? []).map((item) => ({ value: item.id, label: item.title })),
             ]}
           />
           <Button
@@ -125,7 +114,8 @@ export const ChangeLogTable = () => {
         </>
       }
     >
-      <Table<AuditLog>
+      <Table<ChangeLogItem>
+        rowKey="id"
         columns={columns}
         dataSource={data?.items}
         loading={isFetching}
@@ -140,6 +130,7 @@ export const ChangeLogTable = () => {
           onChange: setPage,
         }}
       />
+      <RestoreModal log={restoring} onClose={() => setRestoring(null)} />
     </PanelCard>
   );
 };

@@ -1,13 +1,15 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { Form } from 'antd';
 import { useMemo } from 'react';
 import { toast } from 'sonner';
 
 import { FormItem } from '@/component/form';
-import { DateInput, FileInput, TextInput } from '@/component/input';
+import { DateInput, FileInput, SelectInput, TextInput } from '@/component/input';
 import { FormModal } from '@/component/modal';
 import { Switch } from '@/component/switch';
 import { QUERY_KEYS } from '@/constant/queryKeys';
 import { resolveFile } from '@/services/file';
+import { getSchemeOptions } from '@/services/lookup';
 
 import { createCompany, getCompany, updateCompany } from '../api';
 import { type CompanyDetail, type CompanyFormValues } from '../types';
@@ -27,7 +29,15 @@ const toFormValues = ({ id: _id, ...detail }: CompanyDetail): CompanyFormValues 
 
 export const CompanyFormModal = ({ open, companyId, onClose }: CompanyFormModalProps) => {
   const queryClient = useQueryClient();
+  const [form] = Form.useForm<CompanyFormValues>();
+  const schemeId = Form.useWatch('schemeId', form);
   const isEdit = Boolean(companyId);
+
+  const { data: schemes, isPending: schemesPending } = useQuery({
+    queryKey: QUERY_KEYS.LOOKUPS.SCHEMES,
+    queryFn: getSchemeOptions,
+    enabled: open,
+  });
 
   const { data: detail, isFetching } = useQuery({
     queryKey: QUERY_KEYS.COMPANIES.DETAIL(companyId ?? ''),
@@ -58,6 +68,7 @@ export const CompanyFormModal = ({ open, companyId, onClose }: CompanyFormModalP
 
   return (
     <FormModal<CompanyFormValues>
+      form={form}
       title={isEdit ? 'ویرایش اطلاعات شرکت' : 'ثبت اطلاعات شرکت'}
       okText={isEdit ? 'ذخیره تغییرات' : 'ثبت شرکت'}
       open={open}
@@ -68,11 +79,30 @@ export const CompanyFormModal = ({ open, companyId, onClose }: CompanyFormModalP
       onCancel={onClose}
       onSubmit={mutateAsync}
     >
+      <FormItem
+        name="schemeId"
+        label="طرح کلان"
+        required
+        extra={isEdit ? 'طرح کلان بعد از ثبت شرکت قابل تغییر نیست.' : undefined}
+      >
+        <SelectInput
+          disabled={isEdit}
+          loading={schemesPending}
+          options={schemes?.map((scheme) => ({ value: scheme.id, label: scheme.title }))}
+          // با تغییر طرح کلان، طرح‌های انتخاب‌شده (که به طرح قبلی تعلق داشتند) پاک می‌شوند
+          onChange={() => form.setFieldValue('planIds', [])}
+        />
+      </FormItem>
       <FormItem name="name" label="نام شرکت" required>
         <TextInput />
       </FormItem>
-      <FormItem name="nationalId" label="شناسه ملی شرکت" required>
-        <TextInput inputMode="numeric" maxLength={11} />
+      <FormItem
+        name="nationalId"
+        label="شناسه ملی شرکت"
+        required
+        extra={isEdit ? 'شناسه ملی بعد از ثبت قابل ویرایش نیست.' : undefined}
+      >
+        <TextInput inputMode="numeric" maxLength={11} disabled={isEdit} />
       </FormItem>
       <FormItem name="agreementNo" label="شماره تفاهم‌نامه منعقده" required>
         <TextInput />
@@ -99,7 +129,7 @@ export const CompanyFormModal = ({ open, companyId, onClose }: CompanyFormModalP
           required
           requiredMessage="حداقل یک طرح باید انتخاب شود."
         >
-          <PlanSelect />
+          <PlanSelect schemeId={schemeId} />
         </FormItem>
       </div>
     </FormModal>

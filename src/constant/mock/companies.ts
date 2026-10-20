@@ -22,6 +22,7 @@ const emptyMonths = (filled: number[]) =>
 export const MOCK_COMPANIES: MockCompany[] = [
   {
     id: 'c-1',
+    schemeId: 'scheme-1',
     name: 'شرکت فناوران پارس',
     nationalId: '10101234567',
     agreementNo: 'TF-1404-001',
@@ -49,6 +50,7 @@ export const MOCK_COMPANIES: MockCompany[] = [
   },
   {
     id: 'c-2',
+    schemeId: 'scheme-1',
     name: 'شرکت صنایع غذایی آوا',
     nationalId: '10107654321',
     agreementNo: 'TF-1404-002',
@@ -66,6 +68,7 @@ export const MOCK_COMPANIES: MockCompany[] = [
   },
   {
     id: 'c-3',
+    schemeId: 'scheme-1',
     name: 'شرکت حمل‌ونقل راه‌آهن نوین',
     nationalId: '10109988776',
     agreementNo: 'TF-1403-017',

@@ -1,13 +1,14 @@
 import { DeleteOutlined, EditOutlined } from '@ant-design/icons';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { App } from 'antd';
 import { type ColumnsType } from 'antd/es/table';
 import { useState } from 'react';
 import { toast } from 'sonner';
 
 import { Button } from '@/component/button';
+import { DeleteReasonModal, type DeleteReasonValues } from '@/component/delete-modal';
 import { Table } from '@/component/table';
 import { QUERY_KEYS } from '@/constant/queryKeys';
+import { resolveFile } from '@/services/file';
 import { formatJalali, toPersianDigits } from '@/utils/date';
 
 import { deleteStaff, getStaffList } from '../api';
@@ -23,31 +24,27 @@ const PAGE_SIZE = 10;
 
 export const StaffTable = ({ companyId, filters, onEdit }: StaffTableProps) => {
   const [page, setPage] = useState(1);
+  const [deleting, setDeleting] = useState<Staff | null>(null);
   const queryClient = useQueryClient();
-  const { modal } = App.useApp();
 
   const { data, isFetching } = useQuery({
     queryKey: QUERY_KEYS.STAFF.LIST(companyId, filters, page),
     queryFn: () => getStaffList(companyId, { ...filters, page, pageSize: PAGE_SIZE }),
   });
 
-  const { mutate: remove } = useMutation({
-    mutationFn: (id: string) => deleteStaff(companyId, id),
+  const { mutateAsync: remove } = useMutation({
+    mutationFn: async ({ description, file }: DeleteReasonValues) => {
+      const uploaded = await resolveFile(file);
+      return deleteStaff(companyId, deleting?.id ?? '', {
+        description: description.trim(),
+        fileId: uploaded?.id ?? '',
+      });
+    },
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: QUERY_KEYS.STAFF.ALL });
       toast.success('پرسنل حذف شد.');
     },
   });
-
-  const confirmDelete = (staff: Staff) =>
-    modal.confirm({
-      title: `حذف «${staff.fullName}»`,
-      content: 'این پرسنل از فهرست پرسنل شرکت حذف می‌شود. آیا مطمئن هستید؟',
-      okText: 'حذف',
-      okButtonProps: { danger: true },
-      cancelText: 'انصراف',
-      onOk: () => remove(staff.id),
-    });
 
   const columns: ColumnsType<Staff> = [
     {
@@ -82,7 +79,7 @@ export const StaffTable = ({ companyId, filters, onEdit }: StaffTableProps) => {
             variant="secondary"
             size="small"
             icon={<DeleteOutlined />}
-            onClick={() => confirmDelete(row)}
+            onClick={() => setDeleting(row)}
           >
             حذف
           </Button>
@@ -92,17 +89,27 @@ export const StaffTable = ({ companyId, filters, onEdit }: StaffTableProps) => {
   ];
 
   return (
-    <Table<Staff>
-      columns={columns}
-      dataSource={data?.items}
-      loading={isFetching}
-      locale={{ emptyText: 'پرسنلی با این شرایط یافت نشد.' }}
-      pagination={{
-        current: page,
-        pageSize: PAGE_SIZE,
-        total: data?.totalCount ?? 0,
-        onChange: setPage,
-      }}
-    />
+    <>
+      <Table<Staff>
+        columns={columns}
+        dataSource={data?.items}
+        loading={isFetching}
+        locale={{ emptyText: 'پرسنلی با این شرایط یافت نشد.' }}
+        pagination={{
+          current: page,
+          pageSize: PAGE_SIZE,
+          total: data?.totalCount ?? 0,
+          onChange: setPage,
+        }}
+      />
+      <DeleteReasonModal
+        open={Boolean(deleting)}
+        title={`حذف «${deleting?.fullName ?? ''}»`}
+        message="این پرسنل از فهرست پرسنل شرکت حذف می‌شود."
+        requireFile
+        onSubmit={remove}
+        onClose={() => setDeleting(null)}
+      />
+    </>
   );
 };

@@ -28,9 +28,13 @@ const decide = (nextStatus: LoanStatus) =>
       const targets = db.loanRequests
         .filter(isPending(params.companyId))
         .filter((item) => body.requestIds.includes(item.id));
-      if (!targets.length) {
-        return json({ message: 'درخواستی برای این تصمیم یافت نشد.' }, { status: 404 });
-      }
+      // اجرای ناقص مجاز است: درخواستی که دیگر در انتظار مدیر نیست با دلیل در skipped برمی‌گردد
+      const skipped = body.requestIds
+        .filter((id) => !targets.some((item) => item.id === id))
+        .map((requestId) => ({
+          requestId,
+          reason: 'این درخواست دیگر در انتظار تأیید مدیر شرکت نیست.',
+        }));
       targets.forEach((item) => {
         item.status = nextStatus;
         item.decidedAt = today();
@@ -43,7 +47,7 @@ const decide = (nextStatus: LoanStatus) =>
           `${action} توسط مدیر شرکت درخواست وام ${item.staffName} — ${formatRial(item.amount)} — شرکت: ${companyName(item.companyId)}${body.note ? ' — توضیحات: ' + body.note : ''}`,
         );
       });
-      return json({ updated: targets.length });
+      return json({ processed: targets.length, skipped });
     },
   );
 

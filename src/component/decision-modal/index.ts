@@ -6,3 +6,4 @@ export {
   type DecisionTarget,
   type DecisionType,
 } from './DecisionModal';
+export { showDecisionResult, type DecisionResult } from './decisionResult';

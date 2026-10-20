@@ -1,8 +1,13 @@
 import ExcelJS from 'exceljs';
 import { delay, http, HttpResponse } from 'msw';
 
-import { ENDPOINTS } from '@/constant/endpoints';
-import { AUDIT_LOG_TYPES, type MockAuditLog } from '@/constant/mock';
+import {
+  type ChangeLogCategory,
+  type CommandResponsesChangeLogItemDto,
+  type CommonFacilityPagedResponseOfChangeLogItemDto,
+} from '@/api/generated/facility/facilityPanelAPI.schemas';
+import { ENDPOINTS, FACILITY } from '@/constant/endpoints';
+import { AUDIT_LOG_TYPES, type MockAuditLog, type MockLogType } from '@/constant/mock';
 import { dayjs } from '@/utils/date';
 
 import { logAction, restoreSnapshot } from '../audit';
@@ -12,44 +17,73 @@ import { api, json } from '../utils';
 const typeTitle = (type: MockAuditLog['type']) =>
   AUDIT_LOG_TYPES.find((item) => item.id === type)?.title.replace('مربوط به ', '') ?? type;
 
-const toItem = (log: MockAuditLog) => ({
+/** دسته بک‌اند: ۱ شرکت، ۲ پرسنل، ۳ وام؛ معنی دسته ۴ در بک‌اند مشخص نیست (کاربران و اطلاعات پایه) */
+const CATEGORY: Record<MockLogType, ChangeLogCategory> = {
+  company: 1,
+  staff: 2,
+  loan: 3,
+  user: 4,
+  base: 4,
+};
+
+const CATEGORY_TITLES = [
+  { id: 1, title: 'مربوط به شرکت‌ها' },
+  { id: 2, title: 'مربوط به پرسنل' },
+  { id: 3, title: 'مربوط به تخصیص وام' },
+  { id: 4, title: 'مربوط به کاربران و اطلاعات پایه' },
+];
+
+const toItem = (log: MockAuditLog): CommandResponsesChangeLogItemDto => ({
   id: log.id,
-  createdAt: log.createdAt,
+  at: log.createdAt,
   user: log.user,
-  type: log.type,
-  typeTitle: typeTitle(log.type),
+  category: CATEGORY[log.type],
+  action: typeTitle(log.type),
   details: log.details,
-  canRollback: Boolean(log.snapshot) && !log.rolledBack,
-  rolledBack: log.rolledBack,
+  before: log.snapshot ? JSON.stringify(log.snapshot.before) : null,
+  after: null,
+  companyId: null,
+  canRestore: Boolean(log.snapshot) && !log.rolledBack,
+  restoredAt: log.restoredAt ?? null,
 });
+
+const filterLogs = (url: URL) => {
+  const category = Number(url.searchParams.get('Category')) || undefined;
+  return db.auditLogs.filter((log) => !category || CATEGORY[log.type] === category);
+};
 
 const jalaliDateTime = (iso: string) => dayjs(iso).formatJalali('YYYY/MM/DD HH:mm');
 
 export const auditLogHandlers = [
+  // بکند ندارد — عنوان دسته‌ها
   http.get(api(ENDPOINTS.LOOKUPS.AUDIT_LOG_TYPES), async () => {
     await delay(150);
-    return json(AUDIT_LOG_TYPES);
+    return json(CATEGORY_TITLES);
   }),
 
-  http.get(api(ENDPOINTS.AUDIT_LOGS.LIST), async ({ request }) => {
+  http.get(api(`${FACILITY}/ChangeLogs`), async ({ request }) => {
     await delay(250);
     const url = new URL(request.url);
-    const type = url.searchParams.get('type');
-    const page = Number(url.searchParams.get('page') ?? 1);
-    const pageSize = Number(url.searchParams.get('pageSize') ?? 20);
-    const list = db.auditLogs.filter((log) => !type || log.type === type);
+    const page = Number(url.searchParams.get('Page') ?? 1);
+    const pageSize = Number(url.searchParams.get('PageSize') ?? 20);
+    const list = filterLogs(url);
     const start = (page - 1) * pageSize;
-    return json({
+    const response: CommonFacilityPagedResponseOfChangeLogItemDto = {
       items: list.slice(start, start + pageSize).map(toItem),
       totalCount: list.length,
       page,
       pageSize,
-    });
+    };
+    return json(response);
   }),
 
-  http.post(api(ENDPOINTS.AUDIT_LOGS.ROLLBACK(':id')), async ({ params, request }) => {
+  http.post(api(`${FACILITY}/ChangeLogs/:id/Restore`), async ({ params, request }) => {
     await delay(350);
-    const log = db.auditLogs.find((item) => item.id === params.id);
+    const { description } = (await request.json()) as { description?: string };
+    if (!description?.trim()) {
+      return json({ message: 'توضیح بازگردانی الزامی است.' }, { status: 400 });
+    }
+    const log = db.auditLogs.find((item) => item.id === Number(params.id));
     if (!log?.snapshot || log.rolledBack) {
       return json({ message: 'این عملیات اطلاعات کافی برای بازگردانی ندارد.' }, { status: 422 });
     }
@@ -57,17 +91,23 @@ export const auditLogHandlers = [
       return json({ message: 'بازگردانی ناموفق بود؛ این رکورد دیگر وجود ندارد.' }, { status: 409 });
     }
     log.rolledBack = true;
-    logAction(request, log.type, `بازگردانی به حالت قبل: ${log.details}`);
+    log.restoredAt = new Date().toISOString();
+    logAction(request, log.type, `بازگردانی به حالت قبل: ${log.details} — ${description.trim()}`);
     return json(toItem(log));
   }),
 
-  http.get(api(ENDPOINTS.REPORTS.AUDIT_LOGS), async () => {
+  http.get(api(ENDPOINTS.CHANGE_LOGS.EXPORT), async ({ request }) => {
     await delay(300);
     const workbook = new ExcelJS.Workbook();
     const sheet = workbook.addWorksheet('گزارش تغییرات', { views: [{ rightToLeft: true }] });
     sheet.addRow(['تاریخ و ساعت', 'کاربر', 'نوع عملیات', 'جزئیات']).font = { bold: true };
-    db.auditLogs.forEach((log) =>
-      sheet.addRow([jalaliDateTime(log.createdAt), log.user, typeTitle(log.type), log.details]),
+    filterLogs(new URL(request.url)).forEach((log) =>
+      sheet.addRow([
+        jalaliDateTime(log.createdAt),
+        log.user.userName ?? '',
+        typeTitle(log.type),
+        log.details,
+      ]),
     );
     sheet.columns.forEach((column, index) => {
       column.width = index === 3 ? 80 : 24;

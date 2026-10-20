@@ -1,0 +1,1548 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "Admin.Api",
+    "version": "V2"
+  },
+  "servers": [
+    {
+      "url": ""
+    },
+    {
+      "url": ""
+    }
+  ],
+  "paths": {
+    "/gateway/identity/Authentication/Login": {
+      "post": {
+        "tags": [
+          "AuthenticationApi"
+        ],
+        "parameters": [
+          {
+            "name": "x-api-version",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "DeviceInfo",
+            "in": "header",
+            "description": "DeviceInfo"
+          },
+          {
+            "name": "AppId",
+            "in": "header",
+            "description": "Android : 1; PWA:2"
+          },
+          {
+            "name": "DeviceTypeId",
+            "in": "header",
+            "description": "1"
+          },
+          {
+            "name": "DeviceId",
+            "in": "header",
+            "description": "0912****230"
+          },
+          {
+            "name": "AppLanguage",
+            "in": "header",
+            "description": "fa"
+          },
+          {
+            "name": "DeviceVersion",
+            "in": "header",
+            "description": "1.7"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json; x-api-version=2": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginQuery"
+              }
+            },
+            "text/json; x-api-version=2": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginQuery"
+              }
+            },
+            "application/*+json; x-api-version=2": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginQuery"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/gateway/identity/Authentication/Generate": {
+      "get": {
+        "tags": [
+          "AuthenticationApi"
+        ],
+        "parameters": [
+          {
+            "name": "x-api-version",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "DeviceInfo",
+            "in": "header",
+            "description": "DeviceInfo"
+          },
+          {
+            "name": "AppId",
+            "in": "header",
+            "description": "Android : 1; PWA:2"
+          },
+          {
+            "name": "DeviceTypeId",
+            "in": "header",
+            "description": "1"
+          },
+          {
+            "name": "DeviceId",
+            "in": "header",
+            "description": "0912****230"
+          },
+          {
+            "name": "AppLanguage",
+            "in": "header",
+            "description": "fa"
+          },
+          {
+            "name": "DeviceVersion",
+            "in": "header",
+            "description": "1.7"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/gateway/identity/Authentication/MainMenu": {
+      "get": {
+        "tags": [
+          "AuthenticationApi"
+        ],
+        "parameters": [
+          {
+            "name": "x-api-version",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "DeviceInfo",
+            "in": "header",
+            "description": "DeviceInfo"
+          },
+          {
+            "name": "AppId",
+            "in": "header",
+            "description": "Android : 1; PWA:2"
+          },
+          {
+            "name": "DeviceTypeId",
+            "in": "header",
+            "description": "1"
+          },
+          {
+            "name": "DeviceId",
+            "in": "header",
+            "description": "0912****230"
+          },
+          {
+            "name": "AppLanguage",
+            "in": "header",
+            "description": "fa"
+          },
+          {
+            "name": "DeviceVersion",
+            "in": "header",
+            "description": "1.7"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/gateway/identity/Authentication/Logout": {
+      "get": {
+        "tags": [
+          "AuthenticationApi"
+        ],
+        "parameters": [
+          {
+            "name": "x-api-version",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "DeviceInfo",
+            "in": "header",
+            "description": "DeviceInfo"
+          },
+          {
+            "name": "AppId",
+            "in": "header",
+            "description": "Android : 1; PWA:2"
+          },
+          {
+            "name": "DeviceTypeId",
+            "in": "header",
+            "description": "1"
+          },
+          {
+            "name": "DeviceId",
+            "in": "header",
+            "description": "0912****230"
+          },
+          {
+            "name": "AppLanguage",
+            "in": "header",
+            "description": "fa"
+          },
+          {
+            "name": "DeviceVersion",
+            "in": "header",
+            "description": "1.7"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/gateway/identity/UserManagement/Accesses": {
+      "get": {
+        "tags": [
+          "UserManagement"
+        ],
+        "parameters": [
+          {
+            "name": "term",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "x-api-version",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "DeviceInfo",
+            "in": "header",
+            "description": "DeviceInfo"
+          },
+          {
+            "name": "AppId",
+            "in": "header",
+            "description": "Android : 1; PWA:2"
+          },
+          {
+            "name": "DeviceTypeId",
+            "in": "header",
+            "description": "1"
+          },
+          {
+            "name": "DeviceId",
+            "in": "header",
+            "description": "0912****230"
+          },
+          {
+            "name": "AppLanguage",
+            "in": "header",
+            "description": "fa"
+          },
+          {
+            "name": "DeviceVersion",
+            "in": "header",
+            "description": "1.7"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "UserManagement"
+        ],
+        "parameters": [
+          {
+            "name": "x-api-version",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "DeviceInfo",
+            "in": "header",
+            "description": "DeviceInfo"
+          },
+          {
+            "name": "AppId",
+            "in": "header",
+            "description": "Android : 1; PWA:2"
+          },
+          {
+            "name": "DeviceTypeId",
+            "in": "header",
+            "description": "1"
+          },
+          {
+            "name": "DeviceId",
+            "in": "header",
+            "description": "0912****230"
+          },
+          {
+            "name": "AppLanguage",
+            "in": "header",
+            "description": "fa"
+          },
+          {
+            "name": "DeviceVersion",
+            "in": "header",
+            "description": "1.7"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json; x-api-version=2": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateAccessCommand"
+              }
+            },
+            "text/json; x-api-version=2": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateAccessCommand"
+              }
+            },
+            "application/*+json; x-api-version=2": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateAccessCommand"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/gateway/identity/UserManagement/Accesses/{id}": {
+      "get": {
+        "tags": [
+          "UserManagement"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "x-api-version",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "DeviceInfo",
+            "in": "header",
+            "description": "DeviceInfo"
+          },
+          {
+            "name": "AppId",
+            "in": "header",
+            "description": "Android : 1; PWA:2"
+          },
+          {
+            "name": "DeviceTypeId",
+            "in": "header",
+            "description": "1"
+          },
+          {
+            "name": "DeviceId",
+            "in": "header",
+            "description": "0912****230"
+          },
+          {
+            "name": "AppLanguage",
+            "in": "header",
+            "description": "fa"
+          },
+          {
+            "name": "DeviceVersion",
+            "in": "header",
+            "description": "1.7"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "UserManagement"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "x-api-version",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "DeviceInfo",
+            "in": "header",
+            "description": "DeviceInfo"
+          },
+          {
+            "name": "AppId",
+            "in": "header",
+            "description": "Android : 1; PWA:2"
+          },
+          {
+            "name": "DeviceTypeId",
+            "in": "header",
+            "description": "1"
+          },
+          {
+            "name": "DeviceId",
+            "in": "header",
+            "description": "0912****230"
+          },
+          {
+            "name": "AppLanguage",
+            "in": "header",
+            "description": "fa"
+          },
+          {
+            "name": "DeviceVersion",
+            "in": "header",
+            "description": "1.7"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json; x-api-version=2": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateAccessCommand"
+              }
+            },
+            "text/json; x-api-version=2": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateAccessCommand"
+              }
+            },
+            "application/*+json; x-api-version=2": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateAccessCommand"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/gateway/identity/UserManagement/Roles": {
+      "get": {
+        "tags": [
+          "UserManagement"
+        ],
+        "parameters": [
+          {
+            "name": "term",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "x-api-version",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "DeviceInfo",
+            "in": "header",
+            "description": "DeviceInfo"
+          },
+          {
+            "name": "AppId",
+            "in": "header",
+            "description": "Android : 1; PWA:2"
+          },
+          {
+            "name": "DeviceTypeId",
+            "in": "header",
+            "description": "1"
+          },
+          {
+            "name": "DeviceId",
+            "in": "header",
+            "description": "0912****230"
+          },
+          {
+            "name": "AppLanguage",
+            "in": "header",
+            "description": "fa"
+          },
+          {
+            "name": "DeviceVersion",
+            "in": "header",
+            "description": "1.7"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "UserManagement"
+        ],
+        "parameters": [
+          {
+            "name": "x-api-version",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "DeviceInfo",
+            "in": "header",
+            "description": "DeviceInfo"
+          },
+          {
+            "name": "AppId",
+            "in": "header",
+            "description": "Android : 1; PWA:2"
+          },
+          {
+            "name": "DeviceTypeId",
+            "in": "header",
+            "description": "1"
+          },
+          {
+            "name": "DeviceId",
+            "in": "header",
+            "description": "0912****230"
+          },
+          {
+            "name": "AppLanguage",
+            "in": "header",
+            "description": "fa"
+          },
+          {
+            "name": "DeviceVersion",
+            "in": "header",
+            "description": "1.7"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json; x-api-version=2": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateRoleCommand"
+              }
+            },
+            "text/json; x-api-version=2": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateRoleCommand"
+              }
+            },
+            "application/*+json; x-api-version=2": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateRoleCommand"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/gateway/identity/UserManagement/Roles/{id}": {
+      "get": {
+        "tags": [
+          "UserManagement"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "x-api-version",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "DeviceInfo",
+            "in": "header",
+            "description": "DeviceInfo"
+          },
+          {
+            "name": "AppId",
+            "in": "header",
+            "description": "Android : 1; PWA:2"
+          },
+          {
+            "name": "DeviceTypeId",
+            "in": "header",
+            "description": "1"
+          },
+          {
+            "name": "DeviceId",
+            "in": "header",
+            "description": "0912****230"
+          },
+          {
+            "name": "AppLanguage",
+            "in": "header",
+            "description": "fa"
+          },
+          {
+            "name": "DeviceVersion",
+            "in": "header",
+            "description": "1.7"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "UserManagement"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "x-api-version",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "DeviceInfo",
+            "in": "header",
+            "description": "DeviceInfo"
+          },
+          {
+            "name": "AppId",
+            "in": "header",
+            "description": "Android : 1; PWA:2"
+          },
+          {
+            "name": "DeviceTypeId",
+            "in": "header",
+            "description": "1"
+          },
+          {
+            "name": "DeviceId",
+            "in": "header",
+            "description": "0912****230"
+          },
+          {
+            "name": "AppLanguage",
+            "in": "header",
+            "description": "fa"
+          },
+          {
+            "name": "DeviceVersion",
+            "in": "header",
+            "description": "1.7"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json; x-api-version=2": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateRoleCommand"
+              }
+            },
+            "text/json; x-api-version=2": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateRoleCommand"
+              }
+            },
+            "application/*+json; x-api-version=2": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateRoleCommand"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/gateway/identity/UserManagement/Groups": {
+      "get": {
+        "tags": [
+          "UserManagement"
+        ],
+        "parameters": [
+          {
+            "name": "term",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "x-api-version",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "DeviceInfo",
+            "in": "header",
+            "description": "DeviceInfo"
+          },
+          {
+            "name": "AppId",
+            "in": "header",
+            "description": "Android : 1; PWA:2"
+          },
+          {
+            "name": "DeviceTypeId",
+            "in": "header",
+            "description": "1"
+          },
+          {
+            "name": "DeviceId",
+            "in": "header",
+            "description": "0912****230"
+          },
+          {
+            "name": "AppLanguage",
+            "in": "header",
+            "description": "fa"
+          },
+          {
+            "name": "DeviceVersion",
+            "in": "header",
+            "description": "1.7"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "UserManagement"
+        ],
+        "parameters": [
+          {
+            "name": "x-api-version",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "DeviceInfo",
+            "in": "header",
+            "description": "DeviceInfo"
+          },
+          {
+            "name": "AppId",
+            "in": "header",
+            "description": "Android : 1; PWA:2"
+          },
+          {
+            "name": "DeviceTypeId",
+            "in": "header",
+            "description": "1"
+          },
+          {
+            "name": "DeviceId",
+            "in": "header",
+            "description": "0912****230"
+          },
+          {
+            "name": "AppLanguage",
+            "in": "header",
+            "description": "fa"
+          },
+          {
+            "name": "DeviceVersion",
+            "in": "header",
+            "description": "1.7"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json; x-api-version=2": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateRoleCommand"
+              }
+            },
+            "text/json; x-api-version=2": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateRoleCommand"
+              }
+            },
+            "application/*+json; x-api-version=2": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateRoleCommand"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/gateway/identity/UserManagement/Groups/{id}": {
+      "get": {
+        "tags": [
+          "UserManagement"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "x-api-version",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "DeviceInfo",
+            "in": "header",
+            "description": "DeviceInfo"
+          },
+          {
+            "name": "AppId",
+            "in": "header",
+            "description": "Android : 1; PWA:2"
+          },
+          {
+            "name": "DeviceTypeId",
+            "in": "header",
+            "description": "1"
+          },
+          {
+            "name": "DeviceId",
+            "in": "header",
+            "description": "0912****230"
+          },
+          {
+            "name": "AppLanguage",
+            "in": "header",
+            "description": "fa"
+          },
+          {
+            "name": "DeviceVersion",
+            "in": "header",
+            "description": "1.7"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "UserManagement"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "x-api-version",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "DeviceInfo",
+            "in": "header",
+            "description": "DeviceInfo"
+          },
+          {
+            "name": "AppId",
+            "in": "header",
+            "description": "Android : 1; PWA:2"
+          },
+          {
+            "name": "DeviceTypeId",
+            "in": "header",
+            "description": "1"
+          },
+          {
+            "name": "DeviceId",
+            "in": "header",
+            "description": "0912****230"
+          },
+          {
+            "name": "AppLanguage",
+            "in": "header",
+            "description": "fa"
+          },
+          {
+            "name": "DeviceVersion",
+            "in": "header",
+            "description": "1.7"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json; x-api-version=2": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateRoleCommand"
+              }
+            },
+            "text/json; x-api-version=2": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateRoleCommand"
+              }
+            },
+            "application/*+json; x-api-version=2": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateRoleCommand"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/gateway/identity/UserManagement/PanelUsers": {
+      "get": {
+        "tags": [
+          "UserManagement"
+        ],
+        "parameters": [
+          {
+            "name": "term",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "x-api-version",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "DeviceInfo",
+            "in": "header",
+            "description": "DeviceInfo"
+          },
+          {
+            "name": "AppId",
+            "in": "header",
+            "description": "Android : 1; PWA:2"
+          },
+          {
+            "name": "DeviceTypeId",
+            "in": "header",
+            "description": "1"
+          },
+          {
+            "name": "DeviceId",
+            "in": "header",
+            "description": "0912****230"
+          },
+          {
+            "name": "AppLanguage",
+            "in": "header",
+            "description": "fa"
+          },
+          {
+            "name": "DeviceVersion",
+            "in": "header",
+            "description": "1.7"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/gateway/identity/UserManagement/PanelUsers/{id}": {
+      "get": {
+        "tags": [
+          "UserManagement"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "x-api-version",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "DeviceInfo",
+            "in": "header",
+            "description": "DeviceInfo"
+          },
+          {
+            "name": "AppId",
+            "in": "header",
+            "description": "Android : 1; PWA:2"
+          },
+          {
+            "name": "DeviceTypeId",
+            "in": "header",
+            "description": "1"
+          },
+          {
+            "name": "DeviceId",
+            "in": "header",
+            "description": "0912****230"
+          },
+          {
+            "name": "AppLanguage",
+            "in": "header",
+            "description": "fa"
+          },
+          {
+            "name": "DeviceVersion",
+            "in": "header",
+            "description": "1.7"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/gateway/identity/UserManagement/PanelUsers/{id}/Active": {
+      "put": {
+        "tags": [
+          "UserManagement"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "isActive",
+            "in": "query",
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "x-api-version",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "DeviceInfo",
+            "in": "header",
+            "description": "DeviceInfo"
+          },
+          {
+            "name": "AppId",
+            "in": "header",
+            "description": "Android : 1; PWA:2"
+          },
+          {
+            "name": "DeviceTypeId",
+            "in": "header",
+            "description": "1"
+          },
+          {
+            "name": "DeviceId",
+            "in": "header",
+            "description": "0912****230"
+          },
+          {
+            "name": "AppLanguage",
+            "in": "header",
+            "description": "fa"
+          },
+          {
+            "name": "DeviceVersion",
+            "in": "header",
+            "description": "1.7"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/gateway/identity/UserManagement/AccessMatrix": {
+      "get": {
+        "tags": [
+          "UserManagement"
+        ],
+        "parameters": [
+          {
+            "name": "x-api-version",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "DeviceInfo",
+            "in": "header",
+            "description": "DeviceInfo"
+          },
+          {
+            "name": "AppId",
+            "in": "header",
+            "description": "Android : 1; PWA:2"
+          },
+          {
+            "name": "DeviceTypeId",
+            "in": "header",
+            "description": "1"
+          },
+          {
+            "name": "DeviceId",
+            "in": "header",
+            "description": "0912****230"
+          },
+          {
+            "name": "AppLanguage",
+            "in": "header",
+            "description": "fa"
+          },
+          {
+            "name": "DeviceVersion",
+            "in": "header",
+            "description": "1.7"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "CreateAccessCommand": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string",
+            "nullable": true
+          },
+          "enTitle": {
+            "type": "string",
+            "nullable": true
+          },
+          "url": {
+            "type": "string",
+            "nullable": true
+          },
+          "iconName": {
+            "type": "string",
+            "nullable": true
+          },
+          "parentId": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "description": {
+            "type": "string",
+            "nullable": true
+          },
+          "isActive": {
+            "type": "boolean"
+          }
+        },
+        "additionalProperties": false
+      },
+      "CreateRoleCommand": {
+        "type": "object",
+        "properties": {
+          "kind": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "persianTitle": {
+            "type": "string",
+            "nullable": true
+          },
+          "title": {
+            "type": "string",
+            "nullable": true
+          },
+          "description": {
+            "type": "string",
+            "nullable": true
+          },
+          "isActive": {
+            "type": "boolean"
+          },
+          "accessIds": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "nullable": true
+          },
+          "userNames": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "nullable": true
+          },
+          "token": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "LoginQuery": {
+        "type": "object",
+        "properties": {
+          "username": {
+            "type": "string",
+            "nullable": true
+          },
+          "password": {
+            "type": "string",
+            "nullable": true
+          },
+          "captchaToken": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "captchaValue": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "UpdateAccessCommand": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "title": {
+            "type": "string",
+            "nullable": true
+          },
+          "enTitle": {
+            "type": "string",
+            "nullable": true
+          },
+          "url": {
+            "type": "string",
+            "nullable": true
+          },
+          "iconName": {
+            "type": "string",
+            "nullable": true
+          },
+          "parentId": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "description": {
+            "type": "string",
+            "nullable": true
+          },
+          "isActive": {
+            "type": "boolean"
+          }
+        },
+        "additionalProperties": false
+      },
+      "UpdateRoleCommand": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "kind": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "persianTitle": {
+            "type": "string",
+            "nullable": true
+          },
+          "title": {
+            "type": "string",
+            "nullable": true
+          },
+          "description": {
+            "type": "string",
+            "nullable": true
+          },
+          "isActive": {
+            "type": "boolean"
+          },
+          "accessIds": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "nullable": true
+          },
+          "userNames": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "securitySchemes": {
+      "Bearer": {
+        "type": "http",
+        "description": "Specify the authorization token.",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    }
+  },
+  "security": [
+    {
+      "Bearer": []
+    }
+  ]
+}

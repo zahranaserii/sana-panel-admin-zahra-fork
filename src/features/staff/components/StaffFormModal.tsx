@@ -83,13 +83,8 @@ export const StaffFormModal = ({ open, companyId, staffId, onClose }: StaffFormM
       <FormItem name="hireDate" label="تاریخ استخدام" required>
         <DateInput />
       </FormItem>
-      <FormItem
-        name="priority"
-        label="اولویت تخصیص (عدد کوچک‌تر = اولویت بالاتر)"
-        required
-        requiredMessage="اولویت تخصیص الزامی است."
-      >
-        <NumberInput min={1} placeholder="مثلاً ۱" />
+      <FormItem name="priority" label="اولویت تخصیص (اختیاری؛ عدد کوچک‌تر = اولویت بالاتر)">
+        <NumberInput min={1} placeholder="خالی = آخرین اولویت" />
       </FormItem>
     </FormModal>
   );

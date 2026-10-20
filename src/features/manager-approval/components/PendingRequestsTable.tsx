@@ -1,17 +1,18 @@
 import { CheckOutlined, CloseOutlined } from '@ant-design/icons';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { App } from 'antd';
 import { type ColumnsType } from 'antd/es/table';
 import { useState } from 'react';
 import { toast } from 'sonner';
 
 import { Button } from '@/component/button';
-import { DecisionModal, type DecisionTarget } from '@/component/decision-modal';
+import { DecisionModal, showDecisionResult, type DecisionTarget } from '@/component/decision-modal';
 import { StatusChip } from '@/component/status-chip';
 import { Table } from '@/component/table';
 import { LOAN_STATUS } from '@/constant/loanStatus';
 import { QUERY_KEYS } from '@/constant/queryKeys';
 import { resolveFile } from '@/services/file';
-import { formatJalali, toPersianDigits } from '@/utils/date';
+import { formatJalali } from '@/utils/date';
 import { formatRial } from '@/utils/number';
 
 import { getPendingRequests, submitDecision } from '../api';
@@ -25,6 +26,7 @@ export const PendingRequestsTable = ({ companyId }: { companyId: string }) => {
   const [target, setTarget] = useState<DecisionTarget | null>(null);
 
   const queryClient = useQueryClient();
+  const { modal } = App.useApp();
 
   const { data, isFetching } = useQuery({
     queryKey: QUERY_KEYS.MANAGER_APPROVALS.LIST(companyId, page),
@@ -40,14 +42,14 @@ export const PendingRequestsTable = ({ companyId }: { companyId: string }) => {
         fileId: uploaded?.id ?? null,
       });
     },
-    onSuccess: ({ updated }) => {
+    onSuccess: (result) => {
       void queryClient.invalidateQueries({ queryKey: QUERY_KEYS.MANAGER_APPROVALS.ALL });
       void queryClient.invalidateQueries({ queryKey: QUERY_KEYS.CREDIT.ALL });
       void queryClient.invalidateQueries({ queryKey: QUERY_KEYS.CREDIT_APPROVALS.ALL });
       setSelected([]);
-      const result =
+      const doneText =
         target?.type === 'reject' ? 'رد شد' : 'تأیید و به مرحله تأیید اعتبارات ارسال شد';
-      toast.success(`${toPersianDigits(updated)} درخواست ${result}.`);
+      showDecisionResult(modal, result, target?.requests ?? [], doneText);
     },
   });
 

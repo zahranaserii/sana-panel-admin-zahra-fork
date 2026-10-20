@@ -6,7 +6,6 @@ import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 
 import { App } from './app/App';
-import { env } from './config/env';
 import { useThemeStore } from './store/useThemeStore';
 import { applyPaletteToDocument } from './theme/palette';
 
@@ -14,7 +13,8 @@ import { applyPaletteToDocument } from './theme/palette';
 applyPaletteToDocument(useThemeStore.getState().mode);
 
 const enableMocking = async () => {
-  if (!env.enableMock) return;
+  // شرط مستقیم روی import.meta.env تا در بیلدِ بدون ماک، کد ماک (MSW و faker) اصلاً ساخته نشود
+  if (import.meta.env.VITE_ENABLE_MOCK !== 'true') return;
   // ماک مستقیماً روی axios وصل می‌شود (بدون Service Worker) تا روی هر سروری بعد از دیپلوی هم کار کند
   const { enableMockAdapter } = await import('./test/msw/mockAdapter');
   enableMockAdapter();

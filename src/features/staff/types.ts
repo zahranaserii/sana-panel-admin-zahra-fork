@@ -10,7 +10,13 @@ export interface Staff {
   priority: number;
 }
 
-export type StaffPayload = Omit<Staff, 'id'>;
+/** اولویت تخصیص اختیاری است؛ خالی = آخرین اولویت (سمت سرور) */
+export type StaffPayload = Omit<Staff, 'id' | 'priority'> & { priority?: number | null };
+
+export interface DeleteStaffPayload {
+  description: string;
+  fileId: string;
+}
 
 /** فیلترهای جستجوی پرسنل (از کوئری آدرس) */
 export interface StaffFilters {

@@ -31,7 +31,11 @@ export const CancelContractModal = ({ company, onClose }: CancelContractModalPro
   const { mutateAsync } = useMutation({
     mutationFn: async ({ file, ...values }: CancelContractFormValues) => {
       const uploaded = await resolveFile(file);
-      return cancelContract(company?.id ?? '', { ...values, fileId: uploaded?.id ?? null });
+      return cancelContract(company?.id ?? '', {
+        ...values,
+        note: values.note.trim(),
+        fileId: uploaded?.id ?? '',
+      });
     },
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: QUERY_KEYS.COMPANIES.ALL });
@@ -59,10 +63,23 @@ export const CancelContractModal = ({ company, onClose }: CancelContractModalPro
           options={reasons?.map((reason) => ({ value: reason.id, label: reason.title }))}
         />
       </FormItem>
-      <FormItem name="note" label="توضیحات (اختیاری)">
-        <TextAreaInput maxLength={500} />
+      <FormItem
+        name="note"
+        label="توضیحات"
+        required
+        rules={[
+          { whitespace: true, message: 'توضیحات الزامی است.' },
+          { min: 5, message: 'توضیحات باید حداقل ۵ نویسه باشد.' },
+        ]}
+      >
+        <TextAreaInput maxLength={1000} />
       </FormItem>
-      <FormItem name="file" label="الصاق فایل (اختیاری)">
+      <FormItem
+        name="file"
+        label="فایل نامه لغو"
+        required
+        requiredMessage="بارگذاری فایل نامه لغو الزامی است."
+      >
         <FileInput />
       </FormItem>
     </FormModal>
