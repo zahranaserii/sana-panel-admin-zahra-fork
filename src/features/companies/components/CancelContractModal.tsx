@@ -1,15 +1,17 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 
+import {
+  getCompaniesLookupQueryKey,
+  getCompaniesSearchQueryKey,
+  useCompaniesCancelContract,
+} from '@/api/generated/facility';
 import { FormItem } from '@/component/form';
 import { DateInput, FileInput, SelectInput, TextAreaInput } from '@/component/input';
 import { FormModal } from '@/component/modal';
-import { QUERY_KEYS } from '@/constant/queryKeys';
-import { resolveFile } from '@/services/file';
-import { getCancelReasons } from '@/services/lookup';
+import { REASON_TYPE, useReasonOptions } from '@/services/reasons';
 import { dayjs, ISO_DATE_FORMAT } from '@/utils/date';
 
-import { cancelContract } from '../api';
 import { type CancelContractFormValues, type CompanyListItem } from '../types';
 
 interface CancelContractModalProps {
@@ -21,28 +23,28 @@ const INITIAL_VALUES = { cancelDate: dayjs().format(ISO_DATE_FORMAT) };
 
 export const CancelContractModal = ({ company, onClose }: CancelContractModalProps) => {
   const queryClient = useQueryClient();
+  const reasons = useReasonOptions(REASON_TYPE.CONTRACT_CANCEL, undefined, Boolean(company));
 
-  const { data: reasons, isPending } = useQuery({
-    queryKey: QUERY_KEYS.LOOKUPS.CANCEL_REASONS,
-    queryFn: getCancelReasons,
-    enabled: Boolean(company),
-  });
-
-  const { mutateAsync } = useMutation({
-    mutationFn: async ({ file, ...values }: CancelContractFormValues) => {
-      const uploaded = await resolveFile(file);
-      return cancelContract(company?.id ?? '', {
-        ...values,
-        note: values.note.trim(),
-        fileId: uploaded?.id ?? '',
-      });
-    },
-    onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: QUERY_KEYS.COMPANIES.ALL });
-      void queryClient.invalidateQueries({ queryKey: QUERY_KEYS.LOOKUPS.COMPANIES });
-      toast.success(`قرارداد «${company?.name}» لغو شد.`);
+  const { mutateAsync } = useCompaniesCancelContract({
+    mutation: {
+      onSuccess: () => {
+        void queryClient.invalidateQueries({ queryKey: getCompaniesSearchQueryKey() });
+        void queryClient.invalidateQueries({ queryKey: getCompaniesLookupQueryKey() });
+        toast.success(`قرارداد «${company?.name}» لغو شد.`);
+      },
     },
   });
+
+  const submit = ({ cancelDate, reasonId, description, file }: CancelContractFormValues) =>
+    mutateAsync({
+      id: company?.id ?? 0,
+      data: {
+        CancelDate: cancelDate,
+        ReasonId: reasonId,
+        Description: description.trim(),
+        letterFile: file ?? undefined,
+      },
+    });
 
   return (
     <FormModal<CancelContractFormValues>
@@ -52,19 +54,16 @@ export const CancelContractModal = ({ company, onClose }: CancelContractModalPro
       open={Boolean(company)}
       initialValues={INITIAL_VALUES}
       onCancel={onClose}
-      onSubmit={mutateAsync}
+      onSubmit={submit}
     >
       <FormItem name="cancelDate" label="تاریخ لغو" required>
         <DateInput />
       </FormItem>
       <FormItem name="reasonId" label="دلیل لغو" required>
-        <SelectInput
-          loading={isPending}
-          options={reasons?.map((reason) => ({ value: reason.id, label: reason.title }))}
-        />
+        <SelectInput loading={reasons.isPending} options={reasons.options} />
       </FormItem>
       <FormItem
-        name="note"
+        name="description"
         label="توضیحات"
         required
         rules={[

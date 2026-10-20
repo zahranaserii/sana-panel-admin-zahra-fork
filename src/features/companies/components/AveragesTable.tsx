@@ -1,36 +1,43 @@
 import { SaveOutlined } from '@ant-design/icons';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQueryClient } from '@tanstack/react-query';
 import { type ColumnsType } from 'antd/es/table';
 import { useEffect, useMemo, useState } from 'react';
 import { toast } from 'sonner';
 
+import {
+  getCompaniesBalanceDocumentsQueryKey,
+  getCompaniesBalancesQueryKey,
+  useCompaniesBalances,
+  useCompaniesBalancesSave,
+} from '@/api/generated/facility';
 import { Button } from '@/component/button';
 import { Form, FormItem } from '@/component/form';
 import { AmountInput } from '@/component/input';
 import { Table } from '@/component/table';
-import { QUERY_KEYS } from '@/constant/queryKeys';
-import { resolveFile } from '@/services/file';
 import { toPersianDigits } from '@/utils/date';
 import { formatAmount } from '@/utils/number';
 
-import { getAverages, saveAverages } from '../api';
-import { type AverageDocFormValues, type MonthlyAverage } from '../types';
+import { type BalanceDocFormValues, type MonthlyBalance } from '../types';
 
 import { AverageDocModal } from './AverageDocModal';
 
 interface AveragesFormValues {
-  averages: (string | null)[];
+  /** کلید = ماه شمسی (YYYY/MM) */
+  averages: Record<string, string | null>;
 }
 
 const toNumber = (value?: string | null) => (value ? Number(value) : null);
 
-const columns: ColumnsType<MonthlyAverage> = [
-  { title: 'ماه', dataIndex: 'month', render: (month: number) => `ماه ${toPersianDigits(month)}` },
+const rial = (value?: number | null) =>
+  value === null || value === undefined ? '—' : `${toPersianDigits(formatAmount(value))} ریال`;
+
+const columns: ColumnsType<MonthlyBalance> = [
+  { title: 'ماه', dataIndex: 'month', render: (month: string) => toPersianDigits(month) },
   {
     title: 'میانگین موجودی (ریال)',
     key: 'average',
     render: (_value, row) => (
-      <FormItem name={['averages', row.month - 1]} noStyle>
+      <FormItem name={['averages', row.month ?? '']} noStyle>
         <AmountInput style={{ width: 240 }} />
       </FormItem>
     ),
@@ -38,27 +45,38 @@ const columns: ColumnsType<MonthlyAverage> = [
   {
     title: 'مانده اعتبار تا این ماه (محاسبه‌شده)',
     dataIndex: 'remainingCredit',
-    render: (value: number | null) =>
-      value === null ? '—' : <b>{toPersianDigits(formatAmount(value))} ریال</b>,
+    render: (value?: number | null) => <b>{rial(value)}</b>,
+  },
+  { title: 'اعتبار استفاده‌شده', dataIndex: 'usedCredit', render: rial },
+  {
+    title: 'مستندات',
+    dataIndex: 'documentCount',
+    align: 'center',
+    render: (value?: number) => toPersianDigits(value ?? 0),
   },
 ];
 
 /** جدول میانگین موجودی ماه‌های سال جاری قرارداد */
-export const AveragesTable = ({ companyId }: { companyId: string }) => {
+export const AveragesTable = ({ companyId }: { companyId: number }) => {
   const [form] = Form.useForm<AveragesFormValues>();
   const queryClient = useQueryClient();
-  const [changedMonths, setChangedMonths] = useState<number[]>([]);
+  const [changedMonths, setChangedMonths] = useState<string[]>([]);
 
-  const { data, isFetching } = useQuery({
-    queryKey: QUERY_KEYS.COMPANIES.AVERAGES(companyId),
-    queryFn: () => getAverages(companyId),
-  });
+  const { data, isFetching } = useCompaniesBalances(companyId);
+  const months = useMemo(() => data?.months ?? [], [data]);
 
   const initialValues = useMemo(
     () => ({
-      averages: data?.map((item) => (item.average === null ? null : String(item.average))),
+      averages: Object.fromEntries(
+        months.map((item) => [
+          item.month ?? '',
+          item.averageBalance === null || item.averageBalance === undefined
+            ? null
+            : String(item.averageBalance),
+        ]),
+      ),
     }),
-    [data],
+    [months],
   );
 
   // با هر بار دریافت سرویس (اولین بار یا بعد از ذخیره) مقادیر فرم به‌روز می‌شود
@@ -66,31 +84,41 @@ export const AveragesTable = ({ companyId }: { companyId: string }) => {
     form.setFieldsValue(initialValues);
   }, [form, initialValues]);
 
-  const { mutateAsync } = useMutation({
-    mutationFn: async ({ file, docTypeId, note }: AverageDocFormValues) => {
-      const uploaded = await resolveFile(file);
-      const averages = form.getFieldValue('averages') as AveragesFormValues['averages'];
-      const items = changedMonths.map((month) => ({
-        month,
-        average: toNumber(averages[month - 1]),
-      }));
-      return saveAverages(companyId, { items, docTypeId, fileId: uploaded?.id ?? '', note });
-    },
-    onSuccess: () => {
-      // سرویس میانگین‌ها و مستندات دوباره فراخوانی می‌شود
-      void queryClient.invalidateQueries({ queryKey: QUERY_KEYS.COMPANIES.AVERAGES(companyId) });
-      void queryClient.invalidateQueries({
-        queryKey: QUERY_KEYS.COMPANIES.AVERAGE_DOCS(companyId),
-      });
-      setChangedMonths([]);
-      toast.success('میانگین‌ها و مستند ثبت شد.');
+  const { mutateAsync } = useCompaniesBalancesSave({
+    mutation: {
+      onSuccess: () => {
+        void queryClient.invalidateQueries({ queryKey: getCompaniesBalancesQueryKey(companyId) });
+        void queryClient.invalidateQueries({
+          queryKey: getCompaniesBalanceDocumentsQueryKey(companyId),
+        });
+        setChangedMonths([]);
+        toast.success('میانگین‌ها و مستند ثبت شد.');
+      },
     },
   });
 
+  /** میانگین‌ها همراه با مستند (multipart) ذخیره می‌شوند */
+  const save = ({ file, documentTypeId, description }: BalanceDocFormValues) => {
+    const averages = (form.getFieldValue('averages') ?? {}) as AveragesFormValues['averages'];
+    return mutateAsync({
+      id: companyId,
+      data: {
+        Months: changedMonths.map((month) => ({
+          month,
+          averageBalance: toNumber(averages[month]),
+        })),
+        RowVersion: data?.rowVersion ?? '',
+        DocumentTypeId: documentTypeId,
+        DocumentDescription: description,
+        files: file ? [file] : [],
+      },
+    });
+  };
+
   const handleFinish = ({ averages }: AveragesFormValues) => {
-    const changed = (data ?? [])
-      .filter((item) => toNumber(averages[item.month - 1]) !== item.average)
-      .map((item) => item.month);
+    const changed = months
+      .filter((item) => toNumber(averages[item.month ?? '']) !== (item.averageBalance ?? null))
+      .map((item) => item.month ?? '');
     if (changed.length === 0) {
       toast.info('تغییری در میانگین‌ها ایجاد نشده است.');
       return;
@@ -101,10 +129,10 @@ export const AveragesTable = ({ companyId }: { companyId: string }) => {
   return (
     <>
       <Form<AveragesFormValues> form={form} onFinish={handleFinish}>
-        <Table<MonthlyAverage>
+        <Table<MonthlyBalance>
           rowKey="month"
           columns={columns}
-          dataSource={data}
+          dataSource={months}
           loading={isFetching}
           maxHeight={440}
         />
@@ -121,7 +149,7 @@ export const AveragesTable = ({ companyId }: { companyId: string }) => {
       <AverageDocModal
         open={changedMonths.length > 0}
         months={changedMonths}
-        onSubmit={mutateAsync}
+        onSubmit={save}
         onClose={() => setChangedMonths([])}
       />
     </>

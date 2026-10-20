@@ -1,25 +1,32 @@
-import { useQuery } from '@tanstack/react-query';
 import { type ColumnsType } from 'antd/es/table';
 
+import { useDashboardGet } from '@/api/generated/facility';
 import { PanelCard } from '@/component/card';
 import { Table } from '@/component/table';
-import { QUERY_KEYS } from '@/constant/queryKeys';
 import { toPersianDigits } from '@/utils/date';
 
-import { getContractsByMonth } from '../api';
 import { type ContractsByMonth } from '../types';
 
 const columns: ColumnsType<ContractsByMonth> = [
-  { title: 'ماه انعقاد', dataIndex: 'month' },
-  { title: 'تعداد شرکت', dataIndex: 'count', render: (v: number) => toPersianDigits(v) },
-  { title: 'نام شرکت‌ها', dataIndex: 'companies', render: (names: string[]) => names.join('، ') },
+  {
+    title: 'ماه انعقاد',
+    dataIndex: 'month',
+    render: (value?: string) => toPersianDigits(value ?? ''),
+  },
+  {
+    title: 'تعداد شرکت',
+    dataIndex: 'companyCount',
+    render: (value?: number) => toPersianDigits(value ?? 0),
+  },
+  {
+    title: 'نام شرکت‌ها',
+    dataIndex: 'companyNames',
+    render: (names?: string[]) => (names ?? []).join('، '),
+  },
 ];
 
 export const ContractsByMonthTable = () => {
-  const { data, isFetching } = useQuery({
-    queryKey: QUERY_KEYS.DASHBOARD.CONTRACTS_BY_MONTH,
-    queryFn: getContractsByMonth,
-  });
+  const { data, isFetching } = useDashboardGet();
 
   return (
     <PanelCard
@@ -29,7 +36,7 @@ export const ContractsByMonthTable = () => {
       <Table<ContractsByMonth>
         rowKey="month"
         columns={columns}
-        dataSource={data}
+        dataSource={data?.contractsByMonth}
         loading={isFetching}
         locale={{ emptyText: 'هنوز تفاهم‌نامه‌ای ثبت نشده است.' }}
       />

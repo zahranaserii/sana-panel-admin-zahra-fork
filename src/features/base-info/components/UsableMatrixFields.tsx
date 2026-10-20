@@ -12,9 +12,9 @@ const label = (value: number | null | undefined, suffix: string) =>
 
 /** جدول درصد قابل استفاده: ردیف = مدت بازپرداخت، ستون = نرخ تسهیلات */
 export const UsableMatrixFields = () => {
-  const terms = Form.useWatch<(number | null)[] | undefined>('terms') ?? [];
+  const terms = Form.useWatch<(number | null)[] | undefined>('repaymentTermsMonths') ?? [];
   const rates = Form.useWatch<(number | null)[] | undefined>('murabahaRates') ?? [];
-  const qarzRate = Form.useWatch<number | undefined>('qarzRate');
+  const qarzRate = Form.useWatch<number | undefined>('qardHasanRate');
   const headers = [
     'قرض‌الحسنه (' + label(qarzRate, '٪') + ')',
     ...rates.map((rate) => 'مرابحه ' + label(rate, '٪')),

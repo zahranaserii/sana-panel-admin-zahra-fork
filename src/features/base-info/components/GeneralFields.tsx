@@ -4,63 +4,94 @@ import { FormItem } from '@/component/form';
 import { NumberInput, TextInput } from '@/component/input';
 import { Switch } from '@/component/switch';
 
-import { type SchemePayload } from '../types';
+import { type SchemeFormValues } from '../types';
 
 import { SectionTitle } from './SectionTitle';
 
 /** نام طرح و تنظیمات عمومی */
-export const GeneralFields = () => {
-  const sepahEnabled = Form.useWatch<boolean | undefined>('sepahEnabled');
+/** isEdit: کد طرح بعد از ثبت قابل تغییر نیست */
+export const GeneralFields = ({ isEdit }: { isEdit: boolean }) => {
+  const isActive = Form.useWatch<boolean | undefined>('isActive');
+  const digitalApproval = Form.useWatch<boolean | undefined>('digitalApprovalEnabled');
 
   return (
     <>
       <SectionTitle title="تنظیمات عمومی" />
       <div className="grid grid-cols-1 gap-x-4 md:grid-cols-2 xl:grid-cols-3">
-        <FormItem<SchemePayload> name="name" label="نام طرح" required>
+        <FormItem<SchemeFormValues>
+          name="title"
+          label="نام طرح"
+          required
+          rules={[{ min: 3, max: 100, message: 'نام طرح باید بین ۳ تا ۱۰۰ حرف باشد.' }]}
+        >
           <TextInput placeholder="مثلاً نگین میثاق" />
         </FormItem>
-        <FormItem<SchemePayload>
-          name="qarzRate"
+        <FormItem<SchemeFormValues>
+          name="code"
+          label="کد طرح"
+          required
+          rules={[{ min: 2, max: 30, message: 'کد طرح باید بین ۲ تا ۳۰ حرف باشد.' }]}
+          extra={isEdit ? 'کد طرح بعد از ثبت قابل تغییر نیست.' : undefined}
+        >
+          <TextInput placeholder="مثلاً NM-01" disabled={isEdit} />
+        </FormItem>
+        <FormItem<SchemeFormValues> name="isActive" label="وضعیت طرح">
+          <Switch label={isActive ? 'فعال' : 'غیرفعال'} />
+        </FormItem>
+        <FormItem<SchemeFormValues>
+          name="qardHasanRate"
           label="نرخ تسهیلات قرض‌الحسنه (درصد - ثابت)"
           required
         >
-          <NumberInput min={0} step={0.1} />
+          <NumberInput min={0} max={4} step={0.1} />
         </FormItem>
-        <FormItem<SchemePayload> name="sepahEnabled" label="حقوق‌بگیر بانک سپه">
-          <Switch label={sepahEnabled ? 'بله' : 'خیر'} />
+        <FormItem<SchemeFormValues>
+          name="salaryFromSepahMultiplierYes"
+          label="ضریب حقوق‌بگیر بانک سپه"
+          required
+        >
+          <NumberInput min={0.01} max={10} step={0.01} />
         </FormItem>
-        {sepahEnabled && (
-          <FormItem<SchemePayload>
-            name="sepahMultiplier"
-            label="نرخ تأثیر حقوق‌بگیر بودن بانک سپه (ضریب)"
-            required
-          >
-            <NumberInput min={0} step={0.01} />
-          </FormItem>
-        )}
-        <FormItem<SchemePayload> name="contractYears" label="مدت قرارداد (سال)" required>
-          <NumberInput min={1} />
+        <FormItem<SchemeFormValues>
+          name="salaryFromSepahMultiplierNo"
+          label="ضریب غیر حقوق‌بگیر بانک سپه"
+          required
+        >
+          <NumberInput min={0.01} max={10} step={0.01} />
         </FormItem>
-        <FormItem<SchemePayload>
-          name="graceMonths"
+        <FormItem<SchemeFormValues>
+          name="contractDurationMonths"
+          label="مدت قرارداد (ماه)"
+          required
+        >
+          <NumberInput min={1} max={120} />
+        </FormItem>
+        <FormItem<SchemeFormValues>
+          name="graceMonthsAfterExpiry"
           label="مهلت استفاده از مانده اعتبار پس از انقضا (ماه)"
           required
         >
-          <NumberInput min={0} />
+          <NumberInput min={0} max={120} />
         </FormItem>
-        <FormItem<SchemePayload>
-          name="maxPlans"
+        <FormItem<SchemeFormValues>
+          name="maxPlansPerCompany"
           label="حداکثر تعداد طرح قابل انتخاب برای هر شرکت"
           required
         >
-          <NumberInput min={1} />
+          <NumberInput min={1} max={10} />
         </FormItem>
-        <FormItem<SchemePayload>
-          name="staffDelayMonths"
+        <FormItem<SchemeFormValues>
+          name="personnelIntroductionDelayMonths"
           label="مهلت مجاز شدن معرفی پرسنل پس از انعقاد قرارداد (ماه)"
           required
         >
-          <NumberInput min={0} />
+          <NumberInput min={0} max={120} />
+        </FormItem>
+        <FormItem<SchemeFormValues> name="waitingPeriodDays" label="دوره انتظار (روز)">
+          <NumberInput min={0} max={180} />
+        </FormItem>
+        <FormItem<SchemeFormValues> name="digitalApprovalEnabled" label="تأیید شعبه دیجیتال">
+          <Switch label={digitalApproval ? 'فعال' : 'غیرفعال'} />
         </FormItem>
       </div>
     </>

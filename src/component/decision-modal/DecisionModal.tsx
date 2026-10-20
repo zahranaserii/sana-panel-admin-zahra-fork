@@ -1,6 +1,7 @@
 import { type ReactNode } from 'react';
 
-import { type LookupItem } from '@/types/common';
+import { type PostApprovalStage } from '@/api/generated/facility/facilityPanelAPI.schemas';
+
 import { toPersianDigits } from '@/utils/date';
 import { formatRial } from '@/utils/number';
 import { rialToTomanWords } from '@/utils/numberToWords';
@@ -11,20 +12,24 @@ import { FormModal } from '../modal';
 
 export type DecisionType = 'approve' | 'reject';
 
+/** مقادیر فرم تصمیم (نام فیلدها مثل بدنه بک‌اند) */
 export interface DecisionFormValues {
-  note?: string;
+  description?: string;
   file?: File | null;
-  reasonId?: string;
-  stageId?: string;
-  noGrantReasonId?: string;
+  /** دلیل رد */
+  reasonId?: number;
+  /** مرحله پس از تأیید (تأیید اعتبارات) */
+  postStage?: PostApprovalStage;
+  /** علت مرحله‌ای که علت می‌خواهد (عدم اعطای تسهیلات غیرحضوری) */
+  postStageReasonId?: number;
 }
 
 /** حداقل اطلاعات درخواست برای نمایش در مودال تصمیم */
 export interface DecisionRequestInfo {
-  id: string;
-  staffName: string;
-  planTitle: string;
-  amount: number;
+  id?: number;
+  personnelName?: string;
+  planTitle?: string;
+  amount?: number;
 }
 
 export interface DecisionTarget {
@@ -35,7 +40,9 @@ export interface DecisionTarget {
 export interface DecisionModalProps {
   target: DecisionTarget | null;
   /** اگر داده شود، در حالت رد انتخاب دلیل اجباری است */
-  rejectReasons?: LookupItem[];
+  rejectReasons?: { value: number; label: string }[];
+  /** امکان الصاق مستندات (پیش‌فرض: دارد) */
+  allowFile?: boolean;
   /** در حالت رد، توضیحات اجباری است (تأیید اعتبارات) */
   requireRejectNote?: boolean;
   /** فیلدهای اضافه در حالت تأیید (مثل مرحله پس از تأیید) */
@@ -48,13 +55,15 @@ const describe = (requests: DecisionRequestInfo[]) => {
   const [first] = requests;
   if (requests.length > 1 || !first)
     return `${toPersianDigits(requests.length)} درخواست انتخاب‌شده`;
-  return `${first.staffName} — ${first.planTitle} — ${formatRial(first.amount)} (${rialToTomanWords(first.amount)})`;
+  const amount = first.amount ?? 0;
+  return `${first.personnelName} — ${first.planTitle} — ${formatRial(amount)} (${rialToTomanWords(amount)})`;
 };
 
 /** مودال ثبت تصمیم (تأیید / رد) برای یک یا چند درخواست */
 export const DecisionModal = ({
   target,
   rejectReasons,
+  allowFile = true,
   requireRejectNote,
   approveFields,
   onSubmit,
@@ -83,24 +92,27 @@ export const DecisionModal = ({
           required
           requiredMessage="انتخاب دلیل رد اجباری است."
         >
-          <SelectInput
-            options={rejectReasons.map((reason) => ({ value: reason.id, label: reason.title }))}
-          />
+          <SelectInput options={rejectReasons} />
         </FormItem>
       )}
       {!isReject && approveFields}
       <FormItem
-        name="note"
+        name="description"
         label={noteRequired ? 'توضیحات' : 'توضیحات (اختیاری)'}
         required={noteRequired}
         requiredMessage="توضیحات رد الزامی است."
-        rules={[{ whitespace: true, message: 'توضیحات رد الزامی است.' }]}
+        rules={[
+          { whitespace: true, message: 'توضیحات رد الزامی است.' },
+          ...(noteRequired ? [{ min: 5, message: 'توضیحات باید حداقل ۵ نویسه باشد.' }] : []),
+        ]}
       >
         <TextAreaInput maxLength={500} />
       </FormItem>
-      <FormItem name="file" label="الصاق مستندات (اختیاری)">
-        <FileInput />
-      </FormItem>
+      {allowFile && (
+        <FormItem name="file" label="الصاق مستندات (اختیاری)">
+          <FileInput />
+        </FormItem>
+      )}
     </FormModal>
   );
 };

@@ -26,13 +26,6 @@ const CATEGORY: Record<MockLogType, ChangeLogCategory> = {
   base: 4,
 };
 
-const CATEGORY_TITLES = [
-  { id: 1, title: 'مربوط به شرکت‌ها' },
-  { id: 2, title: 'مربوط به پرسنل' },
-  { id: 3, title: 'مربوط به تخصیص وام' },
-  { id: 4, title: 'مربوط به کاربران و اطلاعات پایه' },
-];
-
 const toItem = (log: MockAuditLog): CommandResponsesChangeLogItemDto => ({
   id: log.id,
   at: log.createdAt,
@@ -49,18 +42,17 @@ const toItem = (log: MockAuditLog): CommandResponsesChangeLogItemDto => ({
 
 const filterLogs = (url: URL) => {
   const category = Number(url.searchParams.get('Category')) || undefined;
-  return db.auditLogs.filter((log) => !category || CATEGORY[log.type] === category);
+  const panelUserId = Number(url.searchParams.get('PanelUserId')) || undefined;
+  return db.auditLogs.filter(
+    (log) =>
+      (!category || CATEGORY[log.type] === category) &&
+      (!panelUserId || log.user.panelUserId === panelUserId),
+  );
 };
 
 const jalaliDateTime = (iso: string) => dayjs(iso).formatJalali('YYYY/MM/DD HH:mm');
 
 export const auditLogHandlers = [
-  // بکند ندارد — عنوان دسته‌ها
-  http.get(api(ENDPOINTS.LOOKUPS.AUDIT_LOG_TYPES), async () => {
-    await delay(150);
-    return json(CATEGORY_TITLES);
-  }),
-
   http.get(api(`${FACILITY}/ChangeLogs`), async ({ request }) => {
     await delay(250);
     const url = new URL(request.url);
@@ -75,6 +67,12 @@ export const auditLogHandlers = [
       pageSize,
     };
     return json(response);
+  }),
+
+  http.get(api(`${FACILITY}/ChangeLogs/Users`), async () => {
+    await delay(150);
+    const users = new Map(db.auditLogs.map((log) => [log.user.panelUserId, log.user]));
+    return json([...users.values()]);
   }),
 
   http.post(api(`${FACILITY}/ChangeLogs/:id/Restore`), async ({ params, request }) => {

@@ -1,13 +1,27 @@
 import { type StatusTone } from '@/component/status-chip';
 
-export type LoanStatus =
-  'pending_manager' | 'rejected_manager' | 'pending_credit' | 'approved' | 'rejected';
+/** وضعیت درخواست وام بک‌اند (Lookups/Enums → loanRequestStatus) */
+export const LOAN_STATUS = {
+  PENDING_MANAGER: 1,
+  REJECTED_MANAGER: 2,
+  PENDING_CREDIT: 3,
+  APPROVED: 4,
+  REJECTED: 5,
+  PENDING_DIGITAL: 6,
+  REJECTED_DIGITAL: 7,
+  CANCELLED: 8,
+} as const;
 
-/** عنوان و رنگ هر وضعیت درخواست وام */
-export const LOAN_STATUS: Record<LoanStatus, { title: string; tone: StatusTone }> = {
-  pending_manager: { title: 'در انتظار تأیید مدیر شرکت', tone: 'warning' },
-  rejected_manager: { title: 'رد شده توسط مدیر شرکت', tone: 'error' },
-  pending_credit: { title: 'در انتظار', tone: 'warning' },
-  approved: { title: 'تأیید شده', tone: 'success' },
-  rejected: { title: 'رد شده', tone: 'error' },
+/** رنگ هر وضعیت (عنوان از Lookups/Enums می‌آید) */
+const TONES: Record<number, StatusTone> = {
+  [LOAN_STATUS.PENDING_MANAGER]: 'warning',
+  [LOAN_STATUS.REJECTED_MANAGER]: 'error',
+  [LOAN_STATUS.PENDING_CREDIT]: 'warning',
+  [LOAN_STATUS.APPROVED]: 'success',
+  [LOAN_STATUS.REJECTED]: 'error',
+  [LOAN_STATUS.PENDING_DIGITAL]: 'warning',
+  [LOAN_STATUS.REJECTED_DIGITAL]: 'error',
+  [LOAN_STATUS.CANCELLED]: 'default',
 };
+
+export const loanStatusTone = (status?: number) => TONES[status ?? 0] ?? 'default';

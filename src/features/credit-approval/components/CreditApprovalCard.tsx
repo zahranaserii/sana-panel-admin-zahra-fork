@@ -1,22 +1,33 @@
 import { CheckOutlined, CloseOutlined } from '@ant-design/icons';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQueryClient } from '@tanstack/react-query';
 import { App } from 'antd';
 import { useState } from 'react';
 import { toast } from 'sonner';
 
+import {
+  getApprovalsCreditQueueQueryKey,
+  getLoansSearchQueryKey,
+  useApprovalsCreditDecide,
+  useApprovalsCreditQueue,
+  useCompaniesLookup,
+} from '@/api/generated/facility';
 import { Button } from '@/component/button';
 import { PanelCard } from '@/component/card';
 import { DecisionModal, showDecisionResult, type DecisionTarget } from '@/component/decision-modal';
 import { SelectInput } from '@/component/input';
 import { Table } from '@/component/table';
-import { QUERY_KEYS } from '@/constant/queryKeys';
-import { type DecisionFormValues, type DecisionType } from '@/features/manager-approval/types';
-import { resolveFile } from '@/services/file';
-import { getAllCompanyOptions, getRejectReasons } from '@/services/lookup';
+import { LOAN_STATUS } from '@/constant/loanStatus';
+import {
+  DECISION,
+  type DecisionFormValues,
+  type DecisionType,
+} from '@/features/manager-approval/types';
+import { useEnums } from '@/services/enums';
+import { REASON_TYPE, useReasonOptions } from '@/services/reasons';
 
-import { getCreditApprovals, submitCreditDecision } from '../api';
 import { type CreditApprovalItem } from '../types';
 
+import { ChangeStageModal } from './ChangeStageModal';
 import { buildColumns } from './columns';
 import { PostStageFields } from './PostStageFields';
 
@@ -36,41 +47,47 @@ export const CreditApprovalCard = ({ companyId, onCompanyChange }: CreditApprova
   const [page, setPage] = useState(1);
   const [selected, setSelected] = useState<CreditApprovalItem[]>([]);
   const [target, setTarget] = useState<DecisionTarget | null>(null);
+  const [changingStage, setChangingStage] = useState<CreditApprovalItem | null>(null);
+  const enums = useEnums();
 
-  const { data, isFetching } = useQuery({
-    queryKey: QUERY_KEYS.CREDIT_APPROVALS.LIST(companyId, page),
-    queryFn: () => getCreditApprovals({ companyId, page, pageSize: PAGE_SIZE }),
+  const { data, isFetching } = useApprovalsCreditQueue({
+    CompanyId: companyId ? Number(companyId) : undefined,
+    Page: page,
+    PageSize: PAGE_SIZE,
   });
-  const { data: companies } = useQuery({
-    queryKey: QUERY_KEYS.LOOKUPS.ALL_COMPANIES,
-    queryFn: getAllCompanyOptions,
-  });
-  const { data: rejectReasons } = useQuery({
-    queryKey: QUERY_KEYS.LOOKUPS.REJECT_REASONS,
-    queryFn: getRejectReasons,
-  });
+  // همه شرکت‌ها، شامل قراردادهای لغوشده
+  const { data: companies } = useCompaniesLookup({ activeOnly: false });
+  const rejectReasons = useReasonOptions(REASON_TYPE.LOAN_REJECT);
 
-  const { mutateAsync: decide } = useMutation({
-    mutationFn: async ({ file, ...values }: DecisionFormValues) => {
-      const uploaded = await resolveFile(file);
-      return submitCreditDecision(target?.type ?? 'approve', {
-        ...values,
-        requestIds: target?.requests.map((item) => item.id) ?? [],
-        fileId: uploaded?.id ?? null,
-      });
-    },
-    onSuccess: (result) => {
-      void queryClient.invalidateQueries({ queryKey: QUERY_KEYS.CREDIT_APPROVALS.ALL });
-      void queryClient.invalidateQueries({ queryKey: QUERY_KEYS.CREDIT.ALL });
-      setSelected([]);
-      showDecisionResult(
-        modal,
-        result,
-        target?.requests ?? [],
-        target?.type === 'reject' ? 'رد شد' : 'تأیید شد',
-      );
+  const { mutateAsync } = useApprovalsCreditDecide({
+    mutation: {
+      onSuccess: (result) => {
+        void queryClient.invalidateQueries({ queryKey: getApprovalsCreditQueueQueryKey() });
+        void queryClient.invalidateQueries({ queryKey: getLoansSearchQueryKey() });
+        setSelected([]);
+        showDecisionResult(
+          modal,
+          result,
+          target?.requests ?? [],
+          target?.type === 'reject' ? 'رد شد' : 'تأیید شد',
+        );
+      },
     },
   });
+
+  /** تأیید همراه با مرحله پس از تأیید؛ رد با دلیل و توضیحات (multipart) */
+  const decide = ({ file, description, ...values }: DecisionFormValues) =>
+    mutateAsync({
+      data: {
+        RequestIds: target?.requests.map((item) => item.id ?? 0) ?? [],
+        Decision: DECISION[target?.type ?? 'approve'],
+        ReasonId: values.reasonId,
+        Description: description?.trim() ? description.trim() : undefined,
+        PostStage: values.postStage,
+        PostStageReasonId: values.postStageReasonId,
+        attachment: file ?? undefined,
+      },
+    });
 
   const openBulk = (type: DecisionType) => {
     if (!selected.length) {
@@ -99,7 +116,7 @@ export const CreditApprovalCard = ({ companyId, onCompanyChange }: CreditApprova
             onChange={changeCompany}
             options={[
               { value: ALL, label: 'همه شرکت‌ها' },
-              ...(companies ?? []).map((item) => ({ value: item.id, label: item.title })),
+              ...(companies ?? []).map((item) => ({ value: String(item.id), label: item.title })),
             ]}
           />
           <Button size="small" icon={<CheckOutlined />} onClick={() => openBulk('approve')}>
@@ -117,15 +134,20 @@ export const CreditApprovalCard = ({ companyId, onCompanyChange }: CreditApprova
       }
     >
       <Table<CreditApprovalItem>
-        columns={buildColumns((type, row) => setTarget({ type, requests: [row] }))}
+        rowKey="id"
+        columns={buildColumns({
+          onDecide: (type, row) => setTarget({ type, requests: [row] }),
+          onChangeStage: setChangingStage,
+          stageTitle: (stage) => enums.title('postApprovalStage', stage),
+        })}
         dataSource={data?.items}
         loading={isFetching}
         locale={{ emptyText: 'درخواستی برای نمایش وجود ندارد.' }}
         rowSelection={{
-          selectedRowKeys: selected.map((item) => item.id),
+          selectedRowKeys: selected.map((item) => item.id ?? 0),
           onChange: (_keys, rows) => setSelected(rows),
           // فقط درخواست‌های «در انتظار» قابل انتخاب گروهی هستند
-          getCheckboxProps: (row) => ({ disabled: row.status !== 'pending_credit' }),
+          getCheckboxProps: (row) => ({ disabled: row.status !== LOAN_STATUS.PENDING_CREDIT }),
         }}
         pagination={{
           current: page,
@@ -136,12 +158,13 @@ export const CreditApprovalCard = ({ companyId, onCompanyChange }: CreditApprova
       />
       <DecisionModal
         target={target}
-        rejectReasons={rejectReasons ?? []}
+        rejectReasons={rejectReasons.options}
         requireRejectNote
         approveFields={<PostStageFields />}
         onSubmit={decide}
         onClose={() => setTarget(null)}
       />
+      <ChangeStageModal request={changingStage} onClose={() => setChangingStage(null)} />
     </PanelCard>
   );
 };

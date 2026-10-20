@@ -22,3 +22,21 @@ export const json = (body: unknown, init?: ResponseInit) => {
     init,
   );
 };
+
+/** پاسخ دانلود فایل (محتوای نمونه با همان نام فایل ذخیره‌شده) */
+export const fileResponse = (fileName = 'file') =>
+  new HttpResponse(new Blob([`فایل نمونه: ${fileName}`]), {
+    headers: {
+      'Content-Type': 'application/octet-stream',
+      'Content-Disposition': `attachment; filename*=UTF-8''${encodeURIComponent(fileName)}`,
+    },
+  });
+
+/** مقادیر عددی یک فیلد تکراری multipart (مثل PlanIds) */
+export const formNumbers = (form: FormData, key: string) => form.getAll(key).map(Number);
+
+/** مقدار متنی یک فیلد multipart */
+export const formText = (form: FormData, key: string) => {
+  const value = form.get(key);
+  return typeof value === 'string' ? value.trim() : '';
+};

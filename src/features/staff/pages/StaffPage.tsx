@@ -10,12 +10,12 @@ import { type StaffFilters } from '../types';
 export const StaffPage = () => {
   const { params, setParams } = useQueryParams();
   const [modalOpen, setModalOpen] = useState(false);
-  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editingId, setEditingId] = useState<number | null>(null);
 
-  const companyId = params.companyId;
+  const companyId = params.companyId ? Number(params.companyId) : undefined;
   const filters: StaffFilters = { q: params.q, hireFrom: params.hireFrom, hireTo: params.hireTo };
 
-  const openModal = (id: string | null) => {
+  const openModal = (id: number | null) => {
     setEditingId(id);
     setModalOpen(true);
   };
@@ -23,7 +23,7 @@ export const StaffPage = () => {
   return (
     <>
       <PanelCard>
-        <CompanySelect value={companyId} onChange={(id) => setParams({ companyId: id })} />
+        <CompanySelect value={params.companyId} onChange={(id) => setParams({ companyId: id })} />
       </PanelCard>
 
       {companyId && (

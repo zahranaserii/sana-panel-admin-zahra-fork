@@ -1,25 +1,70 @@
 import { DeleteOutlined, EditOutlined, PlusOutlined } from '@ant-design/icons';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQueryClient } from '@tanstack/react-query';
 import { App } from 'antd';
 import { type ColumnsType } from 'antd/es/table';
 import { useState } from 'react';
 import { generatePath, useNavigate } from 'react-router';
 import { toast } from 'sonner';
 
+import { useBasicInfoSchemeDelete, useBasicInfoSchemeSearch } from '@/api/generated/facility';
 import { Button } from '@/component/button';
 import { PanelCard } from '@/component/card';
+import { StatusChip } from '@/component/status-chip';
 import { Table } from '@/component/table';
-import { QUERY_KEYS } from '@/constant/queryKeys';
 import { ROUTES } from '@/constant/routes';
 import { toPersianDigits } from '@/utils/date';
 
-import { deleteScheme, getSchemes } from '../api';
 import { type SchemeListItem } from '../types';
+import { invalidateBasicInfo } from '../utils';
 
 const PAGE_SIZE = 10;
 
-const joinNumbers = (list: number[], suffix = '') =>
-  list.map((value) => toPersianDigits(value) + suffix).join('، ');
+const joinNumbers = (list: number[] = [], suffix = '') =>
+  list.map((value) => toPersianDigits(value) + suffix).join('، ') || '—';
+
+const number = (value?: number, suffix = '') =>
+  value === undefined ? '—' : toPersianDigits(value) + suffix;
+
+const DATA_COLUMNS: ColumnsType<SchemeListItem> = [
+  { title: 'نام طرح', dataIndex: 'title' },
+  { title: 'کد', dataIndex: 'code', render: (value?: string) => value ?? '—' },
+  {
+    title: 'نرخ قرض‌الحسنه',
+    dataIndex: 'qardHasanRate',
+    render: (value?: number) => number(value, '٪'),
+  },
+  {
+    title: 'نرخ‌های مرابحه',
+    dataIndex: 'murabahaRates',
+    render: (value?: number[]) => joinNumbers(value, '٪'),
+  },
+  {
+    title: 'مدت‌های بازپرداخت (ماه)',
+    dataIndex: 'repaymentTermsMonths',
+    render: (value?: number[]) => joinNumbers(value),
+  },
+  {
+    title: 'مدت قرارداد',
+    dataIndex: 'contractDurationMonths',
+    render: (value?: number) => number(value, ' ماه'),
+  },
+  {
+    title: 'حداکثر طرح',
+    dataIndex: 'maxPlansPerCompany',
+    render: (value?: number) => number(value),
+  },
+  { title: 'تعداد شرکت', dataIndex: 'companyCount', render: (value?: number) => number(value) },
+  {
+    title: 'وضعیت',
+    dataIndex: 'isActive',
+    render: (value?: boolean) =>
+      value ? (
+        <StatusChip tone="success">فعال</StatusChip>
+      ) : (
+        <StatusChip tone="default">غیرفعال</StatusChip>
+      ),
+  },
+];
 
 export const SchemesTable = () => {
   const [page, setPage] = useState(1);
@@ -27,53 +72,33 @@ export const SchemesTable = () => {
   const queryClient = useQueryClient();
   const { modal } = App.useApp();
 
-  const { data, isFetching } = useQuery({
-    queryKey: QUERY_KEYS.BASE_INFO.LIST(page),
-    queryFn: () => getSchemes({ page, pageSize: PAGE_SIZE }),
+  const { data, isFetching } = useBasicInfoSchemeSearch({
+    IncludeInactive: true,
+    Page: page,
+    PageSize: PAGE_SIZE,
   });
 
-  const { mutate: remove } = useMutation({
-    mutationFn: deleteScheme,
-    onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: QUERY_KEYS.BASE_INFO.ALL });
-      void queryClient.invalidateQueries({ queryKey: QUERY_KEYS.LOOKUPS.PLANS });
-      toast.success('طرح حذف شد.');
+  const { mutateAsync: remove } = useBasicInfoSchemeDelete({
+    mutation: {
+      onSuccess: () => {
+        void invalidateBasicInfo(queryClient);
+        toast.success('طرح حذف شد.');
+      },
     },
   });
 
   const confirmDelete = (scheme: SchemeListItem) =>
     modal.confirm({
-      title: `حذف طرح «${scheme.name}»`,
+      title: `حذف طرح «${scheme.title}»`,
       content: 'طرح با همه اطلاعات پایه آن (نرخ‌ها، مدت‌ها، دلایل و انواع مستند) حذف می‌شود.',
       okText: 'حذف',
       okButtonProps: { danger: true },
       cancelText: 'انصراف',
-      onOk: () => remove(scheme.id),
+      onOk: () => remove({ schemeId: scheme.id ?? 0 }),
     });
 
   const columns: ColumnsType<SchemeListItem> = [
-    { title: 'نام طرح', dataIndex: 'name' },
-    {
-      title: 'نرخ قرض‌الحسنه',
-      dataIndex: 'qarzRate',
-      render: (v: number) => toPersianDigits(v) + '٪',
-    },
-    {
-      title: 'نرخ‌های مرابحه',
-      dataIndex: 'murabahaRates',
-      render: (v: number[]) => joinNumbers(v, '٪'),
-    },
-    {
-      title: 'مدت‌های بازپرداخت (ماه)',
-      dataIndex: 'terms',
-      render: (v: number[]) => joinNumbers(v),
-    },
-    {
-      title: 'مدت قرارداد',
-      dataIndex: 'contractYears',
-      render: (v: number) => toPersianDigits(v) + ' سال',
-    },
-    { title: 'حداکثر طرح', dataIndex: 'maxPlans', render: (v: number) => toPersianDigits(v) },
+    ...DATA_COLUMNS,
     {
       title: 'عملیات',
       key: 'actions',
@@ -83,7 +108,7 @@ export const SchemesTable = () => {
             variant="outline"
             size="small"
             icon={<EditOutlined />}
-            onClick={() => navigate(generatePath(ROUTES.BASE_INFO_EDIT, { id: row.id }))}
+            onClick={() => navigate(generatePath(ROUTES.BASE_INFO_EDIT, { id: String(row.id) }))}
           >
             ویرایش
           </Button>
@@ -116,10 +141,12 @@ export const SchemesTable = () => {
       }
     >
       <Table<SchemeListItem>
+        rowKey="id"
         columns={columns}
         dataSource={data?.items}
         loading={isFetching}
         showRowNumber
+        scroll={{ x: 1100 }}
         locale={{ emptyText: 'طرحی ثبت نشده است.' }}
         pagination={{
           current: page,

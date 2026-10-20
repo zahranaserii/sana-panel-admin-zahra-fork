@@ -1,70 +1,5 @@
 export const QUERY_KEYS = {
   PROFILE: ['profile'],
-  BASE_INFO: {
-    ALL: ['base-info'],
-    LIST: (page: number) => ['base-info', 'list', page],
-    DETAIL: (id: string) => ['base-info', 'detail', id],
-  },
-  LOOKUPS: {
-    CANCEL_REASONS: ['lookups', 'cancel-reasons'],
-    REJECT_REASONS: ['lookups', 'reject-reasons'],
-    NO_GRANT_REASONS: ['lookups', 'no-grant-reasons'],
-    AVG_DOC_TYPES: ['lookups', 'avg-doc-types'],
-    PLANS: ['lookups', 'plans'],
-    PLANS_OF: (schemeId: string) => ['lookups', 'plans', schemeId],
-    SCHEMES: ['lookups', 'schemes'],
-    COMPANIES: ['lookups', 'companies'],
-    ALL_COMPANIES: ['lookups', 'companies', 'all'],
-    POST_APPROVAL_STAGES: ['lookups', 'post-approval-stages'],
-    AUDIT_LOG_TYPES: ['lookups', 'audit-log-types'],
-  },
-  COMPANIES: {
-    ALL: ['companies'],
-    LIST: (page: number, pageSize: number) => ['companies', 'list', page, pageSize],
-    DETAIL: (id: string) => ['companies', 'detail', id],
-    AVERAGES: (id: string) => ['companies', 'averages', id],
-    AVERAGE_DOCS: (id: string) => ['companies', 'average-docs', id],
-  },
-  CREDIT: {
-    ALL: ['credit'],
-    ELIGIBILITY: (companyId: string, date: string) => ['credit', 'eligibility', companyId, date],
-    SUMMARY: (companyId: string, date: string) => ['credit', 'summary', companyId, date],
-    LOAN_REQUESTS: (companyId: string, page: number) => [
-      'credit',
-      'loan-requests',
-      companyId,
-      page,
-    ],
-  },
-  MANAGER_APPROVALS: {
-    ALL: ['manager-approvals'],
-    LIST: (companyId: string, page: number) => ['manager-approvals', companyId, page],
-  },
-  CREDIT_APPROVALS: {
-    ALL: ['credit-approvals'],
-    LIST: (companyId: string | undefined, page: number) => [
-      'credit-approvals',
-      companyId ?? 'all',
-      page,
-    ],
-  },
-  DASHBOARD: {
-    ALL: ['dashboard'],
-    SUMMARY: ['dashboard', 'summary'],
-    REQUEST_STATUS: ['dashboard', 'request-status'],
-    PLAN_SHARE: ['dashboard', 'plan-share'],
-    COMPANY_CREDIT: ['dashboard', 'company-credit'],
-    MONTHS: ['dashboard', 'months'],
-    RANKING: (month: string | undefined, sortBy: string) => [
-      'dashboard',
-      'ranking',
-      month ?? 'all',
-      sortBy,
-    ],
-    CONTRACTS_BY_MONTH: ['dashboard', 'contracts-by-month'],
-    MONTHLY_PERFORMANCE: ['dashboard', 'monthly-performance'],
-    REMOVED_COMPANIES: ['dashboard', 'removed-companies'],
-  },
   USERS: {
     ALL: ['users'],
     LIST: (page: number) => ['users', 'list', page],
@@ -72,15 +7,4 @@ export const QUERY_KEYS = {
     ROLES: ['users', 'roles'],
   },
   MAIN_MENU: ['main-menu'],
-  STAFF: {
-    ALL: ['staff'],
-    LIST: (companyId: string, filters: object, page: number) => [
-      'staff',
-      'list',
-      companyId,
-      filters,
-      page,
-    ],
-    DETAIL: (companyId: string, id: string) => ['staff', 'detail', companyId, id],
-  },
 } as const;

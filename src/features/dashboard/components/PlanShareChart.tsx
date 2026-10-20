@@ -1,36 +1,28 @@
-import { useQuery } from '@tanstack/react-query';
-
+import { useDashboardGet } from '@/api/generated/facility';
 import { PanelCard } from '@/component/card';
 import { Skeleton } from '@/component/loading';
-import { QUERY_KEYS } from '@/constant/queryKeys';
 import { useChartTheme } from '@/hooks/useChartTheme';
 import { CHART_MAX_CATEGORIES } from '@/theme/chartPalette';
 
-import { getPlanShare } from '../api';
 import { type PlanShare } from '../types';
 
 import { DonutChart, type DonutItem } from './DonutChart';
 
 /** بیش از ۵ طرح در «سایر» جمع می‌شود تا رنگ‌ها چرخشی تکرار نشوند */
 const foldOthers = (items: PlanShare[]): DonutItem[] => {
-  const sorted = [...items].sort((a, b) => b.count - a.count);
-  if (sorted.length <= CHART_MAX_CATEGORIES) {
-    return sorted.map((item) => ({ title: item.planTitle, count: item.count }));
-  }
+  const sorted = items
+    .map((item) => ({ title: item.planTitle ?? '—', count: item.requestCount ?? 0 }))
+    .sort((a, b) => b.count - a.count);
+  if (sorted.length <= CHART_MAX_CATEGORIES) return sorted;
   const head = sorted.slice(0, CHART_MAX_CATEGORIES - 1);
   const others = sorted.slice(CHART_MAX_CATEGORIES - 1).reduce((sum, item) => sum + item.count, 0);
-  return [
-    ...head.map((item) => ({ title: item.planTitle, count: item.count })),
-    { title: 'سایر', count: others },
-  ];
+  return [...head, { title: 'سایر', count: others }];
 };
 
 export const PlanShareChart = () => {
   const chart = useChartTheme();
-  const { data, isPending } = useQuery({
-    queryKey: QUERY_KEYS.DASHBOARD.PLAN_SHARE,
-    queryFn: getPlanShare,
-  });
+  const { data: dashboard, isPending } = useDashboardGet();
+  const data = dashboard?.planShare;
 
   const renderBody = () => {
     if (isPending) return <Skeleton variant="panel" rows={5} />;

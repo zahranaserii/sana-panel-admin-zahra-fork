@@ -1,45 +1,61 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQueryClient } from '@tanstack/react-query';
 import { useMemo } from 'react';
 import { toast } from 'sonner';
 
+import {
+  getPersonnelSearchQueryKey,
+  usePersonnelCreate,
+  usePersonnelGet,
+  usePersonnelUpdate,
+} from '@/api/generated/facility';
 import { FormItem } from '@/component/form';
 import { DateInput, NumberInput, TextInput } from '@/component/input';
 import { FormModal } from '@/component/modal';
-import { QUERY_KEYS } from '@/constant/queryKeys';
 
-import { createStaff, getStaff, updateStaff } from '../api';
-import { type Staff, type StaffPayload } from '../types';
+import { type StaffDetail, type StaffFormValues } from '../types';
 
 interface StaffFormModalProps {
   open: boolean;
-  companyId: string;
+  companyId: number;
   /** شناسه پرسنل برای ویرایش؛ خالی = افزودن */
-  staffId?: string | null;
+  staffId?: number | null;
   onClose: () => void;
 }
 
-const toFormValues = ({ id: _id, ...staff }: Staff): StaffPayload => staff;
+const toFormValues = (staff: StaffDetail): StaffFormValues => ({
+  fullName: staff.fullName ?? '',
+  nationalCode: staff.nationalCode ?? '',
+  mobile: staff.mobile ?? '',
+  personnelCode: staff.personnelCode ?? '',
+  hireDate: staff.hireDate ?? '',
+  priority: staff.priority,
+});
 
 export const StaffFormModal = ({ open, companyId, staffId, onClose }: StaffFormModalProps) => {
   const queryClient = useQueryClient();
   const isEdit = Boolean(staffId);
 
-  const { data: detail, isFetching } = useQuery({
-    queryKey: QUERY_KEYS.STAFF.DETAIL(companyId, staffId ?? ''),
-    queryFn: () => getStaff(companyId, staffId ?? ''),
-    enabled: open && isEdit,
+  const { data: detail, isFetching } = usePersonnelGet(staffId ?? 0, {
+    query: { enabled: open && isEdit, gcTime: 0 },
   });
 
-  const { mutateAsync } = useMutation({
-    mutationFn: (values: StaffPayload) =>
-      staffId ? updateStaff(companyId, staffId, values) : createStaff(companyId, values),
-    onSuccess: (saved) => {
-      void queryClient.invalidateQueries({ queryKey: QUERY_KEYS.STAFF.ALL });
-      toast.success(
-        isEdit ? `اطلاعات «${saved.fullName}» ویرایش شد.` : `«${saved.fullName}» ثبت شد.`,
-      );
-    },
-  });
+  const onSaved = (saved: StaffDetail) => {
+    void queryClient.invalidateQueries({ queryKey: getPersonnelSearchQueryKey(companyId) });
+    toast.success(
+      isEdit ? `اطلاعات «${saved.fullName}» ویرایش شد.` : `«${saved.fullName}» ثبت شد.`,
+    );
+  };
+
+  const create = usePersonnelCreate({ mutation: { onSuccess: onSaved } });
+  const update = usePersonnelUpdate({ mutation: { onSuccess: onSaved } });
+
+  // اولویت اختیاری است؛ خالی = آخرین اولویت (سمت سرور)
+  const submit = ({ priority, ...values }: StaffFormValues) => {
+    const data = { ...values, priority: priority ?? undefined };
+    return staffId
+      ? update.mutateAsync({ id: staffId, data: { ...data, rowVersion: detail?.rowVersion ?? '' } })
+      : create.mutateAsync({ companyId, data });
+  };
 
   const initialValues = useMemo(
     () => (isEdit && detail ? toFormValues(detail) : undefined),
@@ -47,7 +63,7 @@ export const StaffFormModal = ({ open, companyId, staffId, onClose }: StaffFormM
   );
 
   return (
-    <FormModal<StaffPayload>
+    <FormModal<StaffFormValues>
       title={isEdit ? 'ویرایش پرسنل' : 'افزودن پرسنل'}
       okText={isEdit ? 'ذخیره تغییرات' : 'ثبت پرسنل'}
       open={open}
@@ -56,13 +72,13 @@ export const StaffFormModal = ({ open, companyId, staffId, onClose }: StaffFormM
       loading={isEdit && isFetching}
       initialValues={initialValues}
       onCancel={onClose}
-      onSubmit={mutateAsync}
+      onSubmit={submit}
     >
       <FormItem name="fullName" label="نام و نام خانوادگی" required>
         <TextInput />
       </FormItem>
       <FormItem
-        name="nationalId"
+        name="nationalCode"
         label="کد ملی"
         required
         rules={[{ pattern: /^\d{10}$/, message: 'کد ملی باید ۱۰ رقم باشد.' }]}

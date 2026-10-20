@@ -10,7 +10,7 @@ import { type CompanyListItem } from '../types';
 
 export const CompaniesPage = () => {
   const [formOpen, setFormOpen] = useState(false);
-  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editingId, setEditingId] = useState<number | null>(null);
   const [cancelTarget, setCancelTarget] = useState<CompanyListItem | null>(null);
 
   const openCreate = () => {
@@ -18,7 +18,7 @@ export const CompaniesPage = () => {
     setFormOpen(true);
   };
 
-  const openEdit = (id: string) => {
+  const openEdit = (id: number) => {
     setEditingId(id);
     setFormOpen(true);
   };

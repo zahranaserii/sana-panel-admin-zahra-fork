@@ -1,9 +1,7 @@
-import { useQuery } from '@tanstack/react-query';
 import { useEffect } from 'react';
 
+import { useCompaniesLookup } from '@/api/generated/facility';
 import { SelectInput } from '@/component/input';
-import { QUERY_KEYS } from '@/constant/queryKeys';
-import { getCompanyOptions } from '@/services/lookup';
 
 interface CompanySelectProps {
   value?: string;
@@ -11,18 +9,16 @@ interface CompanySelectProps {
 }
 
 /**
- * انتخاب شرکت فعال (از سرویس شرکت‌های فعال).
+ * انتخاب شرکت فعال (Companies/Lookup).
  * اگر مقداری انتخاب نشده یا شرکت انتخاب‌شده دیگر فعال نیست، اولین شرکت انتخاب می‌شود.
  */
 export const CompanySelect = ({ value, onChange }: CompanySelectProps) => {
-  const { data: companies, isPending } = useQuery({
-    queryKey: QUERY_KEYS.LOOKUPS.COMPANIES,
-    queryFn: getCompanyOptions,
-  });
+  const { data: companies, isPending } = useCompaniesLookup({ activeOnly: true });
 
+  // شناسه عددی است؛ مقدار انتخاب در آدرس صفحه به‌صورت رشته نگه داشته می‌شود
   useEffect(() => {
     const first = companies?.[0]?.id;
-    if (first && !companies.some((item) => item.id === value)) onChange(first);
+    if (first && !companies.some((item) => String(item.id) === value)) onChange(String(first));
   }, [companies, value, onChange]);
 
   return (
@@ -41,7 +37,7 @@ export const CompanySelect = ({ value, onChange }: CompanySelectProps) => {
         value={value}
         onChange={onChange}
         placeholder="ابتدا یک شرکت ثبت کنید"
-        options={companies?.map((item) => ({ value: item.id, label: item.title }))}
+        options={companies?.map((item) => ({ value: String(item.id), label: item.title }))}
       />
     </div>
   );

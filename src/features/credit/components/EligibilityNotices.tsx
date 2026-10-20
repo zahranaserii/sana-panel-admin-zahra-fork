@@ -1,30 +1,29 @@
-import { useQuery } from '@tanstack/react-query';
-
 import { NoticeCard } from '@/component/card';
 import { Skeleton } from '@/component/loading';
-import { QUERY_KEYS } from '@/constant/queryKeys';
 
-import { getEligibility } from '../api';
+import { type CompanyCredit } from '../types';
 
 interface EligibilityNoticesProps {
-  companyId: string;
-  date: string;
+  credit?: CompanyCredit;
+  loading: boolean;
 }
 
-/** پیام‌های مجاز بودن شرکت برای ثبت درخواست (از سرویس) */
-export const EligibilityNotices = ({ companyId, date }: EligibilityNoticesProps) => {
-  const { data, isPending } = useQuery({
-    queryKey: QUERY_KEYS.CREDIT.ELIGIBILITY(companyId, date),
-    queryFn: () => getEligibility(companyId, date),
-  });
-
-  if (isPending) return <Skeleton variant="panel" rows={1} />;
+/** پیام مجاز بودن شرکت برای ثبت درخواست و پیام‌های تکمیلی (از سرویس اعتبار) */
+export const EligibilityNotices = ({ credit, loading }: EligibilityNoticesProps) => {
+  if (loading && !credit) return <Skeleton variant="panel" rows={1} />;
+  const banner = credit?.banner;
+  if (!banner) return null;
 
   return (
     <div className="mt-2">
-      {data?.messages.map((message) => (
-        <NoticeCard key={message.text} type={message.type}>
-          {message.text}
+      {banner.message && (
+        <NoticeCard type={banner.canRegisterLoan ? 'success' : 'error'}>
+          {banner.message}
+        </NoticeCard>
+      )}
+      {banner.messages?.map((text) => (
+        <NoticeCard key={text} type="warning">
+          {text}
         </NoticeCard>
       ))}
     </div>

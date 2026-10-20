@@ -1,77 +1,72 @@
-import { useQuery } from '@tanstack/react-query';
 import { type ColumnsType } from 'antd/es/table';
 
 import { KpiCard, PanelCard } from '@/component/card';
 import { Table } from '@/component/table';
-import { QUERY_KEYS } from '@/constant/queryKeys';
 import { toPersianDigits } from '@/utils/date';
 import { formatRial } from '@/utils/number';
 import { rialToTomanWords } from '@/utils/numberToWords';
 
-import { getCreditSummary } from '../api';
-import { type PlanCredit } from '../types';
+import { type CompanyCredit, type PlanCredit } from '../types';
+
+const percent = (value?: number) => toPersianDigits(`${Number((value ?? 0).toFixed(1))}٪`);
 
 const columns: ColumnsType<PlanCredit> = [
-  { title: 'نوع تسهیلات', dataIndex: 'typeTitle' },
-  { title: 'نرخ', dataIndex: 'rate', render: (value: number) => toPersianDigits(`${value}٪`) },
-  { title: 'مدت', dataIndex: 'term', render: (value: number) => toPersianDigits(`${value} ماه`) },
+  { title: 'نوع تسهیلات', dataIndex: 'contractType' },
+  { title: 'نرخ', dataIndex: 'rate', render: percent },
   {
-    title: 'سهم از میانگین',
-    dataIndex: 'sharePercent',
-    render: (value: number) => toPersianDigits(`${value.toFixed(1)}٪`),
+    title: 'مدت',
+    dataIndex: 'termMonths',
+    render: (value?: number) => toPersianDigits(`${value ?? 0} ماه`),
   },
-  {
-    title: 'درصد قابل‌استفاده',
-    dataIndex: 'usable',
-    render: (value: number) => toPersianDigits(`${value}٪`),
-  },
-  { title: 'اعتبار ایجادشده (تجمعی)', dataIndex: 'created', render: formatRial },
-  { title: 'تخصیص‌یافته', dataIndex: 'disbursed', render: formatRial },
+  // مبلغ سهم این طرح از مجموع میانگین (ریال)
+  { title: 'سهم از میانگین', dataIndex: 'shareOfAverage', render: formatRial },
+  { title: 'درصد قابل‌استفاده', dataIndex: 'usablePercent', render: percent },
+  { title: 'اعتبار ایجادشده (تجمعی)', dataIndex: 'createdCredit', render: formatRial },
+  { title: 'تخصیص‌یافته', dataIndex: 'allocated', render: formatRial },
   {
     title: 'مانده اعتبار ماه',
-    dataIndex: 'available',
+    dataIndex: 'remainingThisMonth',
     render: (value: number) => <b>{formatRial(value)}</b>,
   },
 ];
 
 interface CreditSummaryCardProps {
-  companyId: string;
-  date: string;
+  credit?: CompanyCredit;
+  loading: boolean;
 }
 
 /** مانده اعتبار ماه: میانگین‌ها و اعتبار هر طرح شرکت */
-export const CreditSummaryCard = ({ companyId, date }: CreditSummaryCardProps) => {
-  const { data, isFetching } = useQuery({
-    queryKey: QUERY_KEYS.CREDIT.SUMMARY(companyId, date),
-    queryFn: () => getCreditSummary(companyId, date),
-  });
-
-  return (
-    <PanelCard
-      title="مانده اعتبار ماه"
-      subtitle="میانگین موجودی از صفحه «مدیریت شرکت‌ها» ثبت می‌شود."
-    >
-      <div className="mb-4 grid grid-cols-[repeat(auto-fit,minmax(230px,1fr))] gap-4">
-        <KpiCard
-          label="مجموع میانگین مبنای محاسبه اعتبار"
-          value={formatRial(data?.totalAverage ?? 0)}
-          footer={data ? rialToTomanWords(data.totalAverage) : undefined}
-          loading={isFetching}
-        />
-        <KpiCard
-          label="میانگین ماه جاری"
-          value={formatRial(data?.currentMonthAverage ?? 0)}
-          footer={data ? rialToTomanWords(data.currentMonthAverage) : undefined}
-          loading={isFetching}
-        />
-      </div>
-      <Table<PlanCredit>
-        rowKey="planId"
-        columns={columns}
-        dataSource={data?.plans}
-        loading={isFetching}
-        locale={{ emptyText: 'این شرکت هنوز طرحی ندارد.' }}
+export const CreditSummaryCard = ({ credit, loading }: CreditSummaryCardProps) => (
+  <PanelCard
+    title="مانده اعتبار ماه"
+    subtitle="میانگین موجودی از صفحه «مدیریت شرکت‌ها» ثبت می‌شود."
+  >
+    <div className="mb-4 grid grid-cols-[repeat(auto-fit,minmax(230px,1fr))] gap-4">
+      <KpiCard
+        label="مجموع میانگین مبنای محاسبه اعتبار"
+        value={formatRial(credit?.totalAverageBase ?? 0)}
+        footer={credit ? rialToTomanWords(credit.totalAverageBase ?? 0) : undefined}
+        loading={loading}
       />
-    </PanelCard>
-  );
-};
+      <KpiCard
+        label="میانگین ماه جاری"
+        value={formatRial(credit?.currentMonthAverage ?? 0)}
+        footer={credit ? rialToTomanWords(credit.currentMonthAverage ?? 0) : undefined}
+        loading={loading}
+      />
+      <KpiCard
+        label="مانده اعتبار همه طرح‌ها در این ماه"
+        value={formatRial(credit?.monthRemainingCredit ?? 0)}
+        footer={credit ? rialToTomanWords(credit.monthRemainingCredit ?? 0) : undefined}
+        loading={loading}
+      />
+    </div>
+    <Table<PlanCredit>
+      rowKey="planId"
+      columns={columns}
+      dataSource={credit?.plans}
+      loading={loading}
+      locale={{ emptyText: 'این شرکت هنوز طرحی ندارد.' }}
+    />
+  </PanelCard>
+);

@@ -13,13 +13,13 @@ export const CompanyAverages = () => {
   return (
     <PanelCard
       title="میانگین موجودی حساب جاری — ماه‌های سال جاری قرارداد"
-      subtitle="ستون اول را دستی وارد کنید؛ ستون دوم (مانده اعتبار تا آن ماه) سمت سرور محاسبه می‌شود."
+      subtitle="ستون اول را دستی وارد کنید؛ ستون‌های بعدی (مانده اعتبار و اعتبار استفاده‌شده) سمت سرور محاسبه می‌شود."
     >
       <CompanySelect value={companyId} onChange={setCompanyId} />
       {companyId && (
         <>
-          <AveragesTable companyId={companyId} />
-          <AverageDocsTable companyId={companyId} />
+          <AveragesTable key={companyId} companyId={Number(companyId)} />
+          <AverageDocsTable companyId={Number(companyId)} />
         </>
       )}
     </PanelCard>

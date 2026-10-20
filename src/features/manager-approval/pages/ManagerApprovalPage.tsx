@@ -20,7 +20,7 @@ export const ManagerApprovalPage = () => {
       {companyId && (
         <PanelCard title="درخواست‌های در انتظار تأیید مدیر شرکت">
           {/* با تغییر شرکت، صفحه و انتخاب‌ها از نو شروع می‌شوند */}
-          <PendingRequestsTable key={companyId} companyId={companyId} />
+          <PendingRequestsTable key={companyId} companyId={Number(companyId)} />
         </PanelCard>
       )}
     </>

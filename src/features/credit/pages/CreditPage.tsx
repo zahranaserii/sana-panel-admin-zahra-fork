@@ -1,7 +1,7 @@
+import { useLoansCredit } from '@/api/generated/facility';
 import { PanelCard } from '@/component/card';
 import { useQueryParams } from '@/hooks/useQueryParams';
 import { type StaffFilters } from '@/features/staff/types';
-import { dayjs, ISO_DATE_FORMAT } from '@/utils/date';
 
 import {
   CompanyLoanRequests,
@@ -13,28 +13,43 @@ import {
 
 export const CreditPage = () => {
   const { params, setParams } = useQueryParams();
-  const companyId = params.companyId;
-  // تاریخ مبنا پیش‌فرض امروز است و در آدرس نگه داشته می‌شود
-  const date = params.date ?? dayjs().format(ISO_DATE_FORMAT);
+  const companyId = params.companyId ? Number(params.companyId) : undefined;
   const filters: StaffFilters = { q: params.q, hireFrom: params.hireFrom, hireTo: params.hireTo };
+
+  // تاریخ مبنا اگر انتخاب نشده باشد، پیش‌فرض سرور (baseDateDefault) است
+  const { data: credit, isFetching } = useLoansCredit(
+    companyId ?? 0,
+    params.date ? { baseDate: params.date } : undefined,
+    { query: { enabled: Boolean(companyId) } },
+  );
+  const date = params.date ?? credit?.baseDate;
 
   return (
     <>
       <PanelCard>
         <CreditFilters
-          companyId={companyId}
+          companyId={params.companyId}
           date={date}
+          credit={credit}
           onCompanyChange={(id) => setParams({ companyId: id })}
           onDateChange={(value) => setParams({ date: value })}
         />
-        {companyId && <EligibilityNotices companyId={companyId} date={date} />}
+        {companyId && <EligibilityNotices credit={credit} loading={isFetching} />}
       </PanelCard>
 
       {companyId && (
         <>
-          <CreditSummaryCard companyId={companyId} date={date} />
+          <CreditSummaryCard credit={credit} loading={isFetching} />
           {/* با تغییر شرکت، فرم و انتخاب‌ها از نو شروع می‌شوند */}
-          <LoanRequestCard key={companyId} companyId={companyId} date={date} filters={filters} />
+          {date && (
+            <LoanRequestCard
+              key={companyId}
+              companyId={companyId}
+              date={date}
+              credit={credit}
+              filters={filters}
+            />
+          )}
           <CompanyLoanRequests key={`requests-${companyId}`} companyId={companyId} />
         </>
       )}

@@ -1,16 +1,13 @@
 import { ENDPOINTS } from '@/constant/endpoints';
 import { http } from '@/services/http';
 
-import { type ChangeLogCategoryOption, type ChangeLogsSearchParams } from './types';
+import { type ChangeLogsSearchParams } from './types';
 
 /*
  * لیست و بازگردانی از سرویس‌های تولیدشده استفاده می‌کنند:
  * useChangeLogsSearch و useChangeLogsRestore در @/api/generated/facility
+ * عنوان دسته‌ها از Lookups/Enums (useEnums) می‌آید
  */
-
-/** بکند ندارد — عنوان دسته‌های گزارش (Category عددی بدون عنوان است) */
-export const getChangeLogCategories = () =>
-  http.get<ChangeLogCategoryOption[]>(ENDPOINTS.LOOKUPS.AUDIT_LOG_TYPES);
 
 /**
  * خروجی اکسل: سرویس تولیدشده (changeLogsExport) نوع فایل پاسخ را نمی‌شناسد،

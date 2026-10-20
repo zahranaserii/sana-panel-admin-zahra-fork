@@ -9,5 +9,5 @@ export const SchemeFormPage = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
 
-  return <SchemeForm schemeId={id ?? null} onBack={() => navigate(ROUTES.BASE_INFO)} />;
+  return <SchemeForm schemeId={id ? Number(id) : null} onBack={() => navigate(ROUTES.BASE_INFO)} />;
 };

@@ -9,7 +9,7 @@ import { toPersianDigits } from '@/utils/date';
 import { SectionTitle } from './SectionTitle';
 
 interface NumberListFieldsProps {
-  name: 'murabahaRates' | 'terms';
+  name: 'murabahaRates' | 'repaymentTermsMonths';
   title: string;
   /** لیبل هر ردیف، مثلاً «نرخ مرابحه» */
   itemLabel: string;

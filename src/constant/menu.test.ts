@@ -5,46 +5,59 @@ import { buildMenu, findMenuItemByPath } from './menu';
 import { ROUTES } from './routes';
 
 const groups = buildMenu(MOCK_MAIN_MENU);
+const paths = (menu: typeof groups) =>
+  menu.flatMap((group) => group.items.map((item) => item.path));
 
 describe('buildMenu', () => {
-  it('builds the sidebar groups from the flat backend list', () => {
-    expect(groups.map((group) => group.title)).toEqual([
-      '',
-      'تنظیمات',
-      'مدیریت',
-      'عملیات اعتباری',
-      'گزارش و کنترل',
+  it('maps backend urls to our routes and groups roots that have children', () => {
+    expect(groups.map((group) => group.title)).toEqual(['', 'عملیات اعتباری', '']);
+    expect(groups[0]?.items.map((item) => item.path)).toEqual([ROUTES.HOME]);
+    expect(groups[1]?.items.map((item) => item.path)).toEqual([
+      ROUTES.BASE_INFO,
+      ROUTES.CREDIT,
+      ROUTES.CREDIT_APPROVE,
     ]);
-    expect(groups[0]?.items[0]?.path).toBe(ROUTES.HOME);
   });
 
-  it('hides inactive items, items without a known url and empty groups', () => {
+  it('shows items whose parent is missing without a group', () => {
+    expect(groups[2]?.items.map((item) => item.path)).toEqual([
+      ROUTES.COMPANIES,
+      ROUTES.STAFF,
+      ROUTES.DASHBOARD,
+      ROUTES.USERS,
+      ROUTES.CHANGE_LOG,
+    ]);
+  });
+
+  it('hides inactive items, unknown urls and empty groups', () => {
     const changed: Record<string, Partial<MenuItemDto>> = {
-      [ROUTES.BASE_INFO]: { isActive: false },
-      [ROUTES.COMPANIES]: { url: '/unknown' },
+      '/base-info': { isActive: false },
+      '/facility/loan-allocation': { url: '/unknown' },
+      '/facility/credit-approval': { isActive: false },
     };
     const menu = buildMenu(
       MOCK_MAIN_MENU.map((item) => ({ ...item, ...(item.url ? changed[item.url] : undefined) })),
     );
-    expect(menu.some((group) => group.title === 'تنظیمات')).toBe(false);
-    expect(findMenuItemByPath(menu, ROUTES.COMPANIES)).toBeUndefined();
-    expect(findMenuItemByPath(menu, ROUTES.STAFF)?.label).toBe('پرسنل شرکت');
+    expect(menu.some((group) => group.title === 'عملیات اعتباری')).toBe(false);
+    expect(paths(menu)).not.toContain(ROUTES.BASE_INFO);
+    expect(paths(menu)).not.toContain(ROUTES.CREDIT);
+    expect(paths(menu)).toContain(ROUTES.STAFF);
   });
 });
 
 describe('findMenuItemByPath', () => {
-  it('matches exact paths without confusing shared prefixes', () => {
-    expect(findMenuItemByPath(groups, ROUTES.CREDIT)?.label).toBe('تخصیص وام');
+  it('finds the exact page without confusing similar paths', () => {
+    expect(findMenuItemByPath(groups, ROUTES.CREDIT)?.label).toBe('نخصیص وام');
     expect(findMenuItemByPath(groups, ROUTES.CREDIT_APPROVE)?.label).toBe('تأیید اعتبارات');
   });
 
-  it('matches home only on its own path', () => {
+  it('matches home only on the root path', () => {
     expect(findMenuItemByPath(groups, ROUTES.HOME)?.label).toBe('خانه');
     expect(findMenuItemByPath(groups, ROUTES.USERS)?.label).toBe('مدیریت کاربران');
   });
 
-  it('matches nested pages of a menu item', () => {
-    expect(findMenuItemByPath(groups, `${ROUTES.COMPANIES}/c-1`)?.label).toBe('مدیریت شرکت‌ها');
+  it('matches nested paths and ignores unknown ones', () => {
+    expect(findMenuItemByPath(groups, `${ROUTES.COMPANIES}/c-1`)?.label).toBe('مدیریت‌ شرکت‌ها');
     expect(findMenuItemByPath(groups, '/unknown')).toBeUndefined();
   });
 });

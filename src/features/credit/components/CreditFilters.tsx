@@ -1,9 +1,13 @@
 import { DateInput } from '@/component/input';
 import { CompanySelect } from '@/features/companies/components';
 
+import { type CompanyCredit } from '../types';
+
 interface CreditFiltersProps {
   companyId?: string;
-  date: string;
+  date?: string;
+  /** محدوده مجاز تاریخ مبنا از سرور */
+  credit?: CompanyCredit;
   onCompanyChange: (companyId: string) => void;
   onDateChange: (date: string) => void;
 }
@@ -12,6 +16,7 @@ interface CreditFiltersProps {
 export const CreditFilters = ({
   companyId,
   date,
+  credit,
   onCompanyChange,
   onDateChange,
 }: CreditFiltersProps) => (
@@ -27,6 +32,8 @@ export const CreditFilters = ({
       <DateInput
         id="credit-date"
         value={date}
+        minDate={credit?.baseDateMin}
+        maxDate={credit?.baseDateMax}
         onChange={(value) => typeof value === 'string' && onDateChange(value)}
       />
     </div>

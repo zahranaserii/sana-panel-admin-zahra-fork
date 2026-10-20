@@ -1,17 +1,20 @@
 import { ArrowRightOutlined } from '@ant-design/icons';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQueryClient } from '@tanstack/react-query';
 import { useMemo } from 'react';
 import { toast } from 'sonner';
 
+import {
+  useBasicInfoSchemeCreate,
+  useBasicInfoSchemeGet,
+  useBasicInfoSchemeUpdate,
+} from '@/api/generated/facility';
 import { Button } from '@/component/button';
 import { PanelCard } from '@/component/card';
 import { Form } from '@/component/form';
 import { Skeleton } from '@/component/loading';
-import { QUERY_KEYS } from '@/constant/queryKeys';
-import { removeEmpty } from '@/utils/object';
 
-import { createScheme, getScheme, updateScheme } from '../api';
-import { type Scheme, type SchemePayload, type SchemeTextList } from '../types';
+import { type SchemeDetail, type SchemeFormValues } from '../types';
+import { EMPTY_VALUES, invalidateBasicInfo, toFormValues, toPayload } from '../utils';
 
 import { GeneralFields } from './GeneralFields';
 import { NumberListFields } from './NumberListFields';
@@ -20,86 +23,35 @@ import { UsableMatrixFields } from './UsableMatrixFields';
 
 interface SchemeFormProps {
   /** شناسه طرح برای ویرایش؛ خالی = افزودن */
-  schemeId: string | null;
+  schemeId: number | null;
   /** بازگشت به لیست طرح‌ها (بعد از ثبت یا انصراف) */
   onBack: () => void;
 }
 
-/** فرم خالی طرح جدید: هر لیست یک ردیف خالی دارد */
-const EMPTY_VALUES: Partial<SchemePayload> = {
-  sepahEnabled: false,
-  murabahaRates: [null as never],
-  terms: [null as never],
-  usable: [],
-  cancelReasons: [''],
-  rejectReasons: [''],
-  noGrantReasons: [''],
-  avgDocTypes: [''],
-};
-
-/** لیست خالی در ویرایش هم یک ردیف خالی نمایش می‌دهد */
-const withRow = (list: string[]) => (list.length ? list : ['']);
-
-const toFormValues = ({ id: _id, ...scheme }: Scheme): SchemePayload => ({
-  ...scheme,
-  cancelReasons: withRow(scheme.cancelReasons),
-  rejectReasons: withRow(scheme.rejectReasons),
-  noGrantReasons: withRow(scheme.noGrantReasons),
-  avgDocTypes: withRow(scheme.avgDocTypes),
-});
-
-const TEXT_LISTS: SchemeTextList[] = [
-  'cancelReasons',
-  'rejectReasons',
-  'noGrantReasons',
-  'avgDocTypes',
-];
-
-/**
- * مقادیر خالی فرستاده نمی‌شوند؛ ردیف‌های خالی لیست‌های متنی حذف می‌شوند (لیست خالی = []).
- * ضریب سپه فقط وقتی «حقوق‌بگیر بانک سپه» روشن است فرستاده می‌شود.
- */
-const toPayload = ({ sepahMultiplier, ...values }: SchemePayload) =>
-  ({
-    ...removeEmpty(values.sepahEnabled ? { ...values, sepahMultiplier } : values),
-    ...Object.fromEntries(
-      TEXT_LISTS.map((key) => [
-        key,
-        (values[key] ?? []).map((item) => item?.trim()).filter(Boolean),
-      ]),
-    ),
-  }) as SchemePayload;
-
-const LOOKUP_KEYS = [
-  QUERY_KEYS.LOOKUPS.PLANS,
-  QUERY_KEYS.LOOKUPS.CANCEL_REASONS,
-  QUERY_KEYS.LOOKUPS.REJECT_REASONS,
-  QUERY_KEYS.LOOKUPS.NO_GRANT_REASONS,
-  QUERY_KEYS.LOOKUPS.AVG_DOC_TYPES,
-];
-
-/** فرم افزودن/ویرایش طرح */
+/** فرم افزودن/ویرایش طرح (یک سرویس برای کل فرم: BasicInfo/Schemes) */
 export const SchemeForm = ({ schemeId, onBack }: SchemeFormProps) => {
   const queryClient = useQueryClient();
-  const [form] = Form.useForm<SchemePayload>();
-  const isEdit = Boolean(schemeId);
+  const [form] = Form.useForm<SchemeFormValues>();
+  const isEdit = schemeId !== null;
 
-  const { data: detail, isFetching } = useQuery({
-    queryKey: QUERY_KEYS.BASE_INFO.DETAIL(schemeId ?? ''),
-    queryFn: () => getScheme(schemeId ?? ''),
-    enabled: isEdit,
+  const { data: detail, isFetching } = useBasicInfoSchemeGet(schemeId ?? 0, {
+    query: { enabled: isEdit, gcTime: 0 },
   });
 
-  const { mutate, isPending } = useMutation({
-    mutationFn: (values: SchemePayload) =>
-      schemeId ? updateScheme(schemeId, values) : createScheme(values),
-    onSuccess: (saved) => {
-      void queryClient.invalidateQueries({ queryKey: QUERY_KEYS.BASE_INFO.ALL });
-      LOOKUP_KEYS.forEach((queryKey) => void queryClient.invalidateQueries({ queryKey }));
-      toast.success(isEdit ? `طرح «${saved.name}» ویرایش شد.` : `طرح «${saved.name}» ثبت شد.`);
-      onBack();
-    },
-  });
+  const onSaved = (saved: SchemeDetail) => {
+    void invalidateBasicInfo(queryClient);
+    toast.success(isEdit ? `طرح «${saved.title}» ویرایش شد.` : `طرح «${saved.title}» ثبت شد.`);
+    onBack();
+  };
+
+  const create = useBasicInfoSchemeCreate({ mutation: { onSuccess: onSaved } });
+  const update = useBasicInfoSchemeUpdate({ mutation: { onSuccess: onSaved } });
+
+  const submit = (values: SchemeFormValues) => {
+    const data = toPayload(values);
+    if (isEdit) update.mutate({ schemeId, data });
+    else create.mutate({ data });
+  };
 
   const initialValues = useMemo(
     () => (isEdit ? detail && toFormValues(detail) : EMPTY_VALUES),
@@ -107,6 +59,7 @@ export const SchemeForm = ({ schemeId, onBack }: SchemeFormProps) => {
   );
 
   const loading = isEdit && (isFetching || !detail);
+  const isPending = create.isPending || update.isPending;
 
   /** با حذف یک مدت، ردیف متناظرش از جدول درصد قابل استفاده حذف می‌شود */
   const removeUsableRow = (row: number) =>
@@ -137,13 +90,13 @@ export const SchemeForm = ({ schemeId, onBack }: SchemeFormProps) => {
       {loading ? (
         <Skeleton variant="form" rows={8} />
       ) : (
-        <Form<SchemePayload>
+        <Form<SchemeFormValues>
           form={form}
           layout="vertical"
           initialValues={initialValues}
-          onFinish={(values) => mutate(toPayload(values))}
+          onFinish={submit}
         >
-          <GeneralFields />
+          <GeneralFields isEdit={isEdit} />
           <NumberListFields
             name="murabahaRates"
             title="نرخ‌های مرابحه قابل انتخاب (درصد)"
@@ -153,7 +106,7 @@ export const SchemeForm = ({ schemeId, onBack }: SchemeFormProps) => {
             onRemove={removeUsableColumn}
           />
           <NumberListFields
-            name="terms"
+            name="repaymentTermsMonths"
             title="مدت‌های بازپرداخت قابل انتخاب (ماه)"
             itemLabel="مدت"
             addText="افزودن مدت"

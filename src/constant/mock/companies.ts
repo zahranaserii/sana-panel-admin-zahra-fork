@@ -1,89 +1,139 @@
 import {
-  type AverageDoc,
-  type CompanyDetail,
-  type ContractStatus,
-} from '@/features/companies/types';
+  type CommonRegistrarDto,
+  type CommonStoredFileDto,
+  type CompanyStatus,
+  type ReadModelsBalanceDocumentDto,
+  type ReadModelsCancellationInfoDto,
+} from '@/api/generated/facility/facilityPanelAPI.schemas';
 
-export interface MockCompany extends CompanyDetail {
-  registeredBy: string;
-  status: ContractStatus;
-  deleted: boolean;
+import { ADMIN_REGISTRAR, BRANCH_REGISTRAR } from './auditLogs';
+
+/** شرکت در دیتابیس ماک — فیلدها همان مدل بک‌اند (Companies/{id}) */
+export interface MockCompany {
+  id: number;
+  schemeId: number;
+  name: string;
+  nationalId: string;
+  agreementNumber: string;
+  accountNumber: string;
+  /** تاریخ انعقاد قرارداد (میلادی YYYY-MM-DD) */
+  contractDate: string;
+  /** روز افتتاح حساب سپرده (میلادی YYYY-MM-DD) */
+  accountOpeningDate: string;
+  salaryFromSepah: boolean;
+  planIds: number[];
+  branchCode: string;
+  registrar: CommonRegistrarDto;
+  createdAt: string;
+  status: CompanyStatus;
+  agreementFile: CommonStoredFileDto | null;
+  cancellation: ReadModelsCancellationInfoDto | null;
+  deleteDescription?: string;
   deletedAt?: string;
-  cancelDate?: string;
-  cancelReason?: string;
-  /** میانگین ۱۲ ماه سال جاری قرارداد (ریال) */
-  averages: (number | null)[];
-  averageDocs: AverageDoc[];
+  rowVersion: string;
+  /** میانگین موجودی ۱۲ ماه سال جاری قرارداد (ریال؛ null = ثبت‌نشده) */
+  balances: (number | null)[];
+  balancesRowVersion: string;
+  balanceDocuments: ReadModelsBalanceDocumentDto[];
 }
 
 const emptyMonths = (filled: number[]) =>
   Array.from({ length: 12 }, (_, index) => filled[index] ?? null);
 
+/** وضعیت شرکت بک‌اند (Lookups/Enums → companyStatus) */
+export const COMPANY_STATUS = { ACTIVE: 1, CANCELLED: 2, DELETED: 3, EXPIRED: 4 } as const;
+
 export const MOCK_COMPANIES: MockCompany[] = [
   {
-    id: 'c-1',
-    schemeId: 'scheme-1',
+    id: 1,
+    schemeId: 1,
     name: 'شرکت فناوران پارس',
     nationalId: '10101234567',
-    agreementNo: 'TF-1404-001',
-    accountNo: '0101234567001',
+    agreementNumber: 'TF-1404-001',
+    accountNumber: '0101234567001',
     contractDate: '2025-05-31',
-    accountOpenDate: '2025-06-02',
-    sepahSalary: true,
-    agreementFile: { id: 'f-1', name: 'تفاهم‌نامه-فناوران.pdf' },
-    planIds: ['qarz-0', 'mur-1-1'],
-    registeredBy: 'شعبه مرکزی کد ۱۰۰ — مدیر سامانه (کد ۱)',
-    status: 'active',
-    deleted: false,
-    averages: emptyMonths([1_500_000_000, 1_750_000_000, 1_620_000_000]),
-    averageDocs: [
+    accountOpeningDate: '2025-06-02',
+    salaryFromSepah: true,
+    agreementFile: {
+      id: 1,
+      fileName: 'تفاهم‌نامه-فناوران.pdf',
+      size: 120_000,
+      uploadedAt: '2025-05-31T10:00:00',
+      uploadedBy: 'admin',
+    },
+    planIds: [101, 109],
+    branchCode: '150000',
+    registrar: ADMIN_REGISTRAR,
+    createdAt: '2025-05-31T10:00:00',
+    status: COMPANY_STATUS.ACTIVE,
+    cancellation: null,
+    rowVersion: 'c1-v1',
+    balances: emptyMonths([1_500_000_000, 1_750_000_000, 1_620_000_000]),
+    balancesRowVersion: 'c1-b1',
+    balanceDocuments: [
       {
-        id: 'd-1',
-        createdAt: '2025-08-20',
-        months: [1, 2, 3],
-        docType: 'نامه',
-        file: { id: 'f-2', name: 'نامه-میانگین.pdf' },
-        note: 'ثبت اولیه',
-        createdBy: 'مدیر سامانه',
+        id: 1,
+        month: '1404/03',
+        documentType: 'نامه',
+        description: 'ثبت اولیه',
+        file: {
+          id: 2,
+          fileName: 'نامه-میانگین.pdf',
+          size: 80_000,
+          uploadedAt: '2025-08-20T09:00:00',
+          uploadedBy: 'admin',
+        },
       },
     ],
   },
   {
-    id: 'c-2',
-    schemeId: 'scheme-1',
+    id: 2,
+    schemeId: 1,
     name: 'شرکت صنایع غذایی آوا',
     nationalId: '10107654321',
-    agreementNo: 'TF-1404-002',
-    accountNo: '0107654321001',
+    agreementNumber: 'TF-1404-002',
+    accountNumber: '0107654321001',
     contractDate: '2025-07-12',
-    accountOpenDate: '2025-07-15',
-    sepahSalary: false,
+    accountOpeningDate: '2025-07-15',
+    salaryFromSepah: false,
     agreementFile: null,
-    planIds: ['qarz-1', 'mur-0-0', 'mur-2-2'],
-    registeredBy: 'شعبه ونک کد ۲۰۰ — کاربر شعبه (کد ۲)',
-    status: 'active',
-    deleted: false,
-    averages: emptyMonths([820_000_000]),
-    averageDocs: [],
+    planIds: [107, 102, 116],
+    branchCode: '150002',
+    registrar: BRANCH_REGISTRAR,
+    createdAt: '2025-07-12T11:30:00',
+    status: COMPANY_STATUS.ACTIVE,
+    cancellation: null,
+    rowVersion: 'c2-v1',
+    balances: emptyMonths([820_000_000]),
+    balancesRowVersion: 'c2-b1',
+    balanceDocuments: [],
   },
   {
-    id: 'c-3',
-    schemeId: 'scheme-1',
+    id: 3,
+    schemeId: 1,
     name: 'شرکت حمل‌ونقل راه‌آهن نوین',
     nationalId: '10109988776',
-    agreementNo: 'TF-1403-017',
-    accountNo: '0109988776001',
+    agreementNumber: 'TF-1403-017',
+    accountNumber: '0109988776001',
     contractDate: '2024-11-03',
-    accountOpenDate: '2024-11-05',
-    sepahSalary: true,
+    accountOpeningDate: '2024-11-05',
+    salaryFromSepah: true,
     agreementFile: null,
-    planIds: ['mur-3-4'],
-    registeredBy: 'شعبه مرکزی کد ۱۰۰ — مدیر سامانه (کد ۱)',
-    status: 'cancelled',
-    cancelDate: '2025-09-01',
-    cancelReason: 'عدم تمدید به درخواست شرکت',
-    deleted: false,
-    averages: emptyMonths([]),
-    averageDocs: [],
+    planIds: [129],
+    branchCode: '150000',
+    registrar: ADMIN_REGISTRAR,
+    createdAt: '2024-11-03T09:15:00',
+    status: COMPANY_STATUS.CANCELLED,
+    cancellation: {
+      cancelDate: '2025-09-01',
+      reason: 'عدم تمدید به درخواست شرکت',
+      description: 'درخواست کتبی شرکت',
+      cancelledBy: ADMIN_REGISTRAR,
+      cancelledAt: '2025-09-01T10:00:00',
+    },
+    rowVersion: 'c3-v1',
+    balances: emptyMonths([]),
+    balancesRowVersion: 'c3-b1',
+    balanceDocuments: [],
   },
 ];

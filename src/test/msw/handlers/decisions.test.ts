@@ -1,6 +1,7 @@
 import { getResponse } from 'msw';
 
-import { ENDPOINTS } from '@/constant/endpoints';
+import { FACILITY } from '@/constant/endpoints';
+import { LOAN_REQUEST_STATUS } from '@/constant/mock';
 
 import { db } from '../db';
 import { api } from '../utils';
@@ -19,17 +20,22 @@ const post = (path: string, body: unknown) =>
 
 describe('manager decisions', () => {
   it('processes pending requests and returns the rest in skipped with a reason', async () => {
-    const pending = db.loanRequests.find((item) => item.status === 'pending_manager');
+    const pending = db.loanRequests.find(
+      (item) => item.status === LOAN_REQUEST_STATUS.PENDING_MANAGER,
+    );
     const decided = db.loanRequests.find(
-      (item) => item.companyId === pending?.companyId && item.status !== 'pending_manager',
+      (item) =>
+        item.companyId === pending?.companyId &&
+        item.status !== LOAN_REQUEST_STATUS.PENDING_MANAGER,
     );
     expect(pending && decided).toBeTruthy();
 
-    const response = await post(ENDPOINTS.MANAGER_APPROVALS.APPROVE(pending?.companyId ?? ''), {
+    const response = await post(`${FACILITY}/ManagerApprovals/Decisions`, {
       requestIds: [pending?.id, decided?.id],
+      decision: 1,
     });
     const body = (await response?.json()) as {
-      data: { processed: number; skipped: { requestId: string; reason: string }[] };
+      data: { processed: number; skipped: { requestId: number; reason: string }[] };
     };
     expect(body.data.processed).toBe(1);
     expect(body.data.skipped).toEqual([{ requestId: decided?.id, reason: expect.any(String) }]);

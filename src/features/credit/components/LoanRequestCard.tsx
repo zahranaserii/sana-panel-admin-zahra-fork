@@ -1,82 +1,99 @@
 import { SendOutlined } from '@ant-design/icons';
-import { useQuery } from '@tanstack/react-query';
+import { useQueryClient } from '@tanstack/react-query';
+import { App } from 'antd';
 import { useEffect, useMemo, useState } from 'react';
 import { toast } from 'sonner';
 
+import {
+  getLoansCreditQueryKey,
+  getLoansSearchQueryKey,
+  useLoansCreate,
+  useLoansPreview,
+} from '@/api/generated/facility';
 import { Button } from '@/component/button';
-import { NoticeCard, PanelCard } from '@/component/card';
+import { PanelCard } from '@/component/card';
 import { Form, FormItem } from '@/component/form';
 import { SelectInput } from '@/component/input';
 import { RadioGroup } from '@/component/radio';
 import { Typography } from '@/component/typography';
-import { QUERY_KEYS } from '@/constant/queryKeys';
 import { StaffSearch } from '@/features/staff/components';
 import { type StaffFilters } from '@/features/staff/types';
+import { useDebouncedValue } from '@/hooks';
 import { toPersianDigits } from '@/utils/date';
 
-import { getCreditSummary, getEligibility } from '../api';
-import { useCreateLoanRequest } from '../hooks/useCreateLoanRequest';
-import { type LoanRequestFormValues, type PlanCredit } from '../types';
-import { buildRequestItems, buildSuggestion, selectedAmounts } from '../utils';
+import { type CompanyCredit, type LoanRequestFormValues, type PlanCredit } from '../types';
+import { ALLOCATION_MODE, buildLoanBody, repeatList } from '../utils';
 
 import { FixedAmountField } from './FixedAmountField';
+import { PreviewNotices } from './PreviewNotices';
 import { StaffPickTable } from './StaffPickTable';
 
 interface LoanRequestCardProps {
-  companyId: string;
+  companyId: number;
   date: string;
+  credit?: CompanyCredit;
   filters: StaffFilters;
 }
 
-const INITIAL_VALUES: LoanRequestFormValues = { amountMode: 'fixed' };
+const INITIAL_VALUES: LoanRequestFormValues = { mode: ALLOCATION_MODE.FIXED };
 
 const AMOUNT_MODES = [
-  { value: 'fixed', label: 'مبلغ یکسان برای همه' },
-  { value: 'variable', label: 'مبلغ متفاوت برای هرکس' },
+  { value: ALLOCATION_MODE.FIXED, label: 'مبلغ یکسان برای همه' },
+  { value: ALLOCATION_MODE.VARIABLE, label: 'مبلغ متفاوت برای هرکس' },
 ];
 
 const planOption = (plan: PlanCredit) => ({
   value: plan.planId,
-  label: toPersianDigits(`${plan.typeTitle} - نرخ ${plan.rate}٪ - مدت ${plan.term} ماه`),
+  label: toPersianDigits(`${plan.contractType} - نرخ ${plan.rate}٪ - مدت ${plan.termMonths} ماه`),
 });
 
-/** ثبت درخواست تخصیص وام به پرسنل */
-export const LoanRequestCard = ({ companyId, date, filters }: LoanRequestCardProps) => {
+/** ثبت درخواست تخصیص وام به پرسنل (بررسی اعتبار و تخصیص تکراری با سرویس پیش‌نمایش) */
+export const LoanRequestCard = ({ companyId, date, credit, filters }: LoanRequestCardProps) => {
   const [form] = Form.useForm<LoanRequestFormValues>();
-  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const [selectedIds, setSelectedIds] = useState<number[]>([]);
+  const queryClient = useQueryClient();
+  const { modal } = App.useApp();
 
-  const { data: summary } = useQuery({
-    queryKey: QUERY_KEYS.CREDIT.SUMMARY(companyId, date),
-    queryFn: () => getCreditSummary(companyId, date),
-  });
-  const { data: eligibility } = useQuery({
-    queryKey: QUERY_KEYS.CREDIT.ELIGIBILITY(companyId, date),
-    queryFn: () => getEligibility(companyId, date),
-  });
-
-  const plans = useMemo(() => summary?.plans ?? [], [summary]);
-  const canAllocate = Boolean(eligibility?.canAllocate);
+  const plans = useMemo(() => credit?.plans ?? [], [credit]);
+  const canAllocate = Boolean(credit?.banner?.canRegisterLoan);
   const values = Form.useWatch([], form) ?? INITIAL_VALUES;
   const plan = plans.find((item) => item.planId === values.planId);
 
   // اگر طرحی انتخاب نشده یا طرح انتخاب‌شده دیگر وجود ندارد، اولین طرح انتخاب می‌شود
   useEffect(() => {
-    const current = form.getFieldValue('planId') as string | undefined;
+    const current = form.getFieldValue('planId') as number | undefined;
     if (!plans.some((item) => item.planId === current)) {
       form.setFieldValue('planId', plans[0]?.planId);
     }
   }, [plans, form]);
 
-  // بعد از ثبت، مبالغ و انتخاب‌ها پاک می‌شوند ولی ترتیب پرداخت هر ردیف می‌ماند
-  const { mutate, isPending } = useCreateLoanRequest(companyId, () => {
-    const rows = (form.getFieldValue('rows') ?? {}) as NonNullable<LoanRequestFormValues['rows']>;
-    form.setFieldsValue({
-      fixedAmount: undefined,
-      rows: Object.fromEntries(
-        Object.entries(rows).map(([id, row]) => [id, { ...row, amount: undefined }]),
-      ),
-    });
-    setSelectedIds([]);
+  // پیش‌نمایش (مجموع، مجاز بودن، پیام‌ها و تخصیص تکراری) بعد از توقف تایپ از سرور گرفته می‌شود
+  const body = useDebouncedValue(buildLoanBody(values, selectedIds, date));
+  const { data: preview } = useLoansPreview(companyId, body, {
+    query: { enabled: Boolean(plan) && canAllocate },
+  });
+
+  const { mutate, isPending } = useLoansCreate({
+    mutation: {
+      onSuccess: (batch) => {
+        void queryClient.invalidateQueries({ queryKey: getLoansCreditQueryKey(companyId) });
+        void queryClient.invalidateQueries({ queryKey: getLoansSearchQueryKey() });
+        // بعد از ثبت، مبالغ و انتخاب‌ها پاک می‌شوند ولی ترتیب پرداخت هر ردیف می‌ماند
+        const rows = (form.getFieldValue('rows') ?? {}) as NonNullable<
+          LoanRequestFormValues['rows']
+        >;
+        form.setFieldsValue({
+          fixedAmount: undefined,
+          rows: Object.fromEntries(
+            Object.entries(rows).map(([id, row]) => [id, { ...row, amount: undefined }]),
+          ),
+        });
+        setSelectedIds([]);
+        toast.success(
+          `درخواست وام برای ${toPersianDigits(batch.requests?.length ?? 0)} نفر با موفقیت ثبت شد.`,
+        );
+      },
+    },
   });
 
   const handleFinish = (formValues: LoanRequestFormValues) => {
@@ -85,15 +102,23 @@ export const LoanRequestCard = ({ companyId, date, filters }: LoanRequestCardPro
       toast.error('حداقل یک پرسنل را از جدول انتخاب کنید.');
       return;
     }
-    if (selectedAmounts(formValues, selectedIds).some((amount) => !amount)) {
-      toast.error('مبلغ وام برای همه افراد انتخاب‌شده باید وارد شود.');
+    const submit = () => mutate({ companyId, data: buildLoanBody(formValues, selectedIds, date) });
+    const repeats = preview?.repeatAllocations ?? [];
+    if (!repeats.length) {
+      submit();
       return;
     }
-    mutate({ planId: plan.planId, date, items: buildRequestItems(formValues, selectedIds) });
+    modal.confirm({
+      title: 'هشدار تخصیص مجدد در همین ماه',
+      width: 520,
+      content: repeatList(repeats),
+      okText: 'تخصیص مجدد',
+      cancelText: 'انصراف',
+      onOk: submit,
+    });
   };
 
-  const suggestion = plan ? buildSuggestion(plan.available, values, selectedIds) : null;
-  const isVariable = values.amountMode === 'variable';
+  const isVariable = values.mode === ALLOCATION_MODE.VARIABLE;
 
   return (
     <PanelCard
@@ -117,7 +142,7 @@ export const LoanRequestCard = ({ companyId, date, filters }: LoanRequestCardPro
             />
           </FormItem>
         </div>
-        <FormItem name="amountMode">
+        <FormItem name="mode">
           <RadioGroup options={AMOUNT_MODES} />
         </FormItem>
 
@@ -145,11 +170,7 @@ export const LoanRequestCard = ({ companyId, date, filters }: LoanRequestCardPro
         {!isVariable && <FixedAmountField amount={Number(values.fixedAmount ?? 0)} />}
       </Form>
 
-      {suggestion && (
-        <NoticeCard type={suggestion.isError ? 'error' : 'suggestion'} className="mt-3">
-          {suggestion.text}
-        </NoticeCard>
-      )}
+      <PreviewNotices preview={preview} />
       {!canAllocate && (
         <p className="mt-2 text-xs text-danger">
           تا رسیدن تاریخ و شرایط مجاز (طبق پیام بالا)، امکان انتخاب پرسنل و ثبت درخواست وجود ندارد.
@@ -158,7 +179,7 @@ export const LoanRequestCard = ({ companyId, date, filters }: LoanRequestCardPro
       <Button
         variant="primary"
         icon={<SendOutlined />}
-        disabled={!canAllocate || !plan}
+        disabled={!canAllocate || !plan || preview?.isAllowed === false}
         loading={isPending}
         onClick={() => form.submit()}
         className="mt-2"

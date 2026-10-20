@@ -1,55 +1,73 @@
-import { useQuery } from '@tanstack/react-query';
+import { StopOutlined } from '@ant-design/icons';
 import { type ColumnsType } from 'antd/es/table';
 import { useState } from 'react';
 
+import { useLoansSearch } from '@/api/generated/facility';
+import { Button } from '@/component/button';
 import { PanelCard } from '@/component/card';
-import { StatusChip } from '@/component/status-chip';
+import { LoanStatusChip } from '@/component/loan-status';
 import { Table } from '@/component/table';
-import { LOAN_STATUS } from '@/constant/loanStatus';
-import { QUERY_KEYS } from '@/constant/queryKeys';
 import { formatJalali, toPersianDigits } from '@/utils/date';
 import { formatRial } from '@/utils/number';
 
-import { getLoanRequests } from '../api';
 import { type LoanRequest } from '../types';
 
+import { CancelLoanModal } from './CancelLoanModal';
+
 const PAGE_SIZE = 10;
-const toJalali = (value: string | null) =>
+const toJalali = (value?: string | null) =>
   value ? formatJalali(value, undefined, { persianDigits: true }) : '—';
 
-const columns: ColumnsType<LoanRequest> = [
-  {
-    title: 'پرسنل',
-    key: 'staff',
-    render: (_value, row) => (
-      <>
-        {row.staffName}{' '}
-        <span className="text-xs text-ink-soft">
-          (ترتیب پرداخت: {toPersianDigits(row.paymentOrder)})
-        </span>
-      </>
-    ),
-  },
-  { title: 'طرح', dataIndex: 'planTitle' },
-  { title: 'مبلغ', dataIndex: 'amount', render: formatRial },
-  { title: 'تاریخ ثبت', dataIndex: 'createdAt', render: toJalali },
-  { title: 'تاریخ تأیید/رد', dataIndex: 'decidedAt', render: toJalali },
-  {
-    title: 'وضعیت',
-    dataIndex: 'status',
-    render: (status: LoanRequest['status']) => (
-      <StatusChip tone={LOAN_STATUS[status].tone}>{LOAN_STATUS[status].title}</StatusChip>
-    ),
-  },
-];
-
 /** همه درخواست‌های وام ثبت‌شده برای شرکت */
-export const CompanyLoanRequests = ({ companyId }: { companyId: string }) => {
+export const CompanyLoanRequests = ({ companyId }: { companyId: number }) => {
   const [page, setPage] = useState(1);
-  const { data, isFetching } = useQuery({
-    queryKey: QUERY_KEYS.CREDIT.LOAN_REQUESTS(companyId, page),
-    queryFn: () => getLoanRequests(companyId, { page, pageSize: PAGE_SIZE }),
+  const [cancelling, setCancelling] = useState<LoanRequest | null>(null);
+  const { data, isFetching } = useLoansSearch({
+    CompanyId: companyId,
+    Page: page,
+    PageSize: PAGE_SIZE,
   });
+
+  const columns: ColumnsType<LoanRequest> = [
+    {
+      title: 'پرسنل',
+      key: 'personnel',
+      render: (_value, row) => (
+        <>
+          {row.personnelName}{' '}
+          <span className="text-xs text-ink-soft">
+            (ترتیب پرداخت: {toPersianDigits(row.paymentOrder ?? 0)})
+          </span>
+        </>
+      ),
+    },
+    { title: 'طرح', dataIndex: 'planTitle' },
+    { title: 'مبلغ', dataIndex: 'amount', render: formatRial },
+    { title: 'تاریخ ثبت', dataIndex: 'createdAt', render: toJalali },
+    { title: 'تاریخ تأیید/رد', dataIndex: 'decidedAt', render: toJalali },
+    {
+      title: 'وضعیت',
+      dataIndex: 'status',
+      render: (status?: number) => <LoanStatusChip status={status} />,
+    },
+    {
+      title: 'عملیات',
+      key: 'actions',
+      render: (_value, row) =>
+        row.canCancel ? (
+          <Button
+            variant="secondary"
+            size="small"
+            icon={<StopOutlined />}
+            onClick={() => setCancelling(row)}
+          >
+            لغو
+          </Button>
+        ) : (
+          '—'
+        ),
+    },
+  ];
 
   return (
     <PanelCard
@@ -57,6 +75,7 @@ export const CompanyLoanRequests = ({ companyId }: { companyId: string }) => {
       subtitle="فهرست همه درخواست‌های ثبت‌شده برای شرکت انتخاب‌شده، با تاریخ ثبت، تاریخ تأیید/رد و وضعیت"
     >
       <Table<LoanRequest>
+        rowKey="id"
         columns={columns}
         dataSource={data?.items}
         loading={isFetching}
@@ -68,6 +87,7 @@ export const CompanyLoanRequests = ({ companyId }: { companyId: string }) => {
           onChange: setPage,
         }}
       />
+      <CancelLoanModal request={cancelling} onClose={() => setCancelling(null)} />
     </PanelCard>
   );
 };

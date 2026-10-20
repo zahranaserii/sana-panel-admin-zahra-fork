@@ -1,18 +1,12 @@
-import { useQuery } from '@tanstack/react-query';
-
+import { useDashboardGet } from '@/api/generated/facility';
 import { KpiCard } from '@/component/card';
-import { QUERY_KEYS } from '@/constant/queryKeys';
 import { toPersianDigits } from '@/utils/date';
 import { formatRial } from '@/utils/number';
 import { rialToTomanWords } from '@/utils/numberToWords';
 
-import { getSummary } from '../api';
-
 export const SummaryKpis = () => {
-  const { data, isPending } = useQuery({
-    queryKey: QUERY_KEYS.DASHBOARD.SUMMARY,
-    queryFn: getSummary,
-  });
+  const { data: dashboard, isPending } = useDashboardGet();
+  const data = dashboard?.kpis;
 
   return (
     <div className="mb-[18px] grid grid-cols-[repeat(auto-fit,minmax(230px,1fr))] gap-4">
@@ -29,13 +23,13 @@ export const SummaryKpis = () => {
       <KpiCard
         label="جمع مبلغ تأییدشده"
         value={formatRial(data?.approvedAmount ?? 0)}
-        footer={data ? rialToTomanWords(data.approvedAmount) : undefined}
+        footer={data ? rialToTomanWords(data.approvedAmount ?? 0) : undefined}
         loading={isPending}
       />
       <KpiCard
         label="جمع مبلغ در انتظار تأیید"
         value={formatRial(data?.pendingAmount ?? 0)}
-        footer={data ? rialToTomanWords(data.pendingAmount) : undefined}
+        footer={data ? rialToTomanWords(data.pendingAmount ?? 0) : undefined}
         tone="amber"
         loading={isPending}
       />

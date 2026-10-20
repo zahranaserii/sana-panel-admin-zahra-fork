@@ -1,6 +1,6 @@
 import { type MockAuditLog, type MockLogType, type SnapshotEntity } from '@/constant/mock';
 
-import { db, findUserByToken } from './db';
+import { db, registrarOf } from './db';
 
 /**
  * ثبت لاگ عملیات (شبیه‌ساز بک‌اند): هر ثبت، ویرایش، لغو یا حذف
@@ -12,18 +12,10 @@ export const logAction = (
   details: string,
   snapshot?: { entity: SnapshotEntity; id: string; before: object },
 ) => {
-  const username = findUserByToken(request.headers.get('Authorization'))?.username;
-  const panelUser = db.users.find((item) => item.username === username);
   const entry: MockAuditLog = {
     id: Math.max(0, ...db.auditLogs.map((log) => log.id)) + 1,
     createdAt: new Date().toISOString(),
-    user: {
-      panelUserId: panelUser?.id,
-      userName: username ?? 'نامشخص',
-      userCode: panelUser?.userCode ?? null,
-      branchName: panelUser?.branchName ?? null,
-      branchCode: panelUser?.branchCode ?? null,
-    },
+    user: registrarOf(request),
     type,
     details,
     snapshot: snapshot && { ...snapshot, before: structuredClone(snapshot.before) },

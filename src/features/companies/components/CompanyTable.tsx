@@ -1,62 +1,81 @@
 import { DeleteOutlined, EditOutlined, PlusOutlined, StopOutlined } from '@ant-design/icons';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQueryClient } from '@tanstack/react-query';
 import { type ColumnsType } from 'antd/es/table';
 import { useState } from 'react';
 import { toast } from 'sonner';
 
+import {
+  getCompaniesLookupQueryKey,
+  getCompaniesSearchQueryKey,
+  useCompaniesDelete,
+  useCompaniesSearch,
+} from '@/api/generated/facility';
 import { Button } from '@/component/button';
 import { DeleteReasonModal, type DeleteReasonValues } from '@/component/delete-modal';
 import { PanelCard } from '@/component/card';
 import { StatusChip } from '@/component/status-chip';
 import { Table } from '@/component/table';
-import { QUERY_KEYS } from '@/constant/queryKeys';
+import { useEnums } from '@/services/enums';
 import { formatJalali, toPersianDigits } from '@/utils/date';
 
-import { deleteCompany, getCompanies } from '../api';
 import { type CompanyListItem } from '../types';
 
 interface CompanyTableProps {
   onCreate: () => void;
-  onEdit: (id: string) => void;
+  onEdit: (id: number) => void;
   onCancelContract: (company: CompanyListItem) => void;
 }
 
 const PAGE_SIZE = 10;
 
-const renderStatus = (company: CompanyListItem) =>
-  company.status === 'active' ? (
-    <StatusChip tone="success">فعال (تمدید خودکار فعال)</StatusChip>
-  ) : (
-    <StatusChip tone="error">
-      لغوشده در {formatJalali(company.cancelDate, undefined, { persianDigits: true })} (
-      {company.cancelReason ?? '—'})
-    </StatusChip>
-  );
+/** وضعیت شرکت بک‌اند: ۱ فعال، ۲ لغوشده */
+const ACTIVE = 1;
+const CANCELLED = 2;
+
+const registrarLabel = ({ registrar }: CompanyListItem) =>
+  [registrar?.branchName, registrar?.userName].filter(Boolean).join(' — ') || '—';
 
 export const CompanyTable = ({ onCreate, onEdit, onCancelContract }: CompanyTableProps) => {
   const [page, setPage] = useState(1);
   const queryClient = useQueryClient();
   const [deleting, setDeleting] = useState<CompanyListItem | null>(null);
 
-  const { data, isFetching } = useQuery({
-    queryKey: QUERY_KEYS.COMPANIES.LIST(page, PAGE_SIZE),
-    queryFn: () => getCompanies({ page, pageSize: PAGE_SIZE }),
-  });
+  const enums = useEnums();
 
-  const { mutateAsync: remove } = useMutation({
-    mutationFn: ({ description }: DeleteReasonValues) =>
-      deleteCompany(deleting?.id ?? '', { description: description.trim() }),
-    onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: QUERY_KEYS.COMPANIES.ALL });
-      void queryClient.invalidateQueries({ queryKey: QUERY_KEYS.LOOKUPS.COMPANIES });
-      toast.success('شرکت حذف شد.');
+  const { data, isFetching } = useCompaniesSearch({ Page: page, PageSize: PAGE_SIZE });
+
+  const { mutateAsync: deleteCompany } = useCompaniesDelete({
+    mutation: {
+      onSuccess: () => {
+        void queryClient.invalidateQueries({ queryKey: getCompaniesSearchQueryKey() });
+        void queryClient.invalidateQueries({ queryKey: getCompaniesLookupQueryKey() });
+        toast.success('شرکت حذف شد.');
+      },
     },
   });
+
+  const remove = ({ description }: DeleteReasonValues) =>
+    deleteCompany({ id: deleting?.id ?? 0, data: { description: description.trim() } });
+
+  const renderStatus = (company: CompanyListItem) => {
+    if (company.status === ACTIVE) {
+      return <StatusChip tone="success">فعال (تمدید خودکار فعال)</StatusChip>;
+    }
+    if (company.status === CANCELLED) {
+      return (
+        <StatusChip tone="error">
+          لغوشده در {formatJalali(company.cancelDate, undefined, { persianDigits: true })} (
+          {company.cancelReasonTitle ?? '—'})
+        </StatusChip>
+      );
+    }
+    return <StatusChip tone="default">{enums.title('companyStatus', company.status)}</StatusChip>;
+  };
 
   const columns: ColumnsType<CompanyListItem> = [
     { title: 'نام شرکت', dataIndex: 'name' },
     { title: 'شناسه ملی', dataIndex: 'nationalId' },
-    { title: 'شماره تفاهم‌نامه', dataIndex: 'agreementNo' },
+    { title: 'شماره تفاهم‌نامه', dataIndex: 'agreementNumber' },
     {
       title: 'تاریخ قرارداد',
       dataIndex: 'contractDate',
@@ -68,7 +87,12 @@ export const CompanyTable = ({ onCreate, onEdit, onCancelContract }: CompanyTabl
       align: 'center',
       render: (value: number) => toPersianDigits(value),
     },
-    { title: 'ثبت‌کننده', dataIndex: 'registeredBy', className: 'text-[11.5px]' },
+    {
+      title: 'ثبت‌کننده',
+      key: 'registrar',
+      className: 'text-[11.5px]',
+      render: (_value, row) => registrarLabel(row),
+    },
     { title: 'وضعیت قرارداد', key: 'status', render: (_value, row) => renderStatus(row) },
     {
       title: 'عملیات',
@@ -79,11 +103,11 @@ export const CompanyTable = ({ onCreate, onEdit, onCancelContract }: CompanyTabl
             variant="outline"
             size="small"
             icon={<EditOutlined />}
-            onClick={() => onEdit(row.id)}
+            onClick={() => onEdit(row.id ?? 0)}
           >
             ویرایش
           </Button>
-          {row.status === 'active' && (
+          {row.status === ACTIVE && (
             <Button
               variant="secondary"
               size="small"
@@ -116,14 +140,15 @@ export const CompanyTable = ({ onCreate, onEdit, onCancelContract }: CompanyTabl
       }
     >
       <Table<CompanyListItem>
+        rowKey="id"
         columns={columns}
-        dataSource={data?.items}
+        dataSource={data?.page?.items}
         loading={isFetching}
         showRowNumber
         pagination={{
           current: page,
           pageSize: PAGE_SIZE,
-          total: data?.totalCount ?? 0,
+          total: data?.page?.totalCount ?? 0,
           onChange: setPage,
         }}
       />

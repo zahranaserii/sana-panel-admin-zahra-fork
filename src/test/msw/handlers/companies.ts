@@ -1,217 +1,383 @@
 import { delay, http } from 'msw';
 
-import { ENDPOINTS } from '@/constant/endpoints';
-import { type MockCompany } from '@/constant/mock';
 import {
-  type CancelContractPayload,
-  type DeleteCompanyPayload,
-  type CompanyDetail,
-  type CompanyListItem,
-  type CompanyPayload,
-  type MonthlyAverage,
-  type SaveAveragesPayload,
-} from '@/features/companies/types';
+  type CommonFacilityPagedResponseOfCompanyListItemDto,
+  type ReadModelsCompanyBalancesDto,
+  type ReadModelsCompanyDetailsDto,
+  type ReadModelsCompanyListItemDto,
+  type ReadModelsCompanySearchResultDto,
+  type ReadModelsMonthlyBalanceInput,
+} from '@/api/generated/facility/facilityPanelAPI.schemas';
+import { FACILITY } from '@/constant/endpoints';
+import { COMPANY_STATUS, LOAN_REQUEST_STATUS, type MockCompany } from '@/constant/mock';
+import { dayjs } from '@/utils/date';
 
-import {
-  buildPlanOptions,
-  db,
-  fileOf,
-  findUserByToken,
-  lookupTitle,
-  nextId,
-  schemeOf,
-  today,
-} from '../db';
-import { api, json } from '../utils';
 import { logAction } from '../audit';
+import {
+  contractMonths,
+  db,
+  monthKey,
+  nextId,
+  reasonTitle,
+  registrarOf,
+  schemeOf,
+  schemePlans,
+  sepahMultiplier,
+  storeFile,
+} from '../db';
+import { api, fileResponse, formNumbers, formText, json } from '../utils';
 
-/** پسوند توضیحات برای متن لاگ */
-const noteSuffix = (note?: string) => (note ? ' — توضیحات: ' + note : '');
+const COMPANIES = `${FACILITY}/Companies`;
 
 const notFound = () => json({ message: 'شرکت یافت نشد.' }, { status: 404 });
 
-const findCompany = (id: unknown) => db.companies.find((item) => item.id === id && !item.deleted);
+const findCompany = (id: unknown) =>
+  db.companies.find((item) => String(item.id) === id && item.status !== COMPANY_STATUS.DELETED);
 
-const toListItem = (company: MockCompany): CompanyListItem => ({
+const toListItem = (company: MockCompany): ReadModelsCompanyListItemDto => ({
   id: company.id,
   name: company.name,
   nationalId: company.nationalId,
-  agreementNo: company.agreementNo,
+  agreementNumber: company.agreementNumber,
   contractDate: company.contractDate,
   planCount: company.planIds.length,
-  registeredBy: company.registeredBy,
+  registrar: company.registrar,
   status: company.status,
-  cancelDate: company.cancelDate,
-  cancelReason: company.cancelReason,
+  branchCode: company.branchCode,
+  cancelDate: company.cancellation?.cancelDate ?? null,
+  cancelReasonTitle: company.cancellation?.reason ?? null,
 });
 
-const toDetail = (company: MockCompany): CompanyDetail => ({
-  id: company.id,
-  schemeId: company.schemeId,
-  name: company.name,
-  nationalId: company.nationalId,
-  agreementNo: company.agreementNo,
-  accountNo: company.accountNo,
-  contractDate: company.contractDate,
-  accountOpenDate: company.accountOpenDate,
-  sepahSalary: company.sepahSalary,
-  agreementFile: company.agreementFile,
-  planIds: company.planIds,
-});
-
-/** محاسبه ساده مانده اعتبار (در بک‌اند واقعی بر اساس وام‌های تخصیص‌یافته محاسبه می‌شود) */
-const buildAverages = (company: MockCompany): MonthlyAverage[] => {
-  const plans = buildPlanOptions(schemeOf(company.schemeId)).filter((plan) =>
-    company.planIds.includes(plan.id),
-  );
-  const usablePercent = plans.length
-    ? plans.reduce((sum, plan) => sum + plan.usable, 0) / plans.length
-    : 0;
-  const scheme = schemeOf(company.schemeId);
-  const multiplier = scheme.sepahEnabled && company.sepahSalary ? scheme.sepahMultiplier : 1;
-
-  let cumulative = 0;
-  return company.averages.map((average, index) => {
-    cumulative += average ?? 0;
-    return {
-      month: index + 1,
-      average,
-      remainingCredit:
-        average === null ? null : Math.round((cumulative * usablePercent * multiplier) / 100),
-    };
-  });
+const toDetail = (company: MockCompany): ReadModelsCompanyDetailsDto => {
+  const plans = schemePlans(schemeOf(company.schemeId));
+  return {
+    id: company.id,
+    schemeId: company.schemeId,
+    name: company.name,
+    nationalId: company.nationalId,
+    agreementNumber: company.agreementNumber,
+    accountNumber: company.accountNumber,
+    contractDate: company.contractDate,
+    accountOpeningDate: company.accountOpeningDate,
+    accountOpeningDayOfMonth: dayjs(company.accountOpeningDate).jalali().day,
+    salaryFromSepah: company.salaryFromSepah,
+    plans: company.planIds.map((planId) => ({
+      planId,
+      title: plans.find((plan) => plan.id === planId)?.title,
+    })),
+    agreementFile: company.agreementFile ?? undefined,
+    registrar: company.registrar,
+    createdAt: company.createdAt,
+    status: company.status,
+    cancellation: company.cancellation ?? undefined,
+    branchCode: company.branchCode,
+    rowVersion: company.rowVersion,
+  };
 };
 
-const userName = (request: Request) =>
-  findUserByToken(request.headers.get('Authorization'))?.profile.fullName ?? '—';
+/** میانگین‌ها و مانده اعتبار ماه‌های سال جاری قرارداد (در بک‌اند واقعی بر اساس وام‌ها محاسبه می‌شود) */
+const buildBalances = (company: MockCompany): ReadModelsCompanyBalancesDto => {
+  const scheme = schemeOf(company.schemeId);
+  const plans = schemePlans(scheme).filter((plan) => company.planIds.includes(plan.id ?? 0));
+  const usablePercent = plans.length
+    ? plans.reduce((sum, plan) => sum + (plan.usablePercent ?? 0), 0) / plans.length
+    : 0;
+  const multiplier = sepahMultiplier(scheme, company.salaryFromSepah);
+  const months = contractMonths(company.contractDate);
+  const loans = db.loanRequests.filter(
+    (item) => item.companyId === company.id && item.status !== LOAN_REQUEST_STATUS.CANCELLED,
+  );
+
+  let cumulative = 0;
+  return {
+    companyId: company.id,
+    rowVersion: company.balancesRowVersion,
+    months: months.map((month, index) => {
+      const averageBalance = company.balances[index] ?? null;
+      cumulative += averageBalance ?? 0;
+      const documents = company.balanceDocuments.filter((doc) => doc.month === month);
+      return {
+        month,
+        averageBalance,
+        remainingCredit:
+          averageBalance === null
+            ? null
+            : Math.round((cumulative * usablePercent * multiplier) / 100),
+        documentCount: documents.length,
+        hasDocuments: documents.length > 0,
+        usedCredit: loans
+          .filter((item) => monthKey(item.baseDate) === month)
+          .reduce((sum, item) => sum + item.amount, 0),
+      };
+    }),
+  };
+};
+
+/** فیلدهای مشترک ثبت و ویرایش (multipart) */
+const readCompanyForm = (form: FormData) => ({
+  name: formText(form, 'Name'),
+  agreementNumber: formText(form, 'AgreementNumber'),
+  accountNumber: formText(form, 'AccountNumber'),
+  contractDate: formText(form, 'ContractDate'),
+  accountOpeningDate: formText(form, 'AccountOpeningDate'),
+  salaryFromSepah: formText(form, 'SalaryFromSepah') === 'true',
+  planIds: formNumbers(form, 'PlanIds'),
+});
+
+const invalidCompany = (values: ReturnType<typeof readCompanyForm>, company: MockCompany) => {
+  if (!values.name) return 'نام شرکت الزامی است.';
+  if (!values.planIds.length) return 'حداقل یک طرح باید انتخاب شود.';
+  const max = schemeOf(company.schemeId).settings.maxPlansPerCompany;
+  if (values.planIds.length > max) return `حداکثر ${max} طرح قابل انتخاب است.`;
+  return null;
+};
+
+const searchCompanies = (url: URL): ReadModelsCompanySearchResultDto => {
+  const page = Number(url.searchParams.get('Page') ?? 1);
+  const pageSize = Number(url.searchParams.get('PageSize') ?? 10);
+  const status = Number(url.searchParams.get('Status')) || undefined;
+  const term = url.searchParams.get('Term')?.trim() ?? '';
+  const visible = db.companies.filter((item) => item.status !== COMPANY_STATUS.DELETED);
+  const list = visible.filter(
+    (item) =>
+      (!status || item.status === status) &&
+      (!term || item.name.includes(term) || item.nationalId.includes(term)),
+  );
+  const start = (page - 1) * pageSize;
+  const result: CommonFacilityPagedResponseOfCompanyListItemDto = {
+    items: list.slice(start, start + pageSize).map(toListItem),
+    totalCount: list.length,
+    page,
+    pageSize,
+  };
+  return {
+    page: result,
+    activeCount: visible.filter((item) => item.status === COMPANY_STATUS.ACTIVE).length,
+    registeredCount: visible.length,
+  };
+};
 
 export const companyHandlers = [
-  http.get(api(ENDPOINTS.COMPANIES.LIST), async ({ request }) => {
+  http.get(api(COMPANIES), async ({ request }) => {
     await delay(300);
-    const url = new URL(request.url);
-    const page = Number(url.searchParams.get('page') ?? 1);
-    const pageSize = Number(url.searchParams.get('pageSize') ?? 10);
-    const list = db.companies.filter((item) => !item.deleted);
-    const start = (page - 1) * pageSize;
-    return json({
-      items: list.slice(start, start + pageSize).map(toListItem),
-      totalCount: list.length,
-      page,
-      pageSize,
-    });
+    return json(searchCompanies(new URL(request.url)));
   }),
 
-  http.post(api(ENDPOINTS.COMPANIES.LIST), async ({ request }) => {
+  /** کشویی شرکت‌ها (activeOnly = فقط قرارداد فعال) */
+  http.get(api(`${COMPANIES}/Lookup`), async ({ request }) => {
+    await delay(150);
+    const url = new URL(request.url);
+    const activeOnly = url.searchParams.get('activeOnly') !== 'false';
+    const term = url.searchParams.get('term')?.trim() ?? '';
+    const list = db.companies.filter(
+      (item) =>
+        item.status !== COMPANY_STATUS.DELETED &&
+        (!activeOnly || item.status === COMPANY_STATUS.ACTIVE) &&
+        (!term || item.name.includes(term)),
+    );
+    return json(list.map((item) => ({ id: item.id, title: item.name })));
+  }),
+
+  http.post(api(COMPANIES), async ({ request }) => {
     await delay(400);
-    const body = (await request.json()) as CompanyPayload;
-    if (!body.schemeId) return json({ message: 'انتخاب طرح کلان الزامی است.' }, { status: 400 });
-    const user = findUserByToken(request.headers.get('Authorization'));
+    const form = await request.formData();
+    const schemeId = Number(form.get('SchemeId'));
+    if (!schemeId) return json({ message: 'انتخاب طرح کلان الزامی است.' }, { status: 400 });
+    const nationalId = formText(form, 'NationalId');
+    if (db.companies.some((item) => item.nationalId === nationalId)) {
+      return json({ message: 'شرکتی با این شناسه ملی قبلاً ثبت شده است.' }, { status: 409 });
+    }
+    const registrar = registrarOf(request);
     const company: MockCompany = {
-      ...body,
-      id: nextId('c'),
-      agreementFile: body.agreementFileId ? fileOf(body.agreementFileId) : null,
-      registeredBy: user ? `${user.profile.branch ?? ''} — ${user.profile.fullName}` : '—',
-      status: 'active',
-      deleted: false,
-      averages: Array.from({ length: 12 }, () => null),
-      averageDocs: [],
+      ...readCompanyForm(form),
+      id: nextId(),
+      schemeId,
+      nationalId,
+      branchCode: formText(form, 'BranchCode') || (registrar.branchCode ?? ''),
+      agreementFile: storeFile(form.get('agreementFile'), request),
+      registrar,
+      createdAt: new Date().toISOString(),
+      status: COMPANY_STATUS.ACTIVE,
+      cancellation: null,
+      rowVersion: crypto.randomUUID(),
+      balances: Array.from({ length: 12 }, () => null),
+      balancesRowVersion: crypto.randomUUID(),
+      balanceDocuments: [],
     };
+    const error = invalidCompany(readCompanyForm(form), company);
+    if (error) return json({ message: error }, { status: 400 });
     db.companies.unshift(company);
     logAction(request, 'company', `ثبت شرکت جدید: ${company.name}`);
-    return json(toDetail(company), { status: 201 });
+    return json(toDetail(company));
   }),
 
-  http.get(api(ENDPOINTS.COMPANIES.DETAIL(':id')), async ({ params }) => {
+  http.get(api(`${COMPANIES}/:id`), async ({ params }) => {
     await delay(250);
     const company = findCompany(params.id);
     return company ? json(toDetail(company)) : notFound();
   }),
 
-  http.put(api(ENDPOINTS.COMPANIES.DETAIL(':id')), async ({ params, request }) => {
+  http.put(api(`${COMPANIES}/:id`), async ({ params, request }) => {
     await delay(400);
     const company = findCompany(params.id);
     if (!company) return notFound();
-    // طرح کلان و شناسه ملی در ویرایش قابل تغییر نیستند (مثل بک‌اند)
-    const { agreementFileId, ...payload } = (await request.json()) as CompanyPayload;
-    const body = { ...payload, schemeId: company.schemeId, nationalId: company.nationalId };
-    const before = structuredClone(company);
-    Object.assign(company, body);
-    if (agreementFileId && agreementFileId !== company.agreementFile?.id) {
-      company.agreementFile = fileOf(agreementFileId);
+    const form = await request.formData();
+    if (formText(form, 'RowVersion') !== company.rowVersion) {
+      return json(
+        { message: 'اطلاعات این شرکت هم‌زمان توسط کاربر دیگری تغییر کرده است.' },
+        { status: 409 },
+      );
     }
+    // طرح کلان و شناسه ملی در ویرایش قابل تغییر نیستند
+    const values = readCompanyForm(form);
+    const error = invalidCompany(values, company);
+    if (error) return json({ message: error }, { status: 400 });
+    const before = structuredClone(company);
+    Object.assign(company, values, { rowVersion: crypto.randomUUID() });
+    company.agreementFile = storeFile(form.get('agreementFile'), request) ?? company.agreementFile;
     logAction(request, 'company', `ویرایش اطلاعات شرکت: ${company.name}`, {
       entity: 'company',
-      id: company.id,
+      id: String(company.id),
       before,
     });
     return json(toDetail(company));
   }),
 
-  http.delete(api(ENDPOINTS.COMPANIES.DETAIL(':id')), async ({ params, request }) => {
+  http.delete(api(`${COMPANIES}/:id`), async ({ params, request }) => {
     await delay(300);
     const company = findCompany(params.id);
     if (!company) return notFound();
-    const { description } = ((await request.json()) ?? {}) as Partial<DeleteCompanyPayload>;
-    if (!description?.trim()) return json({ message: 'توضیحات حذف الزامی است.' }, { status: 400 });
-    company.deleted = true;
-    company.deletedAt = today();
-    logAction(request, 'company', `حذف شرکت: ${company.name} — ${description.trim()}`);
-    return json(null);
+    const { description } = ((await request.json()) ?? {}) as { description?: string };
+    if ((description?.trim().length ?? 0) < 5) {
+      return json({ message: 'توضیحات حذف (حداقل ۵ نویسه) الزامی است.' }, { status: 400 });
+    }
+    company.status = COMPANY_STATUS.DELETED;
+    company.deleteDescription = description?.trim();
+    company.deletedAt = new Date().toISOString();
+    logAction(request, 'company', `حذف شرکت: ${company.name} — ${company.deleteDescription}`);
+    return json(true);
   }),
 
-  http.post(api(ENDPOINTS.COMPANIES.CANCEL(':id')), async ({ params, request }) => {
+  http.post(api(`${COMPANIES}/:id/Cancel`), async ({ params, request }) => {
     await delay(300);
     const company = findCompany(params.id);
     if (!company) return notFound();
-    const body = (await request.json()) as CancelContractPayload;
-    if ((body.note?.trim().length ?? 0) < 5 || !body.fileId) {
-      return json({ message: 'توضیحات (حداقل ۵ نویسه) و فایل نامه الزامی است.' }, { status: 400 });
+    if (company.status !== COMPANY_STATUS.ACTIVE) {
+      return json({ message: 'قرارداد این شرکت فعال نیست.' }, { status: 422 });
     }
-    company.status = 'cancelled';
-    company.cancelDate = body.cancelDate;
-    company.cancelReason = lookupTitle('cancelReasons', body.reasonId);
+    const form = await request.formData();
+    const description = formText(form, 'Description');
+    const reason = reasonTitle('contractCancel', form.get('ReasonId'), schemeOf(company.schemeId));
+    const file = storeFile(form.get('letterFile'), request);
+    if (!reason || description.length < 5 || !file) {
+      return json(
+        { message: 'دلیل، توضیحات (حداقل ۵ نویسه) و فایل نامه لغو الزامی است.' },
+        { status: 400 },
+      );
+    }
+    company.status = COMPANY_STATUS.CANCELLED;
+    company.cancellation = {
+      cancelDate: formText(form, 'CancelDate'),
+      reason,
+      description,
+      file,
+      cancelledBy: registrarOf(request),
+      cancelledAt: new Date().toISOString(),
+    };
     logAction(
       request,
       'company',
-      `لغو قرارداد شرکت: ${company.name} — دلیل: ${company.cancelReason ?? '—'}${noteSuffix(body.note)}`,
+      `لغو قرارداد شرکت: ${company.name} — دلیل: ${reason} — توضیحات: ${description}`,
     );
-    return json(null);
+    return json(toDetail(company));
   }),
 
-  http.get(api(ENDPOINTS.COMPANIES.AVERAGES(':id')), async ({ params }) => {
+  http.get(api(`${COMPANIES}/:id/AgreementFile`), async ({ params }) => {
+    await delay(200);
+    const company = findCompany(params.id);
+    if (!company?.agreementFile) return json({ message: 'فایل یافت نشد.' }, { status: 404 });
+    return fileResponse(company.agreementFile.fileName);
+  }),
+
+  http.get(api(`${COMPANIES}/:id/Balances`), async ({ params }) => {
     await delay(250);
     const company = findCompany(params.id);
-    return company ? json(buildAverages(company)) : notFound();
+    return company ? json(buildBalances(company)) : notFound();
   }),
 
-  http.post(api(ENDPOINTS.COMPANIES.AVERAGES(':id')), async ({ params, request }) => {
+  http.put(api(`${COMPANIES}/:id/Balances`), async ({ params, request }) => {
     await delay(400);
     const company = findCompany(params.id);
     if (!company) return notFound();
-    const body = (await request.json()) as SaveAveragesPayload;
-    body.items.forEach((item) => {
-      company.averages[item.month - 1] = item.average;
+    const form = await request.formData();
+    if (formText(form, 'RowVersion') !== company.balancesRowVersion) {
+      return json(
+        { message: 'میانگین‌ها هم‌زمان توسط کاربر دیگری تغییر کرده است.' },
+        { status: 409 },
+      );
+    }
+    const items = form
+      .getAll('Months')
+      .map((value) => JSON.parse(String(value)) as ReadModelsMonthlyBalanceInput);
+    const scheme = schemeOf(company.schemeId);
+    const documentType = reasonTitle('documentType', form.get('DocumentTypeId'), scheme);
+    const files = form.getAll('files');
+    if (!items.length) return json({ message: 'ماهی برای ثبت ارسال نشده است.' }, { status: 400 });
+    if (!documentType || !files.length) {
+      return json({ message: 'انتخاب نوع مستند و بارگذاری فایل آن اجباری است.' }, { status: 400 });
+    }
+    const months = contractMonths(company.contractDate);
+    items.forEach((item) => {
+      const index = months.indexOf(item.month);
+      if (index >= 0) company.balances[index] = item.averageBalance ?? null;
     });
-    company.averageDocs.unshift({
-      id: nextId('d'),
-      createdAt: today(),
-      months: body.items.map((item) => item.month),
-      docType: lookupTitle('avgDocTypes', body.docTypeId) ?? '—',
-      file: fileOf(body.fileId),
-      note: body.note,
-      createdBy: userName(request),
-    });
+    const description = formText(form, 'DocumentDescription') || null;
+    items.forEach((item) =>
+      files.forEach((value) => {
+        const file = storeFile(value, request);
+        if (file) {
+          company.balanceDocuments.unshift({
+            id: nextId(),
+            month: item.month,
+            documentType,
+            description,
+            file,
+          });
+        }
+      }),
+    );
+    company.balancesRowVersion = crypto.randomUUID();
     logAction(
       request,
       'company',
-      `ثبت/ویرایش میانگین موجودی (ماه‌های ${body.items.map((item) => item.month).join('، ')}): ${company.name}`,
+      `ثبت/ویرایش میانگین موجودی (ماه‌های ${items.map((item) => item.month).join('، ')}): ${company.name}`,
     );
-    return json(buildAverages(company));
+    return json(buildBalances(company));
   }),
 
-  http.get(api(ENDPOINTS.COMPANIES.AVERAGE_DOCS(':id')), async ({ params }) => {
+  http.get(api(`${COMPANIES}/:id/Balances/Documents`), async ({ params, request }) => {
     await delay(200);
     const company = findCompany(params.id);
-    return company ? json(company.averageDocs) : notFound();
+    if (!company) return notFound();
+    const month = new URL(request.url).searchParams.get('month');
+    return json(company.balanceDocuments.filter((doc) => !month || doc.month === month));
+  }),
+
+  http.get(api(`${COMPANIES}/:id/Balances/Documents/:documentId`), async ({ params }) => {
+    await delay(200);
+    const doc = findCompany(params.id)?.balanceDocuments.find(
+      (item) => String(item.id) === params.documentId,
+    );
+    return doc ? fileResponse(doc.file?.fileName) : notFound();
+  }),
+
+  http.delete(api(`${COMPANIES}/:id/Balances/Documents/:documentId`), async ({ params }) => {
+    await delay(200);
+    const company = findCompany(params.id);
+    if (!company) return notFound();
+    company.balanceDocuments = company.balanceDocuments.filter(
+      (item) => String(item.id) !== params.documentId,
+    );
+    return json(true);
   }),
 ];

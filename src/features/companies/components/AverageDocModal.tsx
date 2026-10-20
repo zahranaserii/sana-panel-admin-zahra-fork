@@ -1,32 +1,25 @@
-import { useQuery } from '@tanstack/react-query';
-
 import { FormItem } from '@/component/form';
 import { FileInput, SelectInput, TextAreaInput } from '@/component/input';
 import { FormModal } from '@/component/modal';
-import { QUERY_KEYS } from '@/constant/queryKeys';
-import { getAvgDocTypes } from '@/services/lookup';
+import { REASON_TYPE, useReasonOptions } from '@/services/reasons';
 import { toPersianDigits } from '@/utils/date';
 
-import { type AverageDocFormValues } from '../types';
+import { type BalanceDocFormValues } from '../types';
 
 interface AverageDocModalProps {
   open: boolean;
-  /** ماه‌هایی که تغییر کرده‌اند */
-  months: number[];
-  onSubmit: (values: AverageDocFormValues) => Promise<unknown>;
+  /** ماه‌هایی که تغییر کرده‌اند (YYYY/MM) */
+  months: string[];
+  onSubmit: (values: BalanceDocFormValues) => Promise<unknown>;
   onClose: () => void;
 }
 
 /** برای ثبت میانگین، انتخاب نوع مستند و بارگذاری فایل آن اجباری است */
 export const AverageDocModal = ({ open, months, onSubmit, onClose }: AverageDocModalProps) => {
-  const { data: docTypes, isPending } = useQuery({
-    queryKey: QUERY_KEYS.LOOKUPS.AVG_DOC_TYPES,
-    queryFn: getAvgDocTypes,
-    enabled: open,
-  });
+  const docTypes = useReasonOptions(REASON_TYPE.DOCUMENT_TYPE, undefined, open);
 
   return (
-    <FormModal<AverageDocFormValues>
+    <FormModal<BalanceDocFormValues>
       title="مستند میانگین موجودی"
       okText="ثبت میانگین و مستند"
       open={open}
@@ -36,11 +29,8 @@ export const AverageDocModal = ({ open, months, onSubmit, onClose }: AverageDocM
       <p className="mt-0 mb-4 text-[12.5px] text-ink-soft">
         ماه‌های تغییر یافته: {toPersianDigits(months.join('، '))}
       </p>
-      <FormItem name="docTypeId" label="نوع مستند" required>
-        <SelectInput
-          loading={isPending}
-          options={docTypes?.map((type) => ({ value: type.id, label: type.title }))}
-        />
+      <FormItem name="documentTypeId" label="نوع مستند" required>
+        <SelectInput loading={docTypes.isPending} options={docTypes.options} />
       </FormItem>
       <FormItem
         name="file"
@@ -50,7 +40,7 @@ export const AverageDocModal = ({ open, months, onSubmit, onClose }: AverageDocM
       >
         <FileInput />
       </FormItem>
-      <FormItem name="note" label="توضیحات (اختیاری)">
+      <FormItem name="description" label="توضیحات (اختیاری)">
         <TextAreaInput maxLength={500} />
       </FormItem>
     </FormModal>

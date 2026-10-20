@@ -3,31 +3,42 @@ import { useMutation } from '@tanstack/react-query';
 
 import { Button } from '@/component/button';
 import { PanelCard } from '@/component/card';
+import { FACILITY } from '@/constant/endpoints';
+import { useEnums } from '@/services/enums';
+import { http } from '@/services/http';
 
-import { downloadReport, REPORT_EXPORTS } from '../api';
+interface ExportOption {
+  value: number;
+  label: string;
+}
 
-type Report = (typeof REPORT_EXPORTS)[number];
-
-const ExportButton = ({ report }: { report: Report }) => {
+/** سرویس تولیدشده نوع فایل را نمی‌شناسد؛ دانلود با http.download (نام فایل از سرور) */
+const ExportButton = ({ report }: { report: ExportOption }) => {
   const { mutate, isPending } = useMutation({
-    mutationFn: () => downloadReport(report.path, report.fileName),
+    mutationFn: () => http.download(`${FACILITY}/Dashboard/Exports/${report.value}`),
   });
+
   return (
     <Button size="small" icon={<DownloadOutlined />} loading={isPending} onClick={() => mutate()}>
-      {report.title}
+      {report.label}
     </Button>
   );
 };
 
-export const ReportExports = () => (
-  <PanelCard
-    title="گزارش‌های خروجی (اکسل)"
-    subtitle="هر فایل شامل جزئیات کامل آن بخش از سامانه است و مستقیماً در Excel باز می‌شود."
-  >
-    <div className="flex flex-wrap gap-2.5">
-      {REPORT_EXPORTS.map((report) => (
-        <ExportButton key={report.key} report={report} />
-      ))}
-    </div>
-  </PanelCard>
-);
+/** خروجی‌ها از enum بک‌اند (dashboardExport) ساخته می‌شوند */
+export const ReportExports = () => {
+  const { options } = useEnums();
+
+  return (
+    <PanelCard
+      title="گزارش‌های خروجی (اکسل)"
+      subtitle="هر فایل شامل جزئیات کامل آن بخش از سامانه است و مستقیماً در Excel باز می‌شود."
+    >
+      <div className="flex flex-wrap gap-2.5">
+        {options('dashboardExport').map((report) => (
+          <ExportButton key={report.value} report={report} />
+        ))}
+      </div>
+    </PanelCard>
+  );
+};

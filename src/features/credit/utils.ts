@@ -1,84 +1,67 @@
+import {
+  type CreateLoanRequestsCommand,
+  type ReadModelsLoanRequestItemInput,
+} from '@/api/generated/facility/facilityPanelAPI.schemas';
+import { createElement } from 'react';
+
+import { type NoticeType } from '@/component/card';
 import { toPersianDigits } from '@/utils/date';
 import { formatRial } from '@/utils/number';
-import { rialToTomanWords } from '@/utils/numberToWords';
 
-import { type LoanRequestFormValues, type LoanRequestItem } from './types';
+import { type Hint, type LoanRequestFormValues, type RepeatAllocation } from './types';
+
+/** حالت تخصیص بک‌اند (allocationMode) */
+export const ALLOCATION_MODE = { FIXED: 1, VARIABLE: 2 } as const;
 
 const toAmount = (value?: string) => Number(value ?? 0) || 0;
 
-/** مبلغ هر پرسنل انتخاب‌شده (حالت یکسان یا متفاوت) */
-export const selectedAmounts = (values: LoanRequestFormValues, staffIds: string[]) =>
-  staffIds.map((id) =>
-    values.amountMode === 'variable'
-      ? toAmount(values.rows?.[id]?.amount)
-      : toAmount(values.fixedAmount),
-  );
-
-/** آیتم‌های درخواست مرتب‌شده بر اساس ترتیب پرداخت */
+/** آیتم‌های درخواست (ترتیب پرداخت هر ردیف؛ مبلغ فقط در حالت مبلغ متفاوت) */
 export const buildRequestItems = (
   values: LoanRequestFormValues,
-  staffIds: string[],
-): LoanRequestItem[] => {
-  const amounts = selectedAmounts(values, staffIds);
-  return staffIds
-    .map((staffId, index) => ({
-      staffId,
-      amount: amounts[index] ?? 0,
-      paymentOrder: values.rows?.[staffId]?.paymentOrder ?? index + 1,
-    }))
-    .sort((a, b) => a.paymentOrder - b.paymentOrder);
-};
+  personnelIds: number[],
+): ReadModelsLoanRequestItemInput[] =>
+  personnelIds.map((personnelId, index) => ({
+    personnelId,
+    amount:
+      values.mode === ALLOCATION_MODE.VARIABLE
+        ? toAmount(values.rows?.[personnelId]?.amount)
+        : null,
+    paymentOrder: values.rows?.[personnelId]?.paymentOrder ?? index + 1,
+  }));
 
-export interface SuggestionResult {
-  text: string;
-  isError: boolean;
-}
-
-/** متن راهنمای اعتبار قابل استفاده بر اساس مبالغ وارد شده (فقط نمایشی؛ بررسی نهایی سمت سرور است) */
-export const buildSuggestion = (
-  available: number,
+/** بدنه پیش‌نمایش و ثبت درخواست */
+export const buildLoanBody = (
   values: LoanRequestFormValues,
-  staffIds: string[],
-): SuggestionResult => {
-  const count = staffIds.length;
-  const amounts = selectedAmounts(values, staffIds);
-  const total = amounts.reduce((sum, amount) => sum + amount, 0);
-  const availableText = `اعتبار قابل استفاده این طرح در این ماه: ${formatRial(available)} (${rialToTomanWords(available)})`;
+  personnelIds: number[],
+  baseDate: string,
+): CreateLoanRequestsCommand => ({
+  planId: values.planId ?? 0,
+  baseDate,
+  mode: values.mode,
+  amount: values.mode === ALLOCATION_MODE.FIXED ? toAmount(values.fixedAmount) : null,
+  items: buildRequestItems(values, personnelIds),
+});
 
-  if (values.amountMode === 'variable') {
-    if (!count) return { text: availableText, isError: false };
-    if (amounts.some((amount) => !amount)) {
-      return { text: 'برای همه پرسنل انتخاب‌شده، مبلغ وام را در جدول وارد کنید.', isError: false };
-    }
-    if (total > available) {
-      return {
-        text: `مجموع مبالغ وارد‌شده (${formatRial(total)}) بیشتر از اعتبار باقی‌مانده این طرح (${formatRial(available)}) است.`,
-        isError: true,
-      };
-    }
-    return {
-      text: `مجموع مبالغ ${toPersianDigits(count)} نفر: ${formatRial(total)} (${rialToTomanWords(total)}) — مجاز است.`,
-      isError: false,
-    };
-  }
-
-  const amount = toAmount(values.fixedAmount);
-  if (!amount) return { text: availableText, isError: false };
-  const maxCount = toPersianDigits(Math.floor(available / amount));
-  if (!count) {
-    return {
-      text: `با این مبلغ برای هر نفر (${rialToTomanWords(amount)})، حداکثر می‌توانید به ${maxCount} نفر با این طرح وام بدهید. پرسنل را از جدول انتخاب کنید.`,
-      isError: false,
-    };
-  }
-  if (total > available) {
-    return {
-      text: `مجموع مبلغ برای ${toPersianDigits(count)} نفر (${formatRial(total)}) بیشتر از اعتبار باقی‌مانده این طرح است. حداکثر تعداد نفرات با این مبلغ: ${maxCount} نفر.`,
-      isError: true,
-    };
-  }
-  return {
-    text: `مجموع مبلغ برای ${toPersianDigits(count)} نفر: ${formatRial(total)} (${rialToTomanWords(total)}) — مجاز است. با اعتبار باقی‌مانده حداکثر تا ${maxCount} نفر قابل پوشش است.`,
-    isError: false,
-  };
+/** سطح پیام بک‌اند (hintLevel: ۱ اطلاع، ۲ موفق، ۳ هشدار، ۴ خطا) → نوع کارت پیام */
+const NOTICE: Record<number, NoticeType> = {
+  1: 'suggestion',
+  2: 'success',
+  3: 'warning',
+  4: 'error',
 };
+
+export const noticeOf = (hint: Hint): NoticeType => NOTICE[hint.level ?? 1] ?? 'suggestion';
+
+/** فهرست پرسنلی که در همین ماه قبلاً وام گرفته‌اند */
+export const repeatList = (items: RepeatAllocation[]) =>
+  createElement(
+    'ul',
+    { className: 'm-0 ps-5 text-[13px] leading-8' },
+    items.map((item) =>
+      createElement(
+        'li',
+        { key: item.personnelId },
+        `${item.personnelName}: قبلاً ${formatRial(item.previousAmount ?? 0)} وام در ماه ${toPersianDigits(item.month ?? '')} تخصیص داده‌اید`,
+      ),
+    ),
+  );

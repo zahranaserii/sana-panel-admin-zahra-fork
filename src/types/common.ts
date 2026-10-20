@@ -28,13 +28,7 @@ export interface UserProfile {
   roles: string[];
 }
 
-/** آیتم ساده برای لیست‌های کشویی */
-export interface LookupItem {
-  id: string;
-  title: string;
-}
-
-/** فایل آپلودشده در سرور */
+/** فایل قبلی سرور (برای نمایش در ورودی فایل) */
 export interface UploadedFile {
   id: string;
   name: string;

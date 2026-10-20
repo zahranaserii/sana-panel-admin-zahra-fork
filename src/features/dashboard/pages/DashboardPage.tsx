@@ -10,7 +10,7 @@ import {
   SummaryKpis,
 } from '../components';
 
-/** هر بخش سرویس مخصوص خودش را دارد */
+/** همه بخش‌ها از یک سرویس (Dashboard) خوانده می‌شوند؛ رتبه‌بندی و خروجی‌ها سرویس جدا دارند */
 export const DashboardPage = () => (
   <>
     <SummaryKpis />

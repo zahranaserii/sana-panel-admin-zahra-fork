@@ -1,14 +1,11 @@
 import { Column } from '@ant-design/charts';
-import { useQuery } from '@tanstack/react-query';
 
+import { useDashboardGet } from '@/api/generated/facility';
 import { PanelCard } from '@/component/card';
 import { Skeleton } from '@/component/loading';
-import { QUERY_KEYS } from '@/constant/queryKeys';
 import { useChartTheme } from '@/hooks/useChartTheme';
 import { toPersianDigits } from '@/utils/date';
 import { formatRial } from '@/utils/number';
-
-import { getCompanyCredit } from '../api';
 
 import { ChartLegend } from './ChartLegend';
 
@@ -23,14 +20,12 @@ const compact = (value: number) => {
 
 export const CompanyCreditChart = () => {
   const chart = useChartTheme();
-  const { data, isPending } = useQuery({
-    queryKey: QUERY_KEYS.DASHBOARD.COMPANY_CREDIT,
-    queryFn: getCompanyCredit,
-  });
+  const { data, isPending } = useDashboardGet();
 
-  const rows = (data ?? []).flatMap((item) => [
-    { companyName: item.companyName, series: SERIES[0], value: item.created },
-    { companyName: item.companyName, series: SERIES[1], value: item.disbursed },
+  // گروه‌بندی (شرکت/شعبه) از سرور می‌آید؛ عنوان هر گروه groupTitle است
+  const rows = (data?.creditVsAllocated ?? []).flatMap((item) => [
+    { companyName: item.groupTitle, series: SERIES[0], value: item.createdCredit ?? 0 },
+    { companyName: item.groupTitle, series: SERIES[1], value: item.allocated ?? 0 },
   ]);
 
   const renderBody = () => {

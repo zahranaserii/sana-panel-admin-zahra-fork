@@ -25,7 +25,7 @@ export const AUDIT_LOG_TYPES: { id: MockLogType; title: string }[] = [
   { id: 'base', title: 'مربوط به اطلاعات پایه' },
 ];
 
-const ADMIN_REGISTRAR: CommonRegistrarDto = {
+export const ADMIN_REGISTRAR: CommonRegistrarDto = {
   panelUserId: 1,
   userName: 'admin',
   userCode: '001',
@@ -33,7 +33,7 @@ const ADMIN_REGISTRAR: CommonRegistrarDto = {
   branchCode: '150000',
 };
 
-const BRANCH_REGISTRAR: CommonRegistrarDto = {
+export const BRANCH_REGISTRAR: CommonRegistrarDto = {
   panelUserId: 2,
   userName: 'branch',
   userCode: '399',

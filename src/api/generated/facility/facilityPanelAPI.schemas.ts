@@ -190,7 +190,7 @@ export interface CommonEnumCatalogDto {
 }
 
 export interface CommonFacilityLookupItemDto {
-  id?: string;
+  id?: number;
   title?: string;
 }
 

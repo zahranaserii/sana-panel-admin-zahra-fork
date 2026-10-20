@@ -9,7 +9,8 @@ test('admin can log in and sees the main layout', async ({ page }) => {
   await page.getByRole('button', { name: /ورود/ }).click();
 
   await expect(page.getByRole('navigation')).toBeVisible();
-  await expect(page.getByText('مدیریت شرکت‌ها')).toBeVisible();
+  // عنوان از بک‌اند می‌آید؛ وجود لینک صفحه با مسیر خود ما بررسی می‌شود
+  await expect(page.locator('nav a[href="/companies"]')).toBeVisible();
 });
 
 test('wrong credentials show an error', async ({ page }) => {

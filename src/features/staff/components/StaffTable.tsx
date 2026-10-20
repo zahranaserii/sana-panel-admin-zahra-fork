@@ -1,50 +1,63 @@
 import { DeleteOutlined, EditOutlined } from '@ant-design/icons';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQueryClient } from '@tanstack/react-query';
 import { type ColumnsType } from 'antd/es/table';
 import { useState } from 'react';
 import { toast } from 'sonner';
 
+import {
+  getPersonnelSearchQueryKey,
+  usePersonnelDelete,
+  usePersonnelSearch,
+} from '@/api/generated/facility';
 import { Button } from '@/component/button';
 import { DeleteReasonModal, type DeleteReasonValues } from '@/component/delete-modal';
+import { StatusChip, type StatusTone } from '@/component/status-chip';
 import { Table } from '@/component/table';
-import { QUERY_KEYS } from '@/constant/queryKeys';
-import { resolveFile } from '@/services/file';
+import { useEnums } from '@/services/enums';
 import { formatJalali, toPersianDigits } from '@/utils/date';
 
-import { deleteStaff, getStaffList } from '../api';
-import { type Staff, type StaffFilters } from '../types';
+import { type Staff, type StaffFilters, toSearchParams } from '../types';
 
 interface StaffTableProps {
-  companyId: string;
+  companyId: number;
   filters: StaffFilters;
-  onEdit: (id: string) => void;
+  onEdit: (id: number) => void;
 }
 
 const PAGE_SIZE = 10;
+
+/** رنگ وضعیت پرسنل (۱ در انتظار تأیید مدیر، ۲ تأییدشده، ۳ ردشده) */
+const STATUS_TONE: Record<number, StatusTone> = { 1: 'warning', 2: 'success', 3: 'error' };
+
+const LOCKED_TITLE = 'این پرسنل در وام استفاده شده و قابل ویرایش یا حذف نیست.';
 
 export const StaffTable = ({ companyId, filters, onEdit }: StaffTableProps) => {
   const [page, setPage] = useState(1);
   const [deleting, setDeleting] = useState<Staff | null>(null);
   const queryClient = useQueryClient();
+  const enums = useEnums();
 
-  const { data, isFetching } = useQuery({
-    queryKey: QUERY_KEYS.STAFF.LIST(companyId, filters, page),
-    queryFn: () => getStaffList(companyId, { ...filters, page, pageSize: PAGE_SIZE }),
+  const { data, isFetching } = usePersonnelSearch(companyId, {
+    ...toSearchParams(filters),
+    Page: page,
+    PageSize: PAGE_SIZE,
   });
 
-  const { mutateAsync: remove } = useMutation({
-    mutationFn: async ({ description, file }: DeleteReasonValues) => {
-      const uploaded = await resolveFile(file);
-      return deleteStaff(companyId, deleting?.id ?? '', {
-        description: description.trim(),
-        fileId: uploaded?.id ?? '',
-      });
-    },
-    onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: QUERY_KEYS.STAFF.ALL });
-      toast.success('پرسنل حذف شد.');
+  const { mutateAsync: deleteStaff } = usePersonnelDelete({
+    mutation: {
+      onSuccess: () => {
+        void queryClient.invalidateQueries({ queryKey: getPersonnelSearchQueryKey(companyId) });
+        toast.success('پرسنل حذف شد.');
+      },
     },
   });
+
+  /** حذف با توضیح و فایل مستند (هر دو الزامی، multipart) */
+  const remove = ({ description, file }: DeleteReasonValues) =>
+    deleteStaff({
+      id: deleting?.id ?? 0,
+      data: { Description: description.trim(), file: file ?? undefined },
+    });
 
   const columns: ColumnsType<Staff> = [
     {
@@ -54,13 +67,23 @@ export const StaffTable = ({ companyId, filters, onEdit }: StaffTableProps) => {
       render: (value: number) => <b>{toPersianDigits(value)}</b>,
     },
     { title: 'نام', dataIndex: 'fullName' },
-    { title: 'کد ملی', dataIndex: 'nationalId' },
+    { title: 'کد ملی', dataIndex: 'nationalCode' },
     { title: 'موبایل', dataIndex: 'mobile' },
     { title: 'کد پرسنلی', dataIndex: 'personnelCode' },
     {
       title: 'تاریخ استخدام',
       dataIndex: 'hireDate',
       render: (value: string) => formatJalali(value, undefined, { persianDigits: true }),
+    },
+    {
+      title: 'وضعیت',
+      key: 'status',
+      render: (_value, row) => (
+        <StatusChip tone={STATUS_TONE[row.status ?? 0] ?? 'default'}>
+          {enums.title('personnelStatus', row.status)}
+          {row.rejectReason ? ` (${row.rejectReason})` : ''}
+        </StatusChip>
+      ),
     },
     {
       title: 'عملیات',
@@ -71,7 +94,9 @@ export const StaffTable = ({ companyId, filters, onEdit }: StaffTableProps) => {
             variant="outline"
             size="small"
             icon={<EditOutlined />}
-            onClick={() => onEdit(row.id)}
+            disabled={row.isLocked}
+            title={row.isLocked ? LOCKED_TITLE : undefined}
+            onClick={() => onEdit(row.id ?? 0)}
           >
             ویرایش
           </Button>
@@ -79,6 +104,8 @@ export const StaffTable = ({ companyId, filters, onEdit }: StaffTableProps) => {
             variant="secondary"
             size="small"
             icon={<DeleteOutlined />}
+            disabled={row.isLocked}
+            title={row.isLocked ? LOCKED_TITLE : undefined}
             onClick={() => setDeleting(row)}
           >
             حذف
@@ -91,6 +118,7 @@ export const StaffTable = ({ companyId, filters, onEdit }: StaffTableProps) => {
   return (
     <>
       <Table<Staff>
+        rowKey="id"
         columns={columns}
         dataSource={data?.items}
         loading={isFetching}

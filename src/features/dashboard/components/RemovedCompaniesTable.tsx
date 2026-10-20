@@ -1,48 +1,57 @@
-import { useQuery } from '@tanstack/react-query';
 import { type ColumnsType } from 'antd/es/table';
 
+import { useDashboardGet } from '@/api/generated/facility';
 import { PanelCard } from '@/component/card';
 import { StatusChip } from '@/component/status-chip';
 import { Table } from '@/component/table';
-import { QUERY_KEYS } from '@/constant/queryKeys';
+import { useEnums } from '@/services/enums';
 import { formatJalali, toPersianDigits } from '@/utils/date';
 import { formatRial } from '@/utils/number';
 
-import { getRemovedCompanies } from '../api';
 import { type RemovedCompany } from '../types';
 
-const columns: ColumnsType<RemovedCompany> = [
-  { title: 'شرکت', dataIndex: 'companyName' },
-  {
-    title: 'وضعیت',
-    dataIndex: 'reason',
-    render: (reason: RemovedCompany['reason']) => (
-      <StatusChip tone={reason === 'deleted' ? 'default' : 'error'}>
-        {reason === 'deleted' ? 'حذف‌شده' : 'لغوشده'}
-      </StatusChip>
-    ),
-  },
-  {
-    title: 'تاریخ حذف',
-    dataIndex: 'removedAt',
-    render: (value: string | null) =>
-      value ? formatJalali(value, undefined, { persianDigits: true }) : '—',
-  },
-  { title: 'میانگین موجودی', dataIndex: 'totalAverage', render: formatRial },
-  { title: 'مجموع وام تخصیص‌یافته', dataIndex: 'disbursed', render: formatRial },
-  { title: 'تعداد درخواست', dataIndex: 'requestCount', render: (v: number) => toPersianDigits(v) },
-  {
-    title: 'نرخ تأیید',
-    dataIndex: 'approvalRate',
-    render: (value: number | null) => (value === null ? '—' : toPersianDigits(`${value}٪`)),
-  },
-];
+/** وضعیت شرکت بک‌اند: ۳ حذف‌شده */
+const DELETED = 3;
+
+const rial = (value?: number | null) =>
+  value === null || value === undefined ? '—' : formatRial(value);
 
 export const RemovedCompaniesTable = () => {
-  const { data, isFetching } = useQuery({
-    queryKey: QUERY_KEYS.DASHBOARD.REMOVED_COMPANIES,
-    queryFn: getRemovedCompanies,
-  });
+  const { data, isFetching } = useDashboardGet();
+  const { title } = useEnums();
+
+  const columns: ColumnsType<RemovedCompany> = [
+    { title: 'شرکت', dataIndex: 'companyName' },
+    {
+      title: 'وضعیت',
+      dataIndex: 'removalKind',
+      render: (kind?: number) => (
+        <StatusChip tone={kind === DELETED ? 'default' : 'error'}>
+          {title('companyStatus', kind)}
+        </StatusChip>
+      ),
+    },
+    {
+      title: 'تاریخ حذف/لغو',
+      dataIndex: 'removedAt',
+      render: (value?: string) =>
+        value ? formatJalali(value, undefined, { persianDigits: true }) : '—',
+    },
+    { title: 'میانگین موجودی', dataIndex: 'averageBalance', render: rial },
+    { title: 'مجموع وام تخصیص‌یافته', dataIndex: 'allocatedTotal', render: rial },
+    {
+      title: 'تعداد درخواست',
+      dataIndex: 'requestCount',
+      render: (value?: number) => toPersianDigits(value ?? 0),
+    },
+    {
+      title: 'نرخ تأیید',
+      dataIndex: 'approvalRate',
+      // null یعنی درخواستی نداشته
+      render: (value?: number | null) =>
+        value === null || value === undefined ? '—' : toPersianDigits(`${value}٪`),
+    },
+  ];
 
   return (
     <PanelCard
@@ -50,9 +59,9 @@ export const RemovedCompaniesTable = () => {
       subtitle="عملکرد شرکت‌هایی که از سامانه حذف یا قراردادشان لغو شده، برای ارزیابی اینکه همکاری خوبی بوده یا نه"
     >
       <Table<RemovedCompany>
-        rowKey="companyName"
+        rowKey="companyId"
         columns={columns}
-        dataSource={data}
+        dataSource={data?.removedCompanies}
         loading={isFetching}
         locale={{ emptyText: 'شرکت حذف‌شده‌ای وجود ندارد.' }}
       />

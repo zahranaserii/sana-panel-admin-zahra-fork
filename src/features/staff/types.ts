@@ -1,22 +1,11 @@
-export interface Staff {
-  id: string;
-  fullName: string;
-  nationalId: string;
-  mobile: string;
-  personnelCode: string;
-  /** تاریخ استخدام (میلادی YYYY-MM-DD) */
-  hireDate: string;
-  /** اولویت تخصیص (عدد کوچک‌تر = اولویت بالاتر) */
-  priority: number;
-}
+import { type PersonnelSearchParams } from '@/api/generated/facility/facilityPanelAPI.schemas';
 
-/** اولویت تخصیص اختیاری است؛ خالی = آخرین اولویت (سمت سرور) */
-export type StaffPayload = Omit<Staff, 'id' | 'priority'> & { priority?: number | null };
-
-export interface DeleteStaffPayload {
-  description: string;
-  fileId: string;
-}
+export type {
+  CreatePersonnelCommand as StaffFormValues,
+  ReadModelsPersonnelDetailsDto as StaffDetail,
+  ReadModelsPersonnelImportResultDto as StaffImportResult,
+  ReadModelsPersonnelListItemDto as Staff,
+} from '@/api/generated/facility/facilityPanelAPI.schemas';
 
 /** فیلترهای جستجوی پرسنل (از کوئری آدرس) */
 export interface StaffFilters {
@@ -25,6 +14,9 @@ export interface StaffFilters {
   hireTo?: string;
 }
 
-export interface StaffImportResult {
-  added: number;
-}
+/** فیلترهای آدرس → پارامترهای جستجوی بک‌اند */
+export const toSearchParams = (filters: StaffFilters): PersonnelSearchParams => ({
+  Term: filters.q,
+  HireDateFrom: filters.hireFrom,
+  HireDateTo: filters.hireTo,
+});

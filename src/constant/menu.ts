@@ -1,5 +1,4 @@
 import {
-  AuditOutlined,
   BarChartOutlined,
   CheckCircleOutlined,
   ControlOutlined,
@@ -22,20 +21,21 @@ interface PageConfig {
 }
 
 /**
- * صفحه‌های فرانت به ازای `url` آیتم‌های منوی بک‌اند.
- * مسیر و آیکون همیشه از همین‌جا (router خود ما) خوانده می‌شود؛ آیتمی که اینجا نباشد نمایش داده نمی‌شود.
+ * کلید = `url` آیتم منوی بک‌اند؛ مقدار = مسیر و آیکون صفحه در router خود ما.
+ * اگر بک‌اند url را عوض کند فقط کلید اینجا عوض می‌شود و مسیرهای فرانت ثابت می‌مانند.
+ * آیتمی که کلیدش اینجا نباشد نمایش داده نمی‌شود.
+ * تأیید مدیر شرکت (ROUTES.MANAGER_APPROVE) فعلاً در منوی بک‌اند آیتم ندارد.
  */
 const PAGES: Record<string, PageConfig> = {
-  [ROUTES.HOME]: { path: ROUTES.HOME, icon: HomeOutlined },
-  [ROUTES.BASE_INFO]: { path: ROUTES.BASE_INFO, icon: ControlOutlined },
-  [ROUTES.COMPANIES]: { path: ROUTES.COMPANIES, icon: ShopOutlined },
-  [ROUTES.STAFF]: { path: ROUTES.STAFF, icon: TeamOutlined },
-  [ROUTES.CREDIT]: { path: ROUTES.CREDIT, icon: CreditCardOutlined },
-  [ROUTES.MANAGER_APPROVE]: { path: ROUTES.MANAGER_APPROVE, icon: AuditOutlined },
-  [ROUTES.CREDIT_APPROVE]: { path: ROUTES.CREDIT_APPROVE, icon: CheckCircleOutlined },
-  [ROUTES.DASHBOARD]: { path: ROUTES.DASHBOARD, icon: BarChartOutlined },
-  [ROUTES.USERS]: { path: ROUTES.USERS, icon: SafetyOutlined },
-  [ROUTES.CHANGE_LOG]: { path: ROUTES.CHANGE_LOG, icon: HistoryOutlined },
+  '/home': { path: ROUTES.HOME, icon: HomeOutlined },
+  '/base-info': { path: ROUTES.BASE_INFO, icon: ControlOutlined },
+  '/facility/management-companies': { path: ROUTES.COMPANIES, icon: ShopOutlined },
+  '/facility/personnel': { path: ROUTES.STAFF, icon: TeamOutlined },
+  '/facility/loan-allocation': { path: ROUTES.CREDIT, icon: CreditCardOutlined },
+  '/facility/credit-approval': { path: ROUTES.CREDIT_APPROVE, icon: CheckCircleOutlined },
+  '/facility/management-dashboard': { path: ROUTES.DASHBOARD, icon: BarChartOutlined },
+  '/facility/management-users': { path: ROUTES.USERS, icon: SafetyOutlined },
+  '/facility/audit-log': { path: ROUTES.CHANGE_LOG, icon: HistoryOutlined },
 };
 
 const isRoot = (item: MenuItemDto) => item.parentId === null || item.parentId === item.id;
@@ -47,27 +47,37 @@ const toMenuItem = (item: MenuItemDto): MenuItem | null => {
 };
 
 /**
- * ساخت گروه‌های سایدبار از لیست تخت بک‌اند:
- * ریشه با url = آیتم بدون گروه (مثل خانه)، ریشه بدون url = گروه با زیرآیتم‌هایش.
+ * ساخت گروه‌های سایدبار از لیست تخت بک‌اند (به ترتیب همان لیست):
+ * ریشه با زیرآیتم = گروه؛ ریشه بدون زیرآیتم = آیتم بدون گروه (مثل خانه).
+ * آیتمی که والدش در پاسخ نیست هم بدون گروه نمایش داده می‌شود.
  * فقط آیتم‌های `isActive` نمایش داده می‌شوند و گروه بدون زیرآیتم حذف می‌شود.
  */
 export const buildMenu = (items: MenuItemDto[]): MenuGroup[] => {
+  const ids = new Set(items.map((item) => item.id));
   const groups: MenuGroup[] = [];
-  items.filter(isRoot).forEach((root) => {
-    if (root.url) {
-      const single = toMenuItem(root);
-      if (!single) return;
-      const last = groups.at(-1);
-      if (last && !last.title) last.items.push(single);
-      else groups.push({ key: `single-${root.id}`, title: '', items: [single] });
+
+  const addSingle = (item: MenuItemDto) => {
+    const single = toMenuItem(item);
+    if (!single) return;
+    const last = groups.at(-1);
+    if (last && !last.title) last.items.push(single);
+    else groups.push({ key: `single-${item.id}`, title: '', items: [single] });
+  };
+
+  items.forEach((item) => {
+    if (!isRoot(item)) {
+      if (item.parentId !== null && !ids.has(item.parentId)) addSingle(item);
       return;
     }
-    if (!root.isActive) return;
-    const children = items
-      .filter((item) => item.parentId === root.id && item.id !== root.id)
-      .map(toMenuItem)
-      .filter((item): item is MenuItem => item !== null);
-    if (children.length) groups.push({ key: String(root.id), title: root.title, items: children });
+    const children = items.filter((child) => child.parentId === item.id && child.id !== item.id);
+    if (!children.length) {
+      addSingle(item);
+      return;
+    }
+    if (!item.isActive) return;
+    const menuItems = children.map(toMenuItem).filter((child): child is MenuItem => child !== null);
+    if (menuItems.length)
+      groups.push({ key: String(item.id), title: item.title, items: menuItems });
   });
   return groups;
 };
