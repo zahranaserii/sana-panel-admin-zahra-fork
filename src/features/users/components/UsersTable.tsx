@@ -9,9 +9,10 @@ import { Button } from '@/component/button';
 import { PanelCard } from '@/component/card';
 import { Table } from '@/component/table';
 import { QUERY_KEYS } from '@/constant/queryKeys';
+import { useFetchBeforeOpen } from '@/hooks';
 import { toPersianDigits } from '@/utils/date';
 
-import { deleteUser, getUsers } from '../api';
+import { deleteUser, getUser, getUsers } from '../api';
 import { type User } from '../types';
 
 import { UserFormModal } from './UserFormModal';
@@ -25,7 +26,7 @@ export const UsersTable = () => {
   const queryClient = useQueryClient();
   const { modal } = App.useApp();
 
-  const { data, isFetching } = useQuery({
+  const { data, isFetching, isError, refetch } = useQuery({
     queryKey: QUERY_KEYS.USERS.LIST(page),
     queryFn: () => getUsers({ page, pageSize: PAGE_SIZE }),
   });
@@ -42,6 +43,20 @@ export const UsersTable = () => {
     setEditingId(id);
     setModalOpen(true);
   };
+
+  const details = useFetchBeforeOpen<number>();
+
+  /** ویرایش: جزئیات کاربر اول گرفته می‌شود؛ با خطا مودال باز نمی‌شود */
+  const openEdit = (id: number) =>
+    void details.open(
+      id,
+      (client) =>
+        client.fetchQuery({
+          queryKey: QUERY_KEYS.USERS.DETAIL(id),
+          queryFn: () => getUser(id),
+        }),
+      () => openModal(id),
+    );
 
   const confirmDelete = (user: User) =>
     modal.confirm({
@@ -68,7 +83,8 @@ export const UsersTable = () => {
             variant="outline"
             size="small"
             icon={<EditOutlined />}
-            onClick={() => openModal(row.id)}
+            loading={details.loadingKey === row.id}
+            onClick={() => openEdit(row.id)}
           >
             ویرایش
           </Button>
@@ -104,6 +120,8 @@ export const UsersTable = () => {
         columns={columns}
         dataSource={data?.items}
         loading={isFetching}
+        error={isError}
+        onRetry={() => void refetch()}
         showRowNumber
         locale={{ emptyText: 'کاربری ثبت نشده است.' }}
         pagination={{

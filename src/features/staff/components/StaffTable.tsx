@@ -22,6 +22,8 @@ interface StaffTableProps {
   companyId: number;
   filters: StaffFilters;
   onEdit: (id: number) => void;
+  /** پرسنلی که جزئیاتش برای ویرایش در حال دریافت است */
+  loadingEditId?: number | null;
 }
 
 const PAGE_SIZE = 10;
@@ -31,13 +33,13 @@ const STATUS_TONE: Record<number, StatusTone> = { 1: 'warning', 2: 'success', 3:
 
 const LOCKED_TITLE = 'این پرسنل در وام استفاده شده و قابل ویرایش یا حذف نیست.';
 
-export const StaffTable = ({ companyId, filters, onEdit }: StaffTableProps) => {
+export const StaffTable = ({ companyId, filters, onEdit, loadingEditId }: StaffTableProps) => {
   const [page, setPage] = useState(1);
   const [deleting, setDeleting] = useState<Staff | null>(null);
   const queryClient = useQueryClient();
   const enums = useEnums();
 
-  const { data, isFetching } = usePersonnelSearch(companyId, {
+  const { data, isFetching, isError, refetch } = usePersonnelSearch(companyId, {
     ...toSearchParams(filters),
     Page: page,
     PageSize: PAGE_SIZE,
@@ -96,6 +98,7 @@ export const StaffTable = ({ companyId, filters, onEdit }: StaffTableProps) => {
             icon={<EditOutlined />}
             disabled={row.isLocked}
             title={row.isLocked ? LOCKED_TITLE : undefined}
+            loading={loadingEditId === row.id}
             onClick={() => onEdit(row.id ?? 0)}
           >
             ویرایش
@@ -122,6 +125,8 @@ export const StaffTable = ({ companyId, filters, onEdit }: StaffTableProps) => {
         columns={columns}
         dataSource={data?.items}
         loading={isFetching}
+        error={isError}
+        onRetry={() => void refetch()}
         locale={{ emptyText: 'پرسنلی با این شرایط یافت نشد.' }}
         pagination={{
           current: page,

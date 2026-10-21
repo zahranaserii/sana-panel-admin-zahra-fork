@@ -72,7 +72,7 @@ export const SchemesTable = () => {
   const queryClient = useQueryClient();
   const { modal } = App.useApp();
 
-  const { data, isFetching } = useBasicInfoSchemeSearch({
+  const { data, isFetching, isError, refetch } = useBasicInfoSchemeSearch({
     IncludeInactive: true,
     Page: page,
     PageSize: PAGE_SIZE,
@@ -145,6 +145,8 @@ export const SchemesTable = () => {
         columns={columns}
         dataSource={data?.items}
         loading={isFetching}
+        error={isError}
+        onRetry={() => void refetch()}
         showRowNumber
         scroll={{ x: 1100 }}
         locale={{ emptyText: 'طرحی ثبت نشده است.' }}

@@ -10,6 +10,7 @@ export * from './layout';
 export * from './loading';
 export * from './modal';
 export * from './radio';
+export * from './retry';
 export * from './status-chip';
 export * from './switch';
 export * from './tab-bar';

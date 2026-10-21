@@ -40,8 +40,9 @@ export const CompanyRanking = () => {
   const [sortBy, setSortBy] = useState<number>(DEFAULT_SORT);
   const enums = useEnums();
 
-  const { data: months } = useDashboardMonths();
-  const { data, isFetching } = useDashboardRanking({
+  const monthsQuery = useDashboardMonths();
+  const months = monthsQuery.data;
+  const { data, isFetching, isError, refetch } = useDashboardRanking({
     Month: month === ALL_MONTHS ? undefined : month,
     SortBy: sortBy as ReadModelsCompanyRankingSort,
   });
@@ -57,6 +58,9 @@ export const CompanyRanking = () => {
             allowClear={false}
             style={{ minWidth: 180 }}
             aria-label="ماه"
+            loading={monthsQuery.isFetching}
+            error={monthsQuery.isError}
+            onRetry={() => void monthsQuery.refetch()}
             value={month}
             onChange={setMonth}
             options={[
@@ -70,6 +74,7 @@ export const CompanyRanking = () => {
             showSearch={false}
             style={{ minWidth: 220 }}
             aria-label="مرتب‌سازی"
+            {...enums.selectProps}
             value={sortBy}
             onChange={setSortBy}
             options={enums.options('companyRankingSort')}
@@ -82,6 +87,8 @@ export const CompanyRanking = () => {
         columns={columns}
         dataSource={data ?? []}
         loading={isFetching}
+        error={isError}
+        onRetry={() => void refetch()}
         locale={{ emptyText: 'هنوز شرکتی ثبت نشده است.' }}
       />
     </PanelCard>

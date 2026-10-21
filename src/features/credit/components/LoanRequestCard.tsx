@@ -69,7 +69,7 @@ export const LoanRequestCard = ({ companyId, date, credit, filters }: LoanReques
 
   // پیش‌نمایش (مجموع، مجاز بودن، پیام‌ها و تخصیص تکراری) بعد از توقف تایپ از سرور گرفته می‌شود
   const body = useDebouncedValue(buildLoanBody(values, selectedIds, date));
-  const { data: preview } = useLoansPreview(companyId, body, {
+  const { data: preview, isError: previewFailed } = useLoansPreview(companyId, body, {
     query: { enabled: Boolean(plan) && canAllocate },
   });
 
@@ -179,7 +179,8 @@ export const LoanRequestCard = ({ companyId, date, credit, filters }: LoanReques
       <Button
         variant="primary"
         icon={<SendOutlined />}
-        disabled={!canAllocate || !plan || preview?.isAllowed === false}
+        // بدون نتیجه پیش‌نمایش (خطا) ثبت غیرفعال است
+        disabled={!canAllocate || !plan || previewFailed || preview?.isAllowed === false}
         loading={isPending}
         onClick={() => form.submit()}
         className="mt-2"

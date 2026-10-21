@@ -13,16 +13,16 @@ const values = (titles: string[], requiresReason: number[] = []) =>
   }));
 
 export const MOCK_ENUMS: Required<CommonEnumCatalogDto> = {
-  companyStatus: values(['فعال', 'لغوشده', 'حذف‌شده', 'منقضی‌شده']),
+  companyStatus: values(['فعال', 'لغوشده', 'منقضی‌شده', 'حذف‌شده']),
   personnelStatus: values(['در انتظار تأیید مدیر شرکت', 'تأییدشده', 'ردشده', 'حذف‌شده']),
   loanRequestStatus: values([
     'در انتظار تأیید مدیر شرکت',
     'ردشده توسط مدیر شرکت',
     'در انتظار تأیید اعتبارات',
-    'تأییدشده',
-    'ردشده',
+    'ردشده توسط اعتبارات',
     'در انتظار تأیید شعبهٔ دیجیتال',
     'ردشده توسط شعبهٔ دیجیتال',
+    'تأییدشده',
     'لغوشده',
   ]),
   postApprovalStage: values(

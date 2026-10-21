@@ -23,6 +23,8 @@ import { type CompanyListItem } from '../types';
 interface CompanyTableProps {
   onCreate: () => void;
   onEdit: (id: number) => void;
+  /** شرکتی که جزئیاتش برای ویرایش در حال دریافت است */
+  loadingEditId?: number | null;
   onCancelContract: (company: CompanyListItem) => void;
 }
 
@@ -35,14 +37,22 @@ const CANCELLED = 2;
 const registrarLabel = ({ registrar }: CompanyListItem) =>
   [registrar?.branchName, registrar?.userName].filter(Boolean).join(' — ') || '—';
 
-export const CompanyTable = ({ onCreate, onEdit, onCancelContract }: CompanyTableProps) => {
+export const CompanyTable = ({
+  onCreate,
+  onEdit,
+  onCancelContract,
+  loadingEditId,
+}: CompanyTableProps) => {
   const [page, setPage] = useState(1);
   const queryClient = useQueryClient();
   const [deleting, setDeleting] = useState<CompanyListItem | null>(null);
 
   const enums = useEnums();
 
-  const { data, isFetching } = useCompaniesSearch({ Page: page, PageSize: PAGE_SIZE });
+  const { data, isFetching, isError, refetch } = useCompaniesSearch({
+    Page: page,
+    PageSize: PAGE_SIZE,
+  });
 
   const { mutateAsync: deleteCompany } = useCompaniesDelete({
     mutation: {
@@ -103,6 +113,7 @@ export const CompanyTable = ({ onCreate, onEdit, onCancelContract }: CompanyTabl
             variant="outline"
             size="small"
             icon={<EditOutlined />}
+            loading={loadingEditId === row.id}
             onClick={() => onEdit(row.id ?? 0)}
           >
             ویرایش
@@ -144,6 +155,8 @@ export const CompanyTable = ({ onCreate, onEdit, onCancelContract }: CompanyTabl
         columns={columns}
         dataSource={data?.page?.items}
         loading={isFetching}
+        error={isError}
+        onRetry={() => void refetch()}
         showRowNumber
         pagination={{
           current: page,

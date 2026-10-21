@@ -41,7 +41,7 @@ const emptyMonths = (filled: number[]) =>
   Array.from({ length: 12 }, (_, index) => filled[index] ?? null);
 
 /** وضعیت شرکت بک‌اند (Lookups/Enums → companyStatus) */
-export const COMPANY_STATUS = { ACTIVE: 1, CANCELLED: 2, DELETED: 3, EXPIRED: 4 } as const;
+export const COMPANY_STATUS = { ACTIVE: 1, CANCELLED: 2, EXPIRED: 3, DELETED: 4 } as const;
 
 export const MOCK_COMPANIES: MockCompany[] = [
   {

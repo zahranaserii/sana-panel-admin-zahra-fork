@@ -41,6 +41,8 @@ export interface DecisionModalProps {
   target: DecisionTarget | null;
   /** اگر داده شود، در حالت رد انتخاب دلیل اجباری است */
   rejectReasons?: { value: number; label: string }[];
+  /** لودینگ و فراخوانی دوباره سرویس دلایل (با باز کردن سلکت خالی) */
+  rejectReasonsProps?: { loading: boolean; onRetry: () => void };
   /** امکان الصاق مستندات (پیش‌فرض: دارد) */
   allowFile?: boolean;
   /** در حالت رد، توضیحات اجباری است (تأیید اعتبارات) */
@@ -63,6 +65,7 @@ const describe = (requests: DecisionRequestInfo[]) => {
 export const DecisionModal = ({
   target,
   rejectReasons,
+  rejectReasonsProps,
   allowFile = true,
   requireRejectNote,
   approveFields,
@@ -92,7 +95,7 @@ export const DecisionModal = ({
           required
           requiredMessage="انتخاب دلیل رد اجباری است."
         >
-          <SelectInput options={rejectReasons} />
+          <SelectInput {...rejectReasonsProps} options={rejectReasons} />
         </FormItem>
       )}
       {!isReject && approveFields}

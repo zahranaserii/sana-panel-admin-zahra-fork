@@ -36,7 +36,8 @@ const queue = (url: URL, statuses: number[]) => {
     (item) =>
       (!companyId || item.companyId === companyId) &&
       (status ? item.status === status : statuses.includes(item.status)) &&
-      (!term || item.personnelName.includes(term)),
+      // مثل بک‌اند: جستجو در نام و کد پرسنلی
+      (!term || item.personnelName.includes(term) || item.personnelCode.includes(term)),
   );
   const page = paginate(list.slice().reverse(), url);
   return { ...page, items: page.items.map(toLoanItem) };

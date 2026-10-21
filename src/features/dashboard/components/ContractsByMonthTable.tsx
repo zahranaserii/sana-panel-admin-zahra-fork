@@ -26,7 +26,7 @@ const columns: ColumnsType<ContractsByMonth> = [
 ];
 
 export const ContractsByMonthTable = () => {
-  const { data, isFetching } = useDashboardGet();
+  const { data, isFetching, isError, refetch } = useDashboardGet();
 
   return (
     <PanelCard
@@ -38,6 +38,8 @@ export const ContractsByMonthTable = () => {
         columns={columns}
         dataSource={data?.contractsByMonth}
         loading={isFetching}
+        error={isError}
+        onRetry={() => void refetch()}
         locale={{ emptyText: 'هنوز تفاهم‌نامه‌ای ثبت نشده است.' }}
       />
     </PanelCard>

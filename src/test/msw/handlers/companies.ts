@@ -25,7 +25,7 @@ import {
   sepahMultiplier,
   storeFile,
 } from '../db';
-import { api, fileResponse, formNumbers, formText, json } from '../utils';
+import { api, fileResponse, formList, formNumbers, formText, json } from '../utils';
 
 const COMPANIES = `${FACILITY}/Companies`;
 
@@ -316,9 +316,11 @@ export const companyHandlers = [
         { status: 409 },
       );
     }
-    const items = form
-      .getAll('Months')
-      .map((value) => JSON.parse(String(value)) as ReadModelsMonthlyBalanceInput);
+    const items = formList('Months', (prefix): ReadModelsMonthlyBalanceInput | null => {
+      const month = formText(form, `${prefix}.month`);
+      const amount = formText(form, `${prefix}.averageBalance`);
+      return month ? { month, averageBalance: amount ? Number(amount) : null } : null;
+    });
     const scheme = schemeOf(company.schemeId);
     const documentType = reasonTitle('documentType', form.get('DocumentTypeId'), scheme);
     const files = form.getAll('files');

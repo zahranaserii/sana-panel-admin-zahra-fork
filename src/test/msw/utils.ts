@@ -35,6 +35,13 @@ export const fileResponse = (fileName = 'file') =>
 /** مقادیر عددی یک فیلد تکراری multipart (مثل PlanIds) */
 export const formNumbers = (form: FormData, key: string) => form.getAll(key).map(Number);
 
+/** آرایه شیء multipart با قرارداد ASP.NET (Months[0].month, Months[1].month, …) تا اولین اندیس خالی */
+export const formList = <T>(key: string, read: (prefix: string) => T | null): T[] => {
+  const items: T[] = [];
+  for (let item = read(`${key}[0]`); item; item = read(`${key}[${items.length}]`)) items.push(item);
+  return items;
+};
+
 /** مقدار متنی یک فیلد multipart */
 export const formText = (form: FormData, key: string) => {
   const value = form.get(key);

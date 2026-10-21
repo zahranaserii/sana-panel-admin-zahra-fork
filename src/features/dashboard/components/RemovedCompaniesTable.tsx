@@ -17,7 +17,7 @@ const rial = (value?: number | null) =>
   value === null || value === undefined ? '—' : formatRial(value);
 
 export const RemovedCompaniesTable = () => {
-  const { data, isFetching } = useDashboardGet();
+  const { data, isFetching, isError, refetch } = useDashboardGet();
   const { title } = useEnums();
 
   const columns: ColumnsType<RemovedCompany> = [
@@ -63,6 +63,8 @@ export const RemovedCompaniesTable = () => {
         columns={columns}
         dataSource={data?.removedCompanies}
         loading={isFetching}
+        error={isError}
+        onRetry={() => void refetch()}
         locale={{ emptyText: 'شرکت حذف‌شده‌ای وجود ندارد.' }}
       />
     </PanelCard>

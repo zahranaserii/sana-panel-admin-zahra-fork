@@ -37,13 +37,18 @@ export const ChangeLogTable = () => {
   const isAdmin = useProfileStore((state) => state.hasRole(ROLES.ADMIN));
 
   const enums = useEnums();
-  const { data: users } = useChangeLogsUsers();
+  const usersQuery = useChangeLogsUsers();
+  const users = usersQuery.data;
 
   const filters = {
     Category: category === ALL ? undefined : (category as ChangeLogCategory),
     PanelUserId: panelUserId === ALL ? undefined : panelUserId,
   };
-  const { data, isFetching } = useChangeLogsSearch({ ...filters, Page: page, PageSize: PAGE_SIZE });
+  const { data, isFetching, isError, refetch } = useChangeLogsSearch({
+    ...filters,
+    Page: page,
+    PageSize: PAGE_SIZE,
+  });
 
   const { mutate: download, isPending: isExporting } = useMutation({
     mutationFn: () => exportChangeLogs(filters),
@@ -100,6 +105,8 @@ export const ChangeLogTable = () => {
             allowClear={false}
             style={{ minWidth: 200 }}
             aria-label="نوع عملیات"
+            {...enums.selectProps}
+            error={!enums.catalog}
             value={category}
             onChange={changeCategory}
             options={[
@@ -112,6 +119,9 @@ export const ChangeLogTable = () => {
             allowClear={false}
             style={{ minWidth: 200 }}
             aria-label="کاربر"
+            loading={usersQuery.isFetching}
+            error={usersQuery.isError}
+            onRetry={() => void usersQuery.refetch()}
             value={panelUserId}
             onChange={changeUser}
             options={[
@@ -138,6 +148,8 @@ export const ChangeLogTable = () => {
         columns={columns}
         dataSource={data?.items}
         loading={isFetching}
+        error={isError}
+        onRetry={() => void refetch()}
         maxHeight={600}
         // عرض ثابت تا ستون جزئیات چندخطی شود و ستون بازگردانی دیده شود
         scroll={{ x: 1000 }}

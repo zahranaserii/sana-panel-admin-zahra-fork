@@ -15,6 +15,7 @@ import { FormItem } from '@/component/form';
 import { DateInput, FileInput, SelectInput, TextInput } from '@/component/input';
 import { FormModal } from '@/component/modal';
 import { Switch } from '@/component/switch';
+import { dayjs } from '@/utils/date';
 
 import { type CompanyDetail, type CompanyFormValues } from '../types';
 
@@ -27,6 +28,13 @@ interface CompanyFormModalProps {
   companyId?: number | null;
   onClose: () => void;
 }
+
+/** قواعد اعتبارسنجی بک‌اند (CreateCompanyCommand / Company) */
+const NAME_PATTERN = /^[\u0600-\u06FF\u200C\s0-9]+$/;
+const AGREEMENT_PATTERN = /^[\p{L}0-9/\-.]+$/u;
+const MIN_CONTRACT_DATE = dayjs.fromJalali(1400, 1, 1).toDate();
+const MIN_ACCOUNT_OPENING_DATE = dayjs.fromJalali(1380, 1, 1).toDate();
+const MAX_DATE = dayjs.fromJalali(1450, 12, 29).toDate();
 
 const EMPTY_VALUES: Partial<CompanyFormValues> = { salaryFromSepah: false, planIds: [] };
 
@@ -55,7 +63,7 @@ export const CompanyFormModal = ({ open, companyId, onClose }: CompanyFormModalP
   const schemeId = Form.useWatch('schemeId', form);
   const isEdit = Boolean(companyId);
 
-  const { data: schemes, isPending: schemesPending } = useBasicInfoSchemes({
+  const schemesQuery = useBasicInfoSchemes({
     query: { enabled: open },
   });
 
@@ -132,34 +140,57 @@ export const CompanyFormModal = ({ open, companyId, onClose }: CompanyFormModalP
       >
         <SelectInput
           disabled={isEdit}
-          loading={schemesPending}
-          options={schemes?.map((scheme) => ({ value: scheme.id, label: scheme.title }))}
+          loading={schemesQuery.isFetching}
+          onRetry={() => void schemesQuery.refetch()}
+          options={schemesQuery.data?.map((scheme) => ({ value: scheme.id, label: scheme.title }))}
           // با تغییر طرح کلان، طرح‌های انتخاب‌شده (که به طرح قبلی تعلق داشتند) پاک می‌شوند
           onChange={() => form.setFieldValue('planIds', [])}
         />
       </FormItem>
-      <FormItem name="name" label="نام شرکت" required>
-        <TextInput />
+      <FormItem
+        name="name"
+        label="نام شرکت"
+        required
+        rules={[
+          { min: 3, max: 100, message: 'نام شرکت باید ۳ تا ۱۰۰ نویسه باشد.' },
+          { pattern: NAME_PATTERN, message: 'نام شرکت فقط حروف فارسی، فاصله و عدد.' },
+        ]}
+      >
+        <TextInput maxLength={100} />
       </FormItem>
       <FormItem
         name="nationalId"
         label="شناسه ملی شرکت"
         required
+        rules={[{ pattern: /^\d{11}$/, message: 'شناسه ملی شرکت باید ۱۱ رقم باشد.' }]}
         extra={isEdit ? 'شناسه ملی بعد از ثبت قابل ویرایش نیست.' : undefined}
       >
         <TextInput inputMode="numeric" maxLength={11} disabled={isEdit} />
       </FormItem>
-      <FormItem name="agreementNumber" label="شماره تفاهم‌نامه منعقده" required>
-        <TextInput />
+      <FormItem
+        name="agreementNumber"
+        label="شماره تفاهم‌نامه منعقده"
+        required
+        rules={[
+          { min: 3, max: 50, message: 'شماره تفاهم‌نامه باید ۳ تا ۵۰ نویسه باشد.' },
+          { pattern: AGREEMENT_PATTERN, message: 'شماره تفاهم‌نامه فقط حرف، عدد و / - .' },
+        ]}
+      >
+        <TextInput maxLength={50} />
       </FormItem>
-      <FormItem name="accountNumber" label="شماره حساب شرکت" required>
-        <TextInput inputMode="numeric" />
+      <FormItem
+        name="accountNumber"
+        label="شماره حساب شرکت"
+        required
+        rules={[{ pattern: /^\d{8,24}$/, message: 'شماره حساب باید ۸ تا ۲۴ رقم باشد.' }]}
+      >
+        <TextInput inputMode="numeric" maxLength={24} />
       </FormItem>
       <FormItem name="contractDate" label="تاریخ انعقاد قرارداد" required>
-        <DateInput />
+        <DateInput minDate={MIN_CONTRACT_DATE} maxDate={MAX_DATE} />
       </FormItem>
       <FormItem name="accountOpeningDate" label="روز افتتاح حساب سپرده" required>
-        <DateInput />
+        <DateInput minDate={MIN_ACCOUNT_OPENING_DATE} maxDate={MAX_DATE} />
       </FormItem>
       <FormItem name="salaryFromSepah" label="دریافت حقوق پرسنل از بانک سپه">
         <Switch checkedChildren="بله" unCheckedChildren="خیر" />

@@ -22,9 +22,12 @@ const buildColumns = (months: string[]): ColumnsType<MonthlyAllocation> => [
 ];
 
 export const MonthlyPerformanceTable = () => {
-  const { data, isFetching } = useDashboardGet();
+  const dashboard = useDashboardGet();
   // ترتیب ستون‌ها از سرویس ماه‌ها (تازه‌ترین اول)
-  const { data: monthOptions } = useDashboardMonths();
+  const monthsQuery = useDashboardMonths();
+  const { data } = dashboard;
+  const monthOptions = monthsQuery.data;
+  const isFetching = dashboard.isFetching || monthsQuery.isFetching;
   const rows = data?.monthlyAllocation ?? [];
   const months = (monthOptions ?? []).map((item) => item.key ?? '');
 
@@ -38,6 +41,11 @@ export const MonthlyPerformanceTable = () => {
         columns={buildColumns(months)}
         dataSource={months.length ? rows : []}
         loading={isFetching}
+        error={dashboard.isError || monthsQuery.isError}
+        onRetry={() => {
+          if (dashboard.isError) void dashboard.refetch();
+          if (monthsQuery.isError) void monthsQuery.refetch();
+        }}
         locale={{ emptyText: 'هنوز داده کافی برای این گزارش وجود ندارد.' }}
       />
     </PanelCard>

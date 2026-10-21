@@ -1,8 +1,11 @@
 import { useState } from 'react';
 
+import { getPersonnelGetQueryOptions } from '@/api/generated/facility';
+
 import { PanelCard } from '@/component/card';
+import { useFetchBeforeOpen } from '@/hooks';
 import { useQueryParams } from '@/hooks/useQueryParams';
-import { CompanySelect } from '@/features/companies/components';
+import { CompanySelect, useSelectedCompany } from '@/features/companies/components';
 
 import { StaffFormModal, StaffSearch, StaffTable, StaffToolbar } from '../components';
 import { type StaffFilters } from '../types';
@@ -12,8 +15,19 @@ export const StaffPage = () => {
   const [modalOpen, setModalOpen] = useState(false);
   const [editingId, setEditingId] = useState<number | null>(null);
 
-  const companyId = params.companyId ? Number(params.companyId) : undefined;
+  // بخش پرسنل فقط وقتی شرکت انتخاب‌شده در کشویی شرکت‌ها باشد نمایش داده می‌شود
+  const companyId = useSelectedCompany(params.companyId);
   const filters: StaffFilters = { q: params.q, hireFrom: params.hireFrom, hireTo: params.hireTo };
+
+  const details = useFetchBeforeOpen<number>();
+
+  /** ویرایش: جزئیات پرسنل اول گرفته می‌شود؛ با خطا مودال باز نمی‌شود */
+  const openEdit = (id: number) =>
+    void details.open(
+      id,
+      (client) => client.fetchQuery(getPersonnelGetQueryOptions(id)),
+      () => openModal(id),
+    );
 
   const openModal = (id: number | null) => {
     setEditingId(id);
@@ -42,7 +56,8 @@ export const StaffPage = () => {
             key={`${companyId}-${JSON.stringify(filters)}`}
             companyId={companyId}
             filters={filters}
-            onEdit={openModal}
+            loadingEditId={details.loadingKey}
+            onEdit={openEdit}
           />
           <StaffFormModal
             open={modalOpen}

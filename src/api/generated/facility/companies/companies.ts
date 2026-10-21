@@ -40,6 +40,7 @@ import type {
 
 import { apiClient } from '../../../../services/http/apiClient';
 import type { ErrorType , BodyType } from '../../../../services/http/apiClient';
+import { toAspNetFormData } from '../../../../services/http/formData';
 
 
 type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
@@ -164,41 +165,7 @@ export const companiesCreate = (
  options?: SecondParameter<typeof apiClient>,signal?: AbortSignal
 ) => {
 
-      const formData = new FormData();
-if(companiesCreateBody?.SchemeId !== undefined) {
- formData.append(`SchemeId`, companiesCreateBody.SchemeId.toString())
- }
-if(companiesCreateBody?.Name !== undefined) {
- formData.append(`Name`, companiesCreateBody.Name);
- }
-if(companiesCreateBody?.NationalId !== undefined) {
- formData.append(`NationalId`, companiesCreateBody.NationalId);
- }
-if(companiesCreateBody?.AgreementNumber !== undefined) {
- formData.append(`AgreementNumber`, companiesCreateBody.AgreementNumber);
- }
-if(companiesCreateBody?.AccountNumber !== undefined) {
- formData.append(`AccountNumber`, companiesCreateBody.AccountNumber);
- }
-if(companiesCreateBody?.ContractDate !== undefined) {
- formData.append(`ContractDate`, companiesCreateBody.ContractDate);
- }
-if(companiesCreateBody?.AccountOpeningDate !== undefined) {
- formData.append(`AccountOpeningDate`, companiesCreateBody.AccountOpeningDate);
- }
-if(companiesCreateBody?.SalaryFromSepah !== undefined) {
- formData.append(`SalaryFromSepah`, companiesCreateBody.SalaryFromSepah.toString())
- }
-if(companiesCreateBody?.PlanIds !== undefined) {
- companiesCreateBody?.PlanIds.forEach(value => formData.append(`PlanIds`, value.toString()));
- }
-if(companiesCreateBody?.BranchCode !== undefined) {
- formData.append(`BranchCode`, companiesCreateBody.BranchCode);
- }
-if(companiesCreateBody?.agreementFile !== undefined) {
- formData.append(`agreementFile`, companiesCreateBody.agreementFile);
- }
-
+      const formData = toAspNetFormData(companiesCreateBody)
       return apiClient<ReadModelsCompanyDetailsDto>(
       {url: `/gateway/facility-management/Companies`, method: 'POST',
       headers: {'Content-Type': 'multipart/form-data', },
@@ -452,35 +419,7 @@ export const companiesUpdate = (
  options?: SecondParameter<typeof apiClient>,signal?: AbortSignal
 ) => {
 
-      const formData = new FormData();
-if(companiesUpdateBody?.Name !== undefined) {
- formData.append(`Name`, companiesUpdateBody.Name);
- }
-if(companiesUpdateBody?.AgreementNumber !== undefined) {
- formData.append(`AgreementNumber`, companiesUpdateBody.AgreementNumber);
- }
-if(companiesUpdateBody?.AccountNumber !== undefined) {
- formData.append(`AccountNumber`, companiesUpdateBody.AccountNumber);
- }
-if(companiesUpdateBody?.ContractDate !== undefined) {
- formData.append(`ContractDate`, companiesUpdateBody.ContractDate);
- }
-if(companiesUpdateBody?.AccountOpeningDate !== undefined) {
- formData.append(`AccountOpeningDate`, companiesUpdateBody.AccountOpeningDate);
- }
-if(companiesUpdateBody?.SalaryFromSepah !== undefined) {
- formData.append(`SalaryFromSepah`, companiesUpdateBody.SalaryFromSepah.toString())
- }
-if(companiesUpdateBody?.PlanIds !== undefined) {
- companiesUpdateBody?.PlanIds.forEach(value => formData.append(`PlanIds`, value.toString()));
- }
-if(companiesUpdateBody?.RowVersion !== undefined) {
- formData.append(`RowVersion`, companiesUpdateBody.RowVersion);
- }
-if(companiesUpdateBody?.agreementFile !== undefined) {
- formData.append(`agreementFile`, companiesUpdateBody.agreementFile);
- }
-
+      const formData = toAspNetFormData(companiesUpdateBody)
       return apiClient<ReadModelsCompanyDetailsDto>(
       {url: `/gateway/facility-management/Companies/${id}`, method: 'PUT',
       headers: {'Content-Type': 'multipart/form-data', },
@@ -618,20 +557,7 @@ export const companiesCancelContract = (
  options?: SecondParameter<typeof apiClient>,signal?: AbortSignal
 ) => {
 
-      const formData = new FormData();
-if(companiesCancelContractBody?.CancelDate !== undefined) {
- formData.append(`CancelDate`, companiesCancelContractBody.CancelDate);
- }
-if(companiesCancelContractBody?.ReasonId !== undefined) {
- formData.append(`ReasonId`, companiesCancelContractBody.ReasonId.toString())
- }
-if(companiesCancelContractBody?.Description !== undefined) {
- formData.append(`Description`, companiesCancelContractBody.Description);
- }
-if(companiesCancelContractBody?.letterFile !== undefined) {
- formData.append(`letterFile`, companiesCancelContractBody.letterFile);
- }
-
+      const formData = toAspNetFormData(companiesCancelContractBody)
       return apiClient<ReadModelsCompanyDetailsDto>(
       {url: `/gateway/facility-management/Companies/${id}/Cancel`, method: 'POST',
       headers: {'Content-Type': 'multipart/form-data', },
@@ -884,23 +810,7 @@ export const companiesBalancesSave = (
  options?: SecondParameter<typeof apiClient>,signal?: AbortSignal
 ) => {
 
-      const formData = new FormData();
-if(companiesBalancesSaveBody?.Months !== undefined) {
- companiesBalancesSaveBody?.Months.forEach(value => formData.append(`Months`, JSON.stringify(value)));
- }
-if(companiesBalancesSaveBody?.RowVersion !== undefined) {
- formData.append(`RowVersion`, companiesBalancesSaveBody.RowVersion);
- }
-if(companiesBalancesSaveBody?.DocumentTypeId !== undefined) {
- formData.append(`DocumentTypeId`, companiesBalancesSaveBody.DocumentTypeId.toString())
- }
-if(companiesBalancesSaveBody?.DocumentDescription !== undefined) {
- formData.append(`DocumentDescription`, companiesBalancesSaveBody.DocumentDescription);
- }
-if(companiesBalancesSaveBody?.files !== undefined) {
- companiesBalancesSaveBody?.files.forEach(value => formData.append(`files`, value));
- }
-
+      const formData = toAspNetFormData(companiesBalancesSaveBody)
       return apiClient<ReadModelsCompanyBalancesDto>(
       {url: `/gateway/facility-management/Companies/${id}/Balances`, method: 'PUT',
       headers: {'Content-Type': 'multipart/form-data', },
@@ -1069,20 +979,7 @@ export const companiesBalanceDocumentsUpload = (
  options?: SecondParameter<typeof apiClient>,signal?: AbortSignal
 ) => {
 
-      const formData = new FormData();
-if(companiesBalanceDocumentsUploadBody?.Month !== undefined) {
- formData.append(`Month`, companiesBalanceDocumentsUploadBody.Month);
- }
-if(companiesBalanceDocumentsUploadBody?.DocumentTypeId !== undefined) {
- formData.append(`DocumentTypeId`, companiesBalanceDocumentsUploadBody.DocumentTypeId.toString())
- }
-if(companiesBalanceDocumentsUploadBody?.Description !== undefined) {
- formData.append(`Description`, companiesBalanceDocumentsUploadBody.Description);
- }
-if(companiesBalanceDocumentsUploadBody?.files !== undefined) {
- companiesBalanceDocumentsUploadBody?.files.forEach(value => formData.append(`files`, value));
- }
-
+      const formData = toAspNetFormData(companiesBalanceDocumentsUploadBody)
       return apiClient<ReadModelsBalanceDocumentDto[] | null>(
       {url: `/gateway/facility-management/Companies/${id}/Balances/Documents`, method: 'POST',
       headers: {'Content-Type': 'multipart/form-data', },

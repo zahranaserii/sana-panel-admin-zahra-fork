@@ -14,7 +14,7 @@ interface PlanSelectProps extends SelectInputProps<number[]> {
 
 /** انتخاب چندتایی طرح‌های مندرج در قرارداد (حداکثر تعداد از سرور می‌آید) */
 export const PlanSelect = ({ schemeId, ...props }: PlanSelectProps) => {
-  const { data, isFetching } = useBasicInfoPlans(schemeId ?? 0, {
+  const { data, isFetching, refetch } = useBasicInfoPlans(schemeId ?? 0, {
     query: { enabled: Boolean(schemeId) },
   });
 
@@ -27,6 +27,7 @@ export const PlanSelect = ({ schemeId, ...props }: PlanSelectProps) => {
       mode="multiple"
       disabled={!schemeId}
       loading={isFetching}
+      onRetry={() => void refetch()}
       maxCount={data?.maxPlansPerCompany}
       placeholder={schemeId ? placeholder : 'ابتدا طرح کلان را انتخاب کنید'}
       options={data?.plans?.map((plan) => ({ value: plan.id, label: planLabel(plan) }))}

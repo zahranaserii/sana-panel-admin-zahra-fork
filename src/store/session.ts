@@ -1,11 +1,15 @@
 import { queryClient } from '@/app/providers/queryClient';
 
-import { useAuthStore } from './useAuthStore';
-import { useProfileStore } from './useProfileStore';
+import { resetStores } from './resettable';
+// استورها با import ریست خودشان را ثبت می‌کنند
+import './useAuthStore';
+import './useProfileStore';
 
-/** خروج کامل: توکن (کوکی و استور)، پروفایل و همه داده‌های کش‌شده (از جمله منو) پاک می‌شوند */
+/**
+ * خروج کامل (لاگ‌اوت و ۴۰۱): همه استورهای دیتای کاربر (توکن و کوکی، پروفایل، وضعیت مودال پایان نشست)
+ * و همه داده‌های کش‌شده (از جمله منو) پاک می‌شوند. تم ریست نمی‌شود.
+ */
 export const resetSession = () => {
-  useAuthStore.getState().logout();
-  useProfileStore.getState().clearProfile();
+  resetStores();
   queryClient.clear();
 };

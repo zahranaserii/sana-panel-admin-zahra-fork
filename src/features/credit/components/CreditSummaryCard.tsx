@@ -1,6 +1,9 @@
 import { type ColumnsType } from 'antd/es/table';
 
+import { type UseQueryResult } from '@tanstack/react-query';
+
 import { KpiCard, PanelCard } from '@/component/card';
+import { QueryState } from '@/component/retry';
 import { Table } from '@/component/table';
 import { toPersianDigits } from '@/utils/date';
 import { formatRial } from '@/utils/number';
@@ -31,42 +34,47 @@ const columns: ColumnsType<PlanCredit> = [
 ];
 
 interface CreditSummaryCardProps {
-  credit?: CompanyCredit;
-  loading: boolean;
+  /** سرویس اعتبار شرکت (برای تلاش مجدد در صورت خطا) */
+  query: UseQueryResult<CompanyCredit>;
 }
 
 /** مانده اعتبار ماه: میانگین‌ها و اعتبار هر طرح شرکت */
-export const CreditSummaryCard = ({ credit, loading }: CreditSummaryCardProps) => (
-  <PanelCard
-    title="مانده اعتبار ماه"
-    subtitle="میانگین موجودی از صفحه «مدیریت شرکت‌ها» ثبت می‌شود."
-  >
-    <div className="mb-4 grid grid-cols-[repeat(auto-fit,minmax(230px,1fr))] gap-4">
-      <KpiCard
-        label="مجموع میانگین مبنای محاسبه اعتبار"
-        value={formatRial(credit?.totalAverageBase ?? 0)}
-        footer={credit ? rialToTomanWords(credit.totalAverageBase ?? 0) : undefined}
-        loading={loading}
-      />
-      <KpiCard
-        label="میانگین ماه جاری"
-        value={formatRial(credit?.currentMonthAverage ?? 0)}
-        footer={credit ? rialToTomanWords(credit.currentMonthAverage ?? 0) : undefined}
-        loading={loading}
-      />
-      <KpiCard
-        label="مانده اعتبار همه طرح‌ها در این ماه"
-        value={formatRial(credit?.monthRemainingCredit ?? 0)}
-        footer={credit ? rialToTomanWords(credit.monthRemainingCredit ?? 0) : undefined}
-        loading={loading}
-      />
-    </div>
-    <Table<PlanCredit>
-      rowKey="planId"
-      columns={columns}
-      dataSource={credit?.plans}
-      loading={loading}
-      locale={{ emptyText: 'این شرکت هنوز طرحی ندارد.' }}
-    />
-  </PanelCard>
-);
+export const CreditSummaryCard = ({ query }: CreditSummaryCardProps) => {
+  const { data: credit, isFetching: loading } = query;
+  return (
+    <PanelCard
+      title="مانده اعتبار ماه"
+      subtitle="میانگین موجودی از صفحه «مدیریت شرکت‌ها» ثبت می‌شود."
+    >
+      <QueryState query={query}>
+        <div className="mb-4 grid grid-cols-[repeat(auto-fit,minmax(230px,1fr))] gap-4">
+          <KpiCard
+            label="مجموع میانگین مبنای محاسبه اعتبار"
+            value={formatRial(credit?.totalAverageBase ?? 0)}
+            footer={credit ? rialToTomanWords(credit.totalAverageBase ?? 0) : undefined}
+            loading={loading}
+          />
+          <KpiCard
+            label="میانگین ماه جاری"
+            value={formatRial(credit?.currentMonthAverage ?? 0)}
+            footer={credit ? rialToTomanWords(credit.currentMonthAverage ?? 0) : undefined}
+            loading={loading}
+          />
+          <KpiCard
+            label="مانده اعتبار همه طرح‌ها در این ماه"
+            value={formatRial(credit?.monthRemainingCredit ?? 0)}
+            footer={credit ? rialToTomanWords(credit.monthRemainingCredit ?? 0) : undefined}
+            loading={loading}
+          />
+        </div>
+        <Table<PlanCredit>
+          rowKey="planId"
+          columns={columns}
+          dataSource={credit?.plans}
+          loading={loading}
+          locale={{ emptyText: 'این شرکت هنوز طرحی ندارد.' }}
+        />
+      </QueryState>
+    </PanelCard>
+  );
+};

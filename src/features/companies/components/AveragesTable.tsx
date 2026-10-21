@@ -9,10 +9,12 @@ import {
   getCompaniesBalancesQueryKey,
   useCompaniesBalances,
   useCompaniesBalancesSave,
+  useCompaniesGet,
 } from '@/api/generated/facility';
 import { Button } from '@/component/button';
 import { Form, FormItem } from '@/component/form';
 import { AmountInput } from '@/component/input';
+import { Retry } from '@/component/retry';
 import { Table } from '@/component/table';
 import { toPersianDigits } from '@/utils/date';
 import { formatAmount } from '@/utils/number';
@@ -62,7 +64,8 @@ export const AveragesTable = ({ companyId }: { companyId: number }) => {
   const queryClient = useQueryClient();
   const [changedMonths, setChangedMonths] = useState<string[]>([]);
 
-  const { data, isFetching } = useCompaniesBalances(companyId);
+  const { data, isFetching, isError, refetch } = useCompaniesBalances(companyId);
+  const { data: company } = useCompaniesGet(companyId);
   const months = useMemo(() => data?.months ?? [], [data]);
 
   const initialValues = useMemo(
@@ -126,6 +129,9 @@ export const AveragesTable = ({ companyId }: { companyId: number }) => {
     setChangedMonths(changed);
   };
 
+  // بدون میانگین‌ها جدول و ذخیره معنی ندارد
+  if (isError) return <Retry loading={isFetching} onRetry={() => void refetch()} />;
+
   return (
     <>
       <Form<AveragesFormValues> form={form} onFinish={handleFinish}>
@@ -149,6 +155,7 @@ export const AveragesTable = ({ companyId }: { companyId: number }) => {
       <AverageDocModal
         open={changedMonths.length > 0}
         months={changedMonths}
+        schemeId={company?.schemeId}
         onSubmit={save}
         onClose={() => setChangedMonths([])}
       />

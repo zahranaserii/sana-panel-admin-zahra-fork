@@ -10,7 +10,9 @@ export type EnumKey = keyof CommonEnumCatalogDto;
  * فرانت عنوان وضعیت‌ها را در کد خودش تکرار نمی‌کند.
  */
 export const useEnums = () => {
-  const { data, isPending } = useLookupsEnums({ query: { staleTime: Infinity } });
+  const { data, isPending, isFetching, refetch } = useLookupsEnums({
+    query: { staleTime: Infinity },
+  });
 
   /** عنوان یک مقدار؛ اگر هنوز نیامده یا ناشناخته باشد «—» */
   const title = useCallback(
@@ -33,5 +35,8 @@ export const useEnums = () => {
     [data],
   );
 
-  return { catalog: data, isPending, title, options, requiresReason };
+  /** پراپ‌های سلکت‌های enum: لودینگ و فراخوانی دوباره با باز کردن سلکت خالی */
+  const selectProps = { loading: isFetching, onRetry: () => void refetch() };
+
+  return { catalog: data, isPending, title, options, requiresReason, selectProps };
 };

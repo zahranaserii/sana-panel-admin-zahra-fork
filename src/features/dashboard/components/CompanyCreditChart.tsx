@@ -3,6 +3,7 @@ import { Column } from '@ant-design/charts';
 import { useDashboardGet } from '@/api/generated/facility';
 import { PanelCard } from '@/component/card';
 import { Skeleton } from '@/component/loading';
+import { QueryState } from '@/component/retry';
 import { useChartTheme } from '@/hooks/useChartTheme';
 import { toPersianDigits } from '@/utils/date';
 import { formatRial } from '@/utils/number';
@@ -20,7 +21,8 @@ const compact = (value: number) => {
 
 export const CompanyCreditChart = () => {
   const chart = useChartTheme();
-  const { data, isPending } = useDashboardGet();
+  const query = useDashboardGet();
+  const { data, isPending } = query;
 
   // گروه‌بندی (شرکت/شعبه) از سرور می‌آید؛ عنوان هر گروه groupTitle است
   const rows = (data?.creditVsAllocated ?? []).flatMap((item) => [
@@ -73,7 +75,7 @@ export const CompanyCreditChart = () => {
       title="اعتبار ایجادشده در مقابل تخصیص‌یافته به تفکیک شرکت"
       subtitle="مقایسه اعتبار ایجادشده (تجمعی) و میزان تخصیص‌یافته هر شرکت"
     >
-      {renderBody()}
+      <QueryState query={query}>{renderBody()}</QueryState>
     </PanelCard>
   );
 };

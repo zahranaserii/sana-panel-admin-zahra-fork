@@ -38,7 +38,11 @@ export const UserFormModal = ({ open, userId, onClose }: UserFormModalProps) => 
     enabled: open && isEdit,
   });
 
-  const { data: roles, isPending: rolesPending } = useQuery({
+  const {
+    data: roles,
+    isFetching: rolesFetching,
+    refetch: refetchRoles,
+  } = useQuery({
     queryKey: QUERY_KEYS.USERS.ROLES,
     queryFn: () => getRoles(ROLE_PARAMS),
     enabled: open,
@@ -110,7 +114,8 @@ export const UserFormModal = ({ open, userId, onClose }: UserFormModalProps) => 
       </FormItem>
       <FormItem name="roleId" label="نقش کاربر" required requiredMessage="انتخاب نقش الزامی است.">
         <SelectInput
-          loading={rolesPending}
+          loading={rolesFetching}
+          onRetry={() => void refetchRoles()}
           placeholder="انتخاب نقش"
           options={roles?.items.map((role) => ({
             value: role.id,

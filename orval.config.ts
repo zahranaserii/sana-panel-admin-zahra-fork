@@ -7,6 +7,8 @@ import { defineConfig } from 'orval';
  * پیش‌فرض: GET = useQuery و بقیه = useMutation؛ استثناها در OPERATIONS.
  */
 const mutator = { path: './src/services/http/apiClient.ts', name: 'apiClient' };
+/** بدنه multipart با قرارداد ASP.NET (آرایه شیء به‌صورت Months[0].month) */
+const formData = { path: './src/services/http/formData.ts', name: 'toAspNetFormData' };
 
 const common = (input: string, target: string) => ({
   input: {
@@ -25,6 +27,7 @@ const common = (input: string, target: string) => ({
     },
     override: {
       mutator,
+      formData,
       header: () => [
         'تولید خودکار با Orval از روی OpenAPI — دستی ویرایش نشود (npm run api:generate)',
       ],

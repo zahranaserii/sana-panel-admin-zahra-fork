@@ -8,11 +8,11 @@ import { getMainMenu } from './api';
 
 /** منوی کاربر (یک بار بعد از ورود گرفته می‌شود و تا خروج در کش می‌ماند) */
 export const useMainMenu = () => {
-  const { data, isPending } = useQuery({
+  const { data, isPending, isError, isFetching, refetch } = useQuery({
     queryKey: QUERY_KEYS.MAIN_MENU,
     queryFn: getMainMenu,
     staleTime: Infinity,
   });
   const groups = useMemo(() => buildMenu(data ?? []), [data]);
-  return { groups, isPending };
+  return { groups, isPending, isError, isFetching, refetch };
 };

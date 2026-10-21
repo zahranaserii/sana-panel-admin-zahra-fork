@@ -27,7 +27,7 @@ export const StaffPickTable = ({
   selectedIds,
   onSelect,
 }: StaffPickTableProps) => {
-  const { data, isFetching } = usePersonnelSearch(companyId, {
+  const { data, isFetching, isError, refetch } = usePersonnelSearch(companyId, {
     ...toSearchParams(filters),
     ...ALL,
   });
@@ -71,6 +71,8 @@ export const StaffPickTable = ({
       columns={columns}
       dataSource={data?.items}
       loading={isFetching}
+      error={isError}
+      onRetry={() => void refetch()}
       maxHeight={300}
       locale={{ emptyText: 'پرسنلی با این شرایط یافت نشد.' }}
       rowSelection={{

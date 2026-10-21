@@ -1,25 +1,27 @@
 import { CheckOutlined, CloseOutlined } from '@ant-design/icons';
 import { useQueryClient } from '@tanstack/react-query';
 import { App } from 'antd';
-import { type ColumnsType } from 'antd/es/table';
 import { useState } from 'react';
 import { toast } from 'sonner';
 
 import {
   getApprovalsCreditQueueQueryKey,
   getApprovalsManagerQueueQueryKey,
-  getLoansCreditQueryKey,
+  getApprovalsPendingCountsQueryKey,
   getLoansSearchQueryKey,
   useApprovalsManagerDecide,
   useApprovalsManagerQueue,
+  useApprovalsPendingCounts,
 } from '@/api/generated/facility';
+import { type LoanRequestStatus } from '@/api/generated/facility/facilityPanelAPI.schemas';
 import { Button } from '@/component/button';
+import { PanelCard } from '@/component/card';
 import { DecisionModal, showDecisionResult, type DecisionTarget } from '@/component/decision-modal';
-import { LoanStatusChip } from '@/component/loan-status';
 import { Table } from '@/component/table';
+import { LOAN_STATUS } from '@/constant/loanStatus';
+import { useDebouncedValue } from '@/hooks';
 import { REASON_TYPE, useReasonOptions } from '@/services/reasons';
-import { formatJalali } from '@/utils/date';
-import { formatRial } from '@/utils/number';
+import { toPersianDigits } from '@/utils/date';
 
 import {
   DECISION,
@@ -28,29 +30,52 @@ import {
   type PendingRequest,
 } from '../types';
 
-const PAGE_SIZE = 10;
+import { ApprovalFilters } from './ApprovalFilters';
+import { buildColumns } from './columns';
 
-export const PendingRequestsTable = ({ companyId }: { companyId: number }) => {
+interface PendingRequestsTableProps {
+  /** خالی = همه شرکت‌ها */
+  companyId?: string;
+  onCompanyChange: (companyId: string | undefined) => void;
+}
+
+const PAGE_SIZE = 10;
+/** انتهای کلید سرویس اعتبار شرکت (getLoansCreditQueryKey → Companies/{id}/Credit) */
+const CREDIT_KEY_SUFFIX = '/Credit';
+
+export const PendingRequestsTable = ({ companyId, onCompanyChange }: PendingRequestsTableProps) => {
   const [page, setPage] = useState(1);
+  const [status, setStatus] = useState<LoanRequestStatus>(LOAN_STATUS.PENDING_MANAGER);
+  const [term, setTerm] = useState('');
   const [selected, setSelected] = useState<PendingRequest[]>([]);
   const [target, setTarget] = useState<DecisionTarget | null>(null);
+  const debouncedTerm = useDebouncedValue(term.trim());
+  const isPending = status === LOAN_STATUS.PENDING_MANAGER;
 
   const queryClient = useQueryClient();
   const { modal } = App.useApp();
 
-  const { data, isFetching } = useApprovalsManagerQueue({
-    CompanyId: companyId,
+  const { data, isFetching, isError, refetch } = useApprovalsManagerQueue({
+    CompanyId: companyId ? Number(companyId) : undefined,
+    Status: isPending ? undefined : status,
+    Term: debouncedTerm || undefined,
     Page: page,
     PageSize: PAGE_SIZE,
   });
+  // تعداد کل در انتظار (همه شرکت‌های دامنه کاربر)؛ خطا پیام نشان نمی‌دهد
+  const { data: counts } = useApprovalsPendingCounts({ request: { silent: true } });
 
   const { mutateAsync } = useApprovalsManagerDecide({
     mutation: {
       onSuccess: (result) => {
         void queryClient.invalidateQueries({ queryKey: getApprovalsManagerQueueQueryKey() });
         void queryClient.invalidateQueries({ queryKey: getApprovalsCreditQueueQueryKey() });
+        void queryClient.invalidateQueries({ queryKey: getApprovalsPendingCountsQueryKey() });
         void queryClient.invalidateQueries({ queryKey: getLoansSearchQueryKey() });
-        void queryClient.invalidateQueries({ queryKey: getLoansCreditQueryKey(companyId) });
+        // مانده اعتبار شرکت‌های این درخواست‌ها (با «همه شرکت‌ها» ممکن است چند شرکت باشد)
+        void queryClient.invalidateQueries({
+          predicate: ({ queryKey }) => String(queryKey[0]).endsWith(CREDIT_KEY_SUFFIX),
+        });
         setSelected([]);
         const doneText =
           target?.type === 'reject' ? 'رد شد' : 'تأیید و به مرحله تأیید اعتبارات ارسال شد';
@@ -80,62 +105,76 @@ export const PendingRequestsTable = ({ companyId }: { companyId: number }) => {
     setTarget({ type, requests: selected });
   };
 
-  const columns: ColumnsType<PendingRequest> = [
-    { title: 'پرسنل', dataIndex: 'personnelName' },
-    { title: 'طرح', dataIndex: 'planTitle' },
-    { title: 'مبلغ', dataIndex: 'amount', render: formatRial },
-    {
-      title: 'تاریخ ثبت',
-      dataIndex: 'createdAt',
-      render: (value: string) => formatJalali(value, undefined, { persianDigits: true }),
-    },
-    {
-      title: 'توضیحات',
-      dataIndex: 'description',
-      render: (value?: string | null) => value ?? '—',
-    },
-    {
-      title: 'وضعیت',
-      dataIndex: 'status',
-      render: (status?: number) => <LoanStatusChip status={status} />,
-    },
-    {
-      title: 'عملیات',
-      key: 'actions',
-      render: (_value, row) => (
-        <div className="flex gap-1.5">
-          <Button
-            size="small"
-            icon={<CheckOutlined />}
-            onClick={() => setTarget({ type: 'approve', requests: [row] })}
-          >
-            تأیید
-          </Button>
-          <Button
-            variant="danger"
-            size="small"
-            icon={<CloseOutlined />}
-            onClick={() => setTarget({ type: 'reject', requests: [row] })}
-          >
-            رد
-          </Button>
-        </div>
-      ),
-    },
-  ];
+  /** با تغییر هر فیلتر، صفحه و انتخاب‌ها از نو شروع می‌شوند */
+  const withReset =
+    <T,>(apply: (value: T) => void) =>
+    (value: T) => {
+      setPage(1);
+      setSelected([]);
+      apply(value);
+    };
+
+  const pendingCount = counts?.managerApproval;
 
   return (
-    <>
+    <PanelCard
+      title={
+        pendingCount
+          ? `درخواست‌های تأیید مدیر شرکت (${toPersianDigits(pendingCount)} در انتظار)`
+          : 'درخواست‌های تأیید مدیر شرکت'
+      }
+      subtitle="فقط درخواست‌هایی که اینجا تأیید شوند، برای بررسی به مرحله «تأیید اعتبارات» می‌روند."
+      extra={
+        <>
+          <ApprovalFilters
+            term={term}
+            onTermChange={withReset(setTerm)}
+            companyId={companyId}
+            onCompanyChange={withReset(onCompanyChange)}
+            status={status}
+            onStatusChange={withReset(setStatus)}
+          />
+          {isPending && (
+            <>
+              <Button size="small" icon={<CheckOutlined />} onClick={() => openBulk('approve')}>
+                تأیید گروهی
+              </Button>
+              <Button
+                variant="danger"
+                size="small"
+                icon={<CloseOutlined />}
+                onClick={() => openBulk('reject')}
+              >
+                رد گروهی
+              </Button>
+            </>
+          )}
+        </>
+      }
+    >
       <Table<PendingRequest>
         rowKey="id"
-        columns={columns}
+        columns={buildColumns({
+          showCompany: !companyId,
+          onDecide: isPending ? (type, row) => setTarget({ type, requests: [row] }) : undefined,
+        })}
         dataSource={data?.items}
         loading={isFetching}
-        locale={{ emptyText: 'درخواستی در انتظار تأیید مدیر شرکت نیست.' }}
-        rowSelection={{
-          selectedRowKeys: selected.map((item) => item.id ?? 0),
-          onChange: (_keys, rows) => setSelected(rows),
+        error={isError}
+        onRetry={() => void refetch()}
+        locale={{
+          emptyText: isPending
+            ? 'درخواستی در انتظار تأیید مدیر شرکت نیست.'
+            : 'درخواست ردشده‌ای وجود ندارد.',
         }}
+        rowSelection={
+          isPending
+            ? {
+                selectedRowKeys: selected.map((item) => item.id ?? 0),
+                onChange: (_keys, rows) => setSelected(rows),
+              }
+            : undefined
+        }
         pagination={{
           current: page,
           pageSize: PAGE_SIZE,
@@ -143,27 +182,15 @@ export const PendingRequestsTable = ({ companyId }: { companyId: number }) => {
           onChange: setPage,
         }}
       />
-      <div className="mt-3 flex gap-2">
-        <Button size="small" icon={<CheckOutlined />} onClick={() => openBulk('approve')}>
-          تأیید گروهی
-        </Button>
-        <Button
-          variant="danger"
-          size="small"
-          icon={<CloseOutlined />}
-          onClick={() => openBulk('reject')}
-        >
-          رد گروهی
-        </Button>
-      </div>
       <DecisionModal
         target={target}
         allowFile={false}
         rejectReasons={rejectReasons.options}
+        rejectReasonsProps={rejectReasons.selectProps}
         requireRejectNote
         onSubmit={decide}
         onClose={() => setTarget(null)}
       />
-    </>
+    </PanelCard>
   );
 };

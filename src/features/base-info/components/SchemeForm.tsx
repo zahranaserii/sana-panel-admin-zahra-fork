@@ -12,6 +12,7 @@ import { Button } from '@/component/button';
 import { PanelCard } from '@/component/card';
 import { Form } from '@/component/form';
 import { Skeleton } from '@/component/loading';
+import { Retry } from '@/component/retry';
 
 import { type SchemeDetail, type SchemeFormValues } from '../types';
 import { EMPTY_VALUES, invalidateBasicInfo, toFormValues, toPayload } from '../utils';
@@ -34,7 +35,12 @@ export const SchemeForm = ({ schemeId, onBack }: SchemeFormProps) => {
   const [form] = Form.useForm<SchemeFormValues>();
   const isEdit = schemeId !== null;
 
-  const { data: detail, isFetching } = useBasicInfoSchemeGet(schemeId ?? 0, {
+  const {
+    data: detail,
+    isFetching,
+    isError,
+    refetch,
+  } = useBasicInfoSchemeGet(schemeId ?? 0, {
     query: { enabled: isEdit, gcTime: 0 },
   });
 
@@ -76,6 +82,9 @@ export const SchemeForm = ({ schemeId, onBack }: SchemeFormProps) => {
         cells.filter((_c, column) => column !== index + 1),
       ),
     );
+
+  // ویرایش بدون جزئیات طرح معنی ندارد: به‌جای کل صفحه فقط تلاش مجدد
+  if (isEdit && isError) return <Retry loading={isFetching} onRetry={() => void refetch()} />;
 
   return (
     <PanelCard

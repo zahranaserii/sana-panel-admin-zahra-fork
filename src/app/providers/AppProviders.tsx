@@ -3,6 +3,7 @@ import { type ReactNode } from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
 import { Toaster } from 'sonner';
 
+import { SessionExpiredModal } from '@/features/auth/components/SessionExpiredModal';
 import { useThemeStore } from '@/store/useThemeStore';
 import { FONT_FAMILY } from '@/theme/typography';
 
@@ -18,11 +19,13 @@ export const AppProviders = ({ children }: { children: ReactNode }) => {
       <ErrorBoundary FallbackComponent={ErrorFallback} onReset={() => queryClient.clear()}>
         <QueryClientProvider client={queryClient}>
           {children}
+          <SessionExpiredModal />
           <Toaster
             dir="rtl"
             position="top-left"
             richColors
             closeButton
+            visibleToasts={1}
             theme={mode}
             toastOptions={{ style: { fontFamily: FONT_FAMILY } }}
           />

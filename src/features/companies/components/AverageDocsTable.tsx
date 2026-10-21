@@ -25,7 +25,7 @@ export const AverageDocsTable = ({ companyId }: { companyId: number }) => {
   const { modal } = App.useApp();
   // حذف مستند فقط برای ادمین
   const isAdmin = useProfileStore((state) => state.hasRole(ROLES.ADMIN));
-  const { data, isFetching } = useCompaniesBalanceDocuments(companyId);
+  const { data, isFetching, isError, refetch } = useCompaniesBalanceDocuments(companyId);
 
   const { mutateAsync: remove } = useCompaniesBalanceDocumentDelete({
     mutation: {
@@ -106,6 +106,8 @@ export const AverageDocsTable = ({ companyId }: { companyId: number }) => {
         columns={columns}
         dataSource={data ?? []}
         loading={isFetching}
+        error={isError}
+        onRetry={() => void refetch()}
         locale={{ emptyText: 'هنوز مستندی ثبت نشده است.' }}
       />
     </>

@@ -37,6 +37,7 @@ import type {
 
 import { apiClient } from '../../../../services/http/apiClient';
 import type { ErrorType , BodyType } from '../../../../services/http/apiClient';
+import { toAspNetFormData } from '../../../../services/http/formData';
 
 
 type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
@@ -323,29 +324,7 @@ export const approvalsCreditDecide = (
  options?: SecondParameter<typeof apiClient>,signal?: AbortSignal
 ) => {
 
-      const formData = new FormData();
-if(approvalsCreditDecideBody?.RequestIds !== undefined) {
- approvalsCreditDecideBody?.RequestIds.forEach(value => formData.append(`RequestIds`, value.toString()));
- }
-if(approvalsCreditDecideBody?.Decision !== undefined) {
- formData.append(`Decision`, approvalsCreditDecideBody.Decision.toString())
- }
-if(approvalsCreditDecideBody?.ReasonId !== undefined) {
- formData.append(`ReasonId`, approvalsCreditDecideBody.ReasonId.toString())
- }
-if(approvalsCreditDecideBody?.Description !== undefined) {
- formData.append(`Description`, approvalsCreditDecideBody.Description);
- }
-if(approvalsCreditDecideBody?.PostStage !== undefined) {
- formData.append(`PostStage`, approvalsCreditDecideBody.PostStage.toString())
- }
-if(approvalsCreditDecideBody?.PostStageReasonId !== undefined) {
- formData.append(`PostStageReasonId`, approvalsCreditDecideBody.PostStageReasonId.toString())
- }
-if(approvalsCreditDecideBody?.attachment !== undefined) {
- formData.append(`attachment`, approvalsCreditDecideBody.attachment);
- }
-
+      const formData = toAspNetFormData(approvalsCreditDecideBody)
       return apiClient<CommandResponsesDecisionResultDto>(
       {url: `/gateway/facility-management/CreditApprovals/Decisions`, method: 'POST',
       headers: {'Content-Type': 'multipart/form-data', },
@@ -574,29 +553,7 @@ export const approvalsDigitalDecide = (
  options?: SecondParameter<typeof apiClient>,signal?: AbortSignal
 ) => {
 
-      const formData = new FormData();
-if(approvalsDigitalDecideBody?.RequestIds !== undefined) {
- approvalsDigitalDecideBody?.RequestIds.forEach(value => formData.append(`RequestIds`, value.toString()));
- }
-if(approvalsDigitalDecideBody?.Decision !== undefined) {
- formData.append(`Decision`, approvalsDigitalDecideBody.Decision.toString())
- }
-if(approvalsDigitalDecideBody?.ReasonId !== undefined) {
- formData.append(`ReasonId`, approvalsDigitalDecideBody.ReasonId.toString())
- }
-if(approvalsDigitalDecideBody?.Description !== undefined) {
- formData.append(`Description`, approvalsDigitalDecideBody.Description);
- }
-if(approvalsDigitalDecideBody?.PostStage !== undefined) {
- formData.append(`PostStage`, approvalsDigitalDecideBody.PostStage.toString())
- }
-if(approvalsDigitalDecideBody?.PostStageReasonId !== undefined) {
- formData.append(`PostStageReasonId`, approvalsDigitalDecideBody.PostStageReasonId.toString())
- }
-if(approvalsDigitalDecideBody?.attachment !== undefined) {
- formData.append(`attachment`, approvalsDigitalDecideBody.attachment);
- }
-
+      const formData = toAspNetFormData(approvalsDigitalDecideBody)
       return apiClient<CommandResponsesDecisionResultDto>(
       {url: `/gateway/facility-management/DigitalApprovals/Decisions`, method: 'POST',
       headers: {'Content-Type': 'multipart/form-data', },

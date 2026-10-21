@@ -1,6 +1,7 @@
 import { useDashboardGet } from '@/api/generated/facility';
 import { PanelCard } from '@/component/card';
 import { Skeleton } from '@/component/loading';
+import { QueryState } from '@/component/retry';
 import { useChartTheme } from '@/hooks/useChartTheme';
 import { CHART_MAX_CATEGORIES } from '@/theme/chartPalette';
 
@@ -21,7 +22,8 @@ const foldOthers = (items: PlanShare[]): DonutItem[] => {
 
 export const PlanShareChart = () => {
   const chart = useChartTheme();
-  const { data: dashboard, isPending } = useDashboardGet();
+  const query = useDashboardGet();
+  const { data: dashboard, isPending } = query;
   const data = dashboard?.planShare;
 
   const renderBody = () => {
@@ -35,7 +37,7 @@ export const PlanShareChart = () => {
       title="سهم هر طرح از تعداد درخواست‌ها"
       subtitle="محبوبیت هر یک از طرح‌های قرض‌الحسنه/مرابحه در میان درخواست‌ها"
     >
-      {renderBody()}
+      <QueryState query={query}>{renderBody()}</QueryState>
     </PanelCard>
   );
 };

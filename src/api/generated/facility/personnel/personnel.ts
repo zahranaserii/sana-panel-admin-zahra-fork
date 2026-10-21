@@ -35,6 +35,7 @@ import type {
 
 import { apiClient } from '../../../../services/http/apiClient';
 import type { ErrorType , BodyType } from '../../../../services/http/apiClient';
+import { toAspNetFormData } from '../../../../services/http/formData';
 
 
 type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
@@ -397,14 +398,7 @@ export const personnelDelete = (
  options?: SecondParameter<typeof apiClient>,signal?: AbortSignal
 ) => {
 
-      const formData = new FormData();
-if(personnelDeleteBody?.Description !== undefined) {
- formData.append(`Description`, personnelDeleteBody.Description);
- }
-if(personnelDeleteBody?.file !== undefined) {
- formData.append(`file`, personnelDeleteBody.file);
- }
-
+      const formData = toAspNetFormData(personnelDeleteBody)
       return apiClient<boolean>(
       {url: `/gateway/facility-management/Personnel/${id}/Delete`, method: 'POST',
       headers: {'Content-Type': 'multipart/form-data', },
@@ -565,11 +559,7 @@ export const personnelImport = (
  options?: SecondParameter<typeof apiClient>,signal?: AbortSignal
 ) => {
 
-      const formData = new FormData();
-if(personnelImportBody?.file !== undefined) {
- formData.append(`file`, personnelImportBody.file);
- }
-
+      const formData = toAspNetFormData(personnelImportBody)
       return apiClient<ReadModelsPersonnelImportResultDto>(
       {url: `/gateway/facility-management/Companies/${companyId}/Personnel/Import`, method: 'POST',
       headers: {'Content-Type': 'multipart/form-data', },

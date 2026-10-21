@@ -40,9 +40,12 @@ export const DeleteReasonModal = ({
       name="description"
       label="توضیحات حذف"
       required
-      rules={[{ whitespace: true, message: 'توضیحات حذف الزامی است.' }]}
+      rules={[
+        { whitespace: true, message: 'توضیحات حذف الزامی است.' },
+        { min: 5, message: 'توضیحات حذف باید حداقل ۵ نویسه باشد.' },
+      ]}
     >
-      <TextAreaInput rows={3} maxLength={1000} />
+      <TextAreaInput rows={3} maxLength={500} />
     </FormItem>
     {requireFile && (
       <FormItem

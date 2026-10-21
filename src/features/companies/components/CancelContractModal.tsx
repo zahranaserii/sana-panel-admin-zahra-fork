@@ -5,6 +5,7 @@ import {
   getCompaniesLookupQueryKey,
   getCompaniesSearchQueryKey,
   useCompaniesCancelContract,
+  useCompaniesGet,
 } from '@/api/generated/facility';
 import { FormItem } from '@/component/form';
 import { DateInput, FileInput, SelectInput, TextAreaInput } from '@/component/input';
@@ -21,9 +22,20 @@ interface CancelContractModalProps {
 
 const INITIAL_VALUES = { cancelDate: dayjs().format(ISO_DATE_FORMAT) };
 
+/** بازه مجاز تاریخ لغو در بک‌اند: ۱۴۰۵/۰۱/۰۱ تا امروز */
+const MIN_CANCEL_DATE = dayjs.fromJalali(1405, 1, 1).toDate();
+
 export const CancelContractModal = ({ company, onClose }: CancelContractModalProps) => {
   const queryClient = useQueryClient();
-  const reasons = useReasonOptions(REASON_TYPE.CONTRACT_CANCEL, undefined, Boolean(company));
+  // دلایل لغو مخصوص طرح کلان شرکت است و طرح فقط در جزئیات شرکت می‌آید
+  const { data: detail } = useCompaniesGet(company?.id ?? 0, {
+    query: { enabled: Boolean(company?.id) },
+  });
+  const reasons = useReasonOptions(
+    REASON_TYPE.CONTRACT_CANCEL,
+    detail?.schemeId,
+    Boolean(detail?.schemeId),
+  );
 
   const { mutateAsync } = useCompaniesCancelContract({
     mutation: {
@@ -57,10 +69,14 @@ export const CancelContractModal = ({ company, onClose }: CancelContractModalPro
       onSubmit={submit}
     >
       <FormItem name="cancelDate" label="تاریخ لغو" required>
-        <DateInput />
+        <DateInput minDate={MIN_CANCEL_DATE} maxDate={new Date()} />
       </FormItem>
       <FormItem name="reasonId" label="دلیل لغو" required>
-        <SelectInput loading={reasons.isPending} options={reasons.options} />
+        <SelectInput
+          {...reasons.selectProps}
+          loading={!detail || reasons.selectProps.loading}
+          options={reasons.options}
+        />
       </FormItem>
       <FormItem
         name="description"

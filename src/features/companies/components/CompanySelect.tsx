@@ -13,7 +13,7 @@ interface CompanySelectProps {
  * اگر مقداری انتخاب نشده یا شرکت انتخاب‌شده دیگر فعال نیست، اولین شرکت انتخاب می‌شود.
  */
 export const CompanySelect = ({ value, onChange }: CompanySelectProps) => {
-  const { data: companies, isPending } = useCompaniesLookup({ activeOnly: true });
+  const { data: companies, isFetching, refetch } = useCompaniesLookup({ activeOnly: true });
 
   // شناسه عددی است؛ مقدار انتخاب در آدرس صفحه به‌صورت رشته نگه داشته می‌شود
   useEffect(() => {
@@ -33,7 +33,8 @@ export const CompanySelect = ({ value, onChange }: CompanySelectProps) => {
         id="company-select"
         className="w-full"
         allowClear={false}
-        loading={isPending}
+        loading={isFetching}
+        onRetry={() => void refetch()}
         value={value}
         onChange={onChange}
         placeholder="ابتدا یک شرکت ثبت کنید"

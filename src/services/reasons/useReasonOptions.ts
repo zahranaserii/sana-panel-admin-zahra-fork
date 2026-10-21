@@ -23,9 +23,14 @@ export const useReasonOptions = (type: ReasonType, schemeId?: number, enabled = 
   const generalQuery = useBasicInfoReasons(params, {
     query: { enabled: enabled && !schemeId },
   });
-  const { data, isPending } = schemeId ? bySchemeQuery : generalQuery;
+  const { data, isPending, isFetching, refetch } = schemeId ? bySchemeQuery : generalQuery;
   return {
     options: (data ?? []).map((reason) => ({ value: reason.id ?? 0, label: reason.title ?? '' })),
     isPending: enabled && isPending,
+    /** پراپ‌های سلکت: لودینگ و فراخوانی دوباره با باز کردن سلکت خالی */
+    selectProps: {
+      loading: enabled && isFetching,
+      onRetry: () => void refetch(),
+    },
   };
 };

@@ -50,13 +50,14 @@ export const CreditApprovalCard = ({ companyId, onCompanyChange }: CreditApprova
   const [changingStage, setChangingStage] = useState<CreditApprovalItem | null>(null);
   const enums = useEnums();
 
-  const { data, isFetching } = useApprovalsCreditQueue({
+  const { data, isFetching, isError, refetch } = useApprovalsCreditQueue({
     CompanyId: companyId ? Number(companyId) : undefined,
     Page: page,
     PageSize: PAGE_SIZE,
   });
   // همه شرکت‌ها، شامل قراردادهای لغوشده
-  const { data: companies } = useCompaniesLookup({ activeOnly: false });
+  const companiesQuery = useCompaniesLookup({ activeOnly: false });
+  const companies = companiesQuery.data;
   const rejectReasons = useReasonOptions(REASON_TYPE.LOAN_REJECT);
 
   const { mutateAsync } = useApprovalsCreditDecide({
@@ -112,6 +113,9 @@ export const CreditApprovalCard = ({ companyId, onCompanyChange }: CreditApprova
             size="small"
             allowClear={false}
             style={{ minWidth: 200 }}
+            loading={companiesQuery.isFetching}
+            error={companiesQuery.isError}
+            onRetry={() => void companiesQuery.refetch()}
             value={companyId ?? ALL}
             onChange={changeCompany}
             options={[
@@ -142,6 +146,8 @@ export const CreditApprovalCard = ({ companyId, onCompanyChange }: CreditApprova
         })}
         dataSource={data?.items}
         loading={isFetching}
+        error={isError}
+        onRetry={() => void refetch()}
         locale={{ emptyText: 'درخواستی برای نمایش وجود ندارد.' }}
         rowSelection={{
           selectedRowKeys: selected.map((item) => item.id ?? 0),
@@ -159,6 +165,7 @@ export const CreditApprovalCard = ({ companyId, onCompanyChange }: CreditApprova
       <DecisionModal
         target={target}
         rejectReasons={rejectReasons.options}
+        rejectReasonsProps={rejectReasons.selectProps}
         requireRejectNote
         approveFields={<PostStageFields />}
         onSubmit={decide}

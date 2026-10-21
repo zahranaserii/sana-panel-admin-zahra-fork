@@ -89,11 +89,13 @@ const hasOpenLoan = (staff: MockStaff) =>
   db.loanRequests.some(
     (item) =>
       item.personnelId === staff.id &&
-      [
-        LOAN_REQUEST_STATUS.PENDING_MANAGER,
-        LOAN_REQUEST_STATUS.PENDING_CREDIT,
-        LOAN_REQUEST_STATUS.PENDING_DIGITAL,
-      ].includes(item.status as 1 | 3 | 6),
+      (
+        [
+          LOAN_REQUEST_STATUS.PENDING_MANAGER,
+          LOAN_REQUEST_STATUS.PENDING_CREDIT,
+          LOAN_REQUEST_STATUS.PENDING_DIGITAL,
+        ] as number[]
+      ).includes(item.status),
   );
 
 const searchStaff = (companyId: number, url: URL) => {

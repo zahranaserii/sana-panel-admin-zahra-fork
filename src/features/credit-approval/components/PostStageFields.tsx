@@ -13,7 +13,7 @@ export const PostStageFields = () => {
   return (
     <>
       <FormItem name="postStage" label="مرحله پس از تأیید" required>
-        <SelectInput loading={enums.isPending} options={enums.options('postApprovalStage')} />
+        <SelectInput {...enums.selectProps} options={enums.options('postApprovalStage')} />
       </FormItem>
       {needsReason && (
         <FormItem
@@ -22,7 +22,7 @@ export const PostStageFields = () => {
           required
           requiredMessage="انتخاب علت اجباری است."
         >
-          <SelectInput loading={reasons.isPending} options={reasons.options} />
+          <SelectInput {...reasons.selectProps} options={reasons.options} />
         </FormItem>
       )}
     </>

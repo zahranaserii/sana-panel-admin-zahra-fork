@@ -7,6 +7,7 @@ import { baseInfoHandlers } from './baseInfo';
 import { companyHandlers } from './companies';
 import { creditHandlers } from './credit';
 import { dashboardHandlers } from './dashboard';
+import { failOnceHandler } from './failOnce';
 import { lookupHandlers } from './lookups';
 import { managerApprovalHandlers } from './managerApprovals';
 import { staffHandlers } from './staff';
@@ -22,6 +23,7 @@ const generatedHandlers = [...Object.values(facilityMocks), ...Object.values(adm
 
 /** ماک‌های دستی: رفتار واقعی (دیتابیس در حافظه، CRUD، خطاهای ۴۰۹/۴۲۲، گزارش تغییرات) */
 const manualHandlers = [
+  failOnceHandler,
   ...authHandlers,
   ...baseInfoHandlers,
   ...lookupHandlers,

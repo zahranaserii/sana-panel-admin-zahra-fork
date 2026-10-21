@@ -1,5 +1,8 @@
 import { useState } from 'react';
 
+import { getCompaniesGetQueryOptions } from '@/api/generated/facility';
+import { useFetchBeforeOpen } from '@/hooks';
+
 import {
   CancelContractModal,
   CompanyAverages,
@@ -18,14 +21,27 @@ export const CompaniesPage = () => {
     setFormOpen(true);
   };
 
-  const openEdit = (id: number) => {
-    setEditingId(id);
-    setFormOpen(true);
-  };
+  const details = useFetchBeforeOpen<number>();
+
+  /** جزئیات شرکت اول گرفته می‌شود؛ با خطا مودال باز نمی‌شود */
+  const openEdit = (id: number) =>
+    void details.open(
+      id,
+      (client) => client.fetchQuery(getCompaniesGetQueryOptions(id)),
+      () => {
+        setEditingId(id);
+        setFormOpen(true);
+      },
+    );
 
   return (
     <>
-      <CompanyTable onCreate={openCreate} onEdit={openEdit} onCancelContract={setCancelTarget} />
+      <CompanyTable
+        loadingEditId={details.loadingKey}
+        onCreate={openCreate}
+        onEdit={openEdit}
+        onCancelContract={setCancelTarget}
+      />
       <CompanyAverages />
 
       <CompanyFormModal open={formOpen} companyId={editingId} onClose={() => setFormOpen(false)} />

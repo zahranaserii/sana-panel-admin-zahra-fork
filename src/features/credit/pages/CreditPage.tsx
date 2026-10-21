@@ -1,6 +1,7 @@
 import { useLoansCredit } from '@/api/generated/facility';
 import { PanelCard } from '@/component/card';
 import { useQueryParams } from '@/hooks/useQueryParams';
+import { useSelectedCompany } from '@/features/companies/components';
 import { type StaffFilters } from '@/features/staff/types';
 
 import {
@@ -13,15 +14,16 @@ import {
 
 export const CreditPage = () => {
   const { params, setParams } = useQueryParams();
-  const companyId = params.companyId ? Number(params.companyId) : undefined;
+  const companyId = useSelectedCompany(params.companyId);
   const filters: StaffFilters = { q: params.q, hireFrom: params.hireFrom, hireTo: params.hireTo };
 
   // تاریخ مبنا اگر انتخاب نشده باشد، پیش‌فرض سرور (baseDateDefault) است
-  const { data: credit, isFetching } = useLoansCredit(
+  const creditQuery = useLoansCredit(
     companyId ?? 0,
     params.date ? { baseDate: params.date } : undefined,
     { query: { enabled: Boolean(companyId) } },
   );
+  const { data: credit, isFetching } = creditQuery;
   const date = params.date ?? credit?.baseDate;
 
   return (
@@ -39,9 +41,9 @@ export const CreditPage = () => {
 
       {companyId && (
         <>
-          <CreditSummaryCard credit={credit} loading={isFetching} />
-          {/* با تغییر شرکت، فرم و انتخاب‌ها از نو شروع می‌شوند */}
-          {date && (
+          <CreditSummaryCard query={creditQuery} />
+          {/* فرم ثبت به اعتبار شرکت وابسته است؛ بدون آن نمایش داده نمی‌شود. با تغییر شرکت، فرم از نو شروع می‌شود */}
+          {credit && date && (
             <LoanRequestCard
               key={companyId}
               companyId={companyId}

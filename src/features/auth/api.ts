@@ -15,8 +15,12 @@ export const login = (values: LoginFormValues) =>
     },
   );
 
-/** خروج؛ خطای آن نادیده گرفته می‌شود چون اطلاعات کاربر در هر حال پاک می‌شود */
-export const logout = () => http.get<unknown>(ENDPOINTS.AUTH.LOGOUT, { silent: true });
+/**
+ * خروج؛ خطای آن نادیده گرفته می‌شود چون اطلاعات کاربر در هر حال پاک می‌شود
+ * (۴۰۱ هم مودال پایان نشست را باز نمی‌کند).
+ */
+export const logout = () =>
+  http.get<unknown>(ENDPOINTS.AUTH.LOGOUT, { silent: true, onError: { 401: () => undefined } });
 
 /** بکند ندارد — سرویس پروفایل در نسخه بعدی سوئگر منتشر می‌شود (فعلاً از ماک) */
 export const getProfile = () => http.get<UserProfile>(ENDPOINTS.AUTH.PROFILE);

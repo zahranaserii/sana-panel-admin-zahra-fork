@@ -22,7 +22,7 @@ const toJalali = (value?: string | null) =>
 export const CompanyLoanRequests = ({ companyId }: { companyId: number }) => {
   const [page, setPage] = useState(1);
   const [cancelling, setCancelling] = useState<LoanRequest | null>(null);
-  const { data, isFetching } = useLoansSearch({
+  const { data, isFetching, isError, refetch } = useLoansSearch({
     CompanyId: companyId,
     Page: page,
     PageSize: PAGE_SIZE,
@@ -79,6 +79,8 @@ export const CompanyLoanRequests = ({ companyId }: { companyId: number }) => {
         columns={columns}
         dataSource={data?.items}
         loading={isFetching}
+        error={isError}
+        onRetry={() => void refetch()}
         locale={{ emptyText: 'هنوز درخواستی برای این شرکت ثبت نشده است.' }}
         pagination={{
           current: page,

@@ -10,13 +10,21 @@ interface AverageDocModalProps {
   open: boolean;
   /** ماه‌هایی که تغییر کرده‌اند (YYYY/MM) */
   months: string[];
+  /** انواع مستند مخصوص طرح کلان شرکت است */
+  schemeId?: number;
   onSubmit: (values: BalanceDocFormValues) => Promise<unknown>;
   onClose: () => void;
 }
 
 /** برای ثبت میانگین، انتخاب نوع مستند و بارگذاری فایل آن اجباری است */
-export const AverageDocModal = ({ open, months, onSubmit, onClose }: AverageDocModalProps) => {
-  const docTypes = useReasonOptions(REASON_TYPE.DOCUMENT_TYPE, undefined, open);
+export const AverageDocModal = ({
+  open,
+  months,
+  schemeId,
+  onSubmit,
+  onClose,
+}: AverageDocModalProps) => {
+  const docTypes = useReasonOptions(REASON_TYPE.DOCUMENT_TYPE, schemeId, open && Boolean(schemeId));
 
   return (
     <FormModal<BalanceDocFormValues>
@@ -30,7 +38,11 @@ export const AverageDocModal = ({ open, months, onSubmit, onClose }: AverageDocM
         ماه‌های تغییر یافته: {toPersianDigits(months.join('، '))}
       </p>
       <FormItem name="documentTypeId" label="نوع مستند" required>
-        <SelectInput loading={docTypes.isPending} options={docTypes.options} />
+        <SelectInput
+          {...docTypes.selectProps}
+          loading={!schemeId || docTypes.selectProps.loading}
+          options={docTypes.options}
+        />
       </FormItem>
       <FormItem
         name="file"
