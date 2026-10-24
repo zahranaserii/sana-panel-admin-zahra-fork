@@ -12,6 +12,9 @@ import { ChartLegend } from './ChartLegend';
 
 const SERIES = ['اعتبار ایجادشده', 'اعتبار تخصیص‌یافته'];
 
+/** گروه‌بندی سرور (creditVsAllocatedGroupKind): ۱ شعبه (دید سراسری ادمین و شعبه دیجیتال)، ۲ شرکت */
+const BY_BRANCH = 1;
+
 /** نمایش فشرده محور (مثل «۲۱۴ م») */
 const compact = (value: number) => {
   if (value >= 1e9) return toPersianDigits(`${Math.round(value / 1e8) / 10} میلیارد`);
@@ -23,6 +26,7 @@ export const CompanyCreditChart = () => {
   const chart = useChartTheme();
   const query = useDashboardGet();
   const { data, isPending } = query;
+  const group = data?.creditVsAllocatedGroupKind === BY_BRANCH ? 'شعبه' : 'شرکت';
 
   // گروه‌بندی (شرکت/شعبه) از سرور می‌آید؛ عنوان هر گروه groupTitle است
   const rows = (data?.creditVsAllocated ?? []).flatMap((item) => [
@@ -72,8 +76,8 @@ export const CompanyCreditChart = () => {
 
   return (
     <PanelCard
-      title="اعتبار ایجادشده در مقابل تخصیص‌یافته به تفکیک شرکت"
-      subtitle="مقایسه اعتبار ایجادشده (تجمعی) و میزان تخصیص‌یافته هر شرکت"
+      title={`اعتبار ایجادشده در مقابل تخصیص‌یافته به تفکیک ${group}`}
+      subtitle={`مقایسه اعتبار ایجادشده (تجمعی) و میزان تخصیص‌یافته هر ${group}`}
     >
       <QueryState query={query}>{renderBody()}</QueryState>
     </PanelCard>

@@ -99,7 +99,8 @@ const buildDashboard = (): ReadModelsDashboardDto => {
         countStatus(LOAN_REQUEST_STATUS.REJECTED_MANAGER),
     },
     planShare: [...planCounts].map(([planTitle, requestCount]) => ({ planTitle, requestCount })),
-    creditVsAllocatedGroupKind: 1,
+    // گروه‌بندی ماک به تفکیک شرکت است (۲)
+    creditVsAllocatedGroupKind: 2,
     creditVsAllocated: companies.map((company) => ({
       groupId: String(company.id),
       groupTitle: company.name,

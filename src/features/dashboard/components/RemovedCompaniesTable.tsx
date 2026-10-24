@@ -10,8 +10,8 @@ import { formatRial } from '@/utils/number';
 
 import { type RemovedCompany } from '../types';
 
-/** وضعیت شرکت بک‌اند: ۳ حذف‌شده */
-const DELETED = 3;
+/** وضعیت شرکت بک‌اند (CompanyStatus): ۲ لغوشده، ۳ منقضی‌شده، ۴ حذف‌شده */
+const DELETED = 4;
 
 const rial = (value?: number | null) =>
   value === null || value === undefined ? '—' : formatRial(value);

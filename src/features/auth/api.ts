@@ -7,8 +7,8 @@ import { type LoginFormValues, type LoginRequest, type LoginResponse } from './t
 export const login = (values: LoginFormValues) =>
   http.post<LoginResponse, LoginRequest>(
     ENDPOINTS.AUTH.LOGIN,
-    // کپچا فعلاً غیرفعال است (بک‌اند اختیاری در نظر گرفته)
-    { ...values, captchaToken: null, captchaValue: null },
+    // کپچا فعلاً با مقدار ثابت ارسال می‌شود (سرویس کپچا هنوز استفاده نمی‌شود)
+    { ...values, captchaValue: '24125', captchaToken: '43d735fd-7fac-4e87-9148-3c6ca0eab8c6' },
     {
       // خطای ۴۰۱ در صفحه لاگین یعنی نام کاربری/رمز اشتباه — رفتار پیش‌فرض (خروج) اجرا نشود
       onError: { 401: () => undefined },
