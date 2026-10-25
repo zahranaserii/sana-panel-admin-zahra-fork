@@ -69,7 +69,7 @@ export const personnelSearch = (
 
 
       return apiClient<CommonFacilityPagedResponseOfPersonnelListItemDto>(
-      {url: `/gateway/facility-management/Companies/${companyId}/Personnel`, method: 'GET',
+      {url: `/facility-management/Companies/${companyId}/Personnel`, method: 'GET',
         params, signal
     },
       options);
@@ -81,7 +81,7 @@ export const personnelSearch = (
 export const getPersonnelSearchQueryKey = (companyId: number,
     params?: PersonnelSearchParams,) => {
     return [
-    `/gateway/facility-management/Companies/${companyId}/Personnel`, ...(params ? [params] : [])
+    `/facility-management/Companies/${companyId}/Personnel`, ...(params ? [params] : [])
     ] as const;
     }
 
@@ -170,7 +170,7 @@ export const personnelCreate = (
 
 
       return apiClient<ReadModelsPersonnelDetailsDto>(
-      {url: `/gateway/facility-management/Companies/${companyId}/Personnel`, method: 'POST',
+      {url: `/facility-management/Companies/${companyId}/Personnel`, method: 'POST',
       headers: {'Content-Type': 'application/json', },
       data: createPersonnelCommand, signal
     },
@@ -237,7 +237,7 @@ export const personnelGet = (
 
 
       return apiClient<ReadModelsPersonnelDetailsDto>(
-      {url: `/gateway/facility-management/Personnel/${id}`, method: 'GET', signal
+      {url: `/facility-management/Personnel/${id}`, method: 'GET', signal
     },
       options);
     }
@@ -247,7 +247,7 @@ export const personnelGet = (
 
 export const getPersonnelGetQueryKey = (id: number,) => {
     return [
-    `/gateway/facility-management/Personnel/${id}`
+    `/facility-management/Personnel/${id}`
     ] as const;
     }
 
@@ -331,7 +331,7 @@ export const personnelUpdate = (
 
 
       return apiClient<ReadModelsPersonnelDetailsDto>(
-      {url: `/gateway/facility-management/Personnel/${id}`, method: 'PUT',
+      {url: `/facility-management/Personnel/${id}`, method: 'PUT',
       headers: {'Content-Type': 'application/json', },
       data: updatePersonnelCommand, signal
     },
@@ -400,7 +400,7 @@ export const personnelDelete = (
 
       const formData = toAspNetFormData(personnelDeleteBody)
       return apiClient<boolean>(
-      {url: `/gateway/facility-management/Personnel/${id}/Delete`, method: 'POST',
+      {url: `/facility-management/Personnel/${id}/Delete`, method: 'POST',
       headers: {'Content-Type': 'multipart/form-data', },
        data: formData, signal
     },
@@ -467,7 +467,7 @@ export const personnelImportTemplate = (
 
 
       return apiClient<unknown>(
-      {url: `/gateway/facility-management/Personnel/Import/Template`, method: 'GET', signal
+      {url: `/facility-management/Personnel/Import/Template`, method: 'GET', signal
     },
       options);
     }
@@ -477,7 +477,7 @@ export const personnelImportTemplate = (
 
 export const getPersonnelImportTemplateQueryKey = () => {
     return [
-    `/gateway/facility-management/Personnel/Import/Template`
+    `/facility-management/Personnel/Import/Template`
     ] as const;
     }
 
@@ -561,7 +561,7 @@ export const personnelImport = (
 
       const formData = toAspNetFormData(personnelImportBody)
       return apiClient<ReadModelsPersonnelImportResultDto>(
-      {url: `/gateway/facility-management/Companies/${companyId}/Personnel/Import`, method: 'POST',
+      {url: `/facility-management/Companies/${companyId}/Personnel/Import`, method: 'POST',
       headers: {'Content-Type': 'multipart/form-data', },
        data: formData, signal
     },
@@ -628,7 +628,7 @@ export const personnelImportResult = (
 
 
       return apiClient<ReadModelsPersonnelImportResultDto>(
-      {url: `/gateway/facility-management/Personnel/Import/${batchId}`, method: 'GET', signal
+      {url: `/facility-management/Personnel/Import/${batchId}`, method: 'GET', signal
     },
       options);
     }
@@ -638,7 +638,7 @@ export const personnelImportResult = (
 
 export const getPersonnelImportResultQueryKey = (batchId: number,) => {
     return [
-    `/gateway/facility-management/Personnel/Import/${batchId}`
+    `/facility-management/Personnel/Import/${batchId}`
     ] as const;
     }
 
@@ -721,7 +721,7 @@ export const personnelDecide = (
 
 
       return apiClient<number>(
-      {url: `/gateway/facility-management/Personnel/Decisions`, method: 'POST',
+      {url: `/facility-management/Personnel/Decisions`, method: 'POST',
       headers: {'Content-Type': 'application/json', },
       data: decidePersonnelCommand, signal
     },

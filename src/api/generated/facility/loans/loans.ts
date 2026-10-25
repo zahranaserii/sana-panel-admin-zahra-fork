@@ -71,7 +71,7 @@ export const loansCredit = (
 
 
       return apiClient<ReadModelsCompanyCreditDto>(
-      {url: `/gateway/facility-management/Companies/${companyId}/Credit`, method: 'GET',
+      {url: `/facility-management/Companies/${companyId}/Credit`, method: 'GET',
         params, signal
     },
       options);
@@ -83,7 +83,7 @@ export const loansCredit = (
 export const getLoansCreditQueryKey = (companyId: number,
     params?: LoansCreditParams,) => {
     return [
-    `/gateway/facility-management/Companies/${companyId}/Credit`, ...(params ? [params] : [])
+    `/facility-management/Companies/${companyId}/Credit`, ...(params ? [params] : [])
     ] as const;
     }
 
@@ -172,7 +172,7 @@ export const loansPreview = (
 
 
       return apiClient<ReadModelsLoanRequestPreviewDto>(
-      {url: `/gateway/facility-management/Companies/${companyId}/LoanRequests/Preview`, method: 'POST',
+      {url: `/facility-management/Companies/${companyId}/LoanRequests/Preview`, method: 'POST',
       headers: {'Content-Type': 'application/json', },
       data: previewLoanRequestQuery, signal
     },
@@ -185,7 +185,7 @@ export const loansPreview = (
 export const getLoansPreviewQueryKey = (companyId: number,
     previewLoanRequestQuery?: BodyType<PreviewLoanRequestQuery>,) => {
     return [
-    'POST', `/gateway/facility-management/Companies/${companyId}/LoanRequests/Preview`, previewLoanRequestQuery
+    'POST', `/facility-management/Companies/${companyId}/LoanRequests/Preview`, previewLoanRequestQuery
     ] as const;
     }
 
@@ -274,7 +274,7 @@ export const loansCreate = (
 
 
       return apiClient<CommandResponsesLoanBatchDto>(
-      {url: `/gateway/facility-management/Companies/${companyId}/LoanRequests`, method: 'POST',
+      {url: `/facility-management/Companies/${companyId}/LoanRequests`, method: 'POST',
       headers: {'Content-Type': 'application/json', },
       data: createLoanRequestsCommand, signal
     },
@@ -342,7 +342,7 @@ export const loansSearch = (
 
 
       return apiClient<CommonFacilityPagedResponseOfLoanRequestListItemDto>(
-      {url: `/gateway/facility-management/LoanRequests`, method: 'GET',
+      {url: `/facility-management/LoanRequests`, method: 'GET',
         params, signal
     },
       options);
@@ -353,7 +353,7 @@ export const loansSearch = (
 
 export const getLoansSearchQueryKey = (params?: LoansSearchParams,) => {
     return [
-    `/gateway/facility-management/LoanRequests`, ...(params ? [params] : [])
+    `/facility-management/LoanRequests`, ...(params ? [params] : [])
     ] as const;
     }
 
@@ -435,7 +435,7 @@ export const loansGet = (
 
 
       return apiClient<ReadModelsLoanRequestDetailsDto>(
-      {url: `/gateway/facility-management/LoanRequests/${id}`, method: 'GET', signal
+      {url: `/facility-management/LoanRequests/${id}`, method: 'GET', signal
     },
       options);
     }
@@ -445,7 +445,7 @@ export const loansGet = (
 
 export const getLoansGetQueryKey = (id: number,) => {
     return [
-    `/gateway/facility-management/LoanRequests/${id}`
+    `/facility-management/LoanRequests/${id}`
     ] as const;
     }
 
@@ -529,7 +529,7 @@ export const loansAddMember = (
 
 
       return apiClient<CommandResponsesLoanBatchDto>(
-      {url: `/gateway/facility-management/LoanBatches/${batchId}/Members`, method: 'POST',
+      {url: `/facility-management/LoanBatches/${batchId}/Members`, method: 'POST',
       headers: {'Content-Type': 'application/json', },
       data: addLoanBatchMemberCommand, signal
     },
@@ -598,7 +598,7 @@ export const loansRemoveMember = (
 
 
       return apiClient<CommandResponsesLoanBatchDto>(
-      {url: `/gateway/facility-management/LoanBatches/${batchId}/Members/${requestId}`, method: 'DELETE', signal
+      {url: `/facility-management/LoanBatches/${batchId}/Members/${requestId}`, method: 'DELETE', signal
     },
       options);
     }
@@ -665,7 +665,7 @@ export const loansDocumentDownload = (
 
 
       return apiClient<unknown>(
-      {url: `/gateway/facility-management/LoanRequests/${id}/Documents/${fileId}`, method: 'GET', signal
+      {url: `/facility-management/LoanRequests/${id}/Documents/${fileId}`, method: 'GET', signal
     },
       options);
     }
@@ -676,7 +676,7 @@ export const loansDocumentDownload = (
 export const getLoansDocumentDownloadQueryKey = (id: number,
     fileId: number,) => {
     return [
-    `/gateway/facility-management/LoanRequests/${id}/Documents/${fileId}`
+    `/facility-management/LoanRequests/${id}/Documents/${fileId}`
     ] as const;
     }
 
@@ -765,7 +765,7 @@ export const loansCancel = (
 
 
       return apiClient<CommandResponsesLoanRequestListItemDto>(
-      {url: `/gateway/facility-management/LoanRequests/${id}/Cancel`, method: 'POST',
+      {url: `/facility-management/LoanRequests/${id}/Cancel`, method: 'POST',
       headers: {'Content-Type': 'application/json', },
       data: cancelLoanRequestCommand, signal
     },

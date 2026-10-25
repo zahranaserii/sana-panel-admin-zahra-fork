@@ -195,6 +195,13 @@
         ],
         "parameters": [
           {
+            "name": "Token",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
             "name": "x-api-version",
             "in": "header",
             "required": true,
@@ -236,6 +243,136 @@
         "responses": {
           "200": {
             "description": "Success"
+          }
+        }
+      }
+    },
+    "/gateway/identity/Internal/Authorization/Resolve": {
+      "post": {
+        "tags": [
+          "InternalAuthorization"
+        ],
+        "parameters": [
+          {
+            "name": "x-api-version",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "DeviceInfo",
+            "in": "header",
+            "description": "DeviceInfo"
+          },
+          {
+            "name": "AppId",
+            "in": "header",
+            "description": "Android : 1; PWA:2"
+          },
+          {
+            "name": "DeviceTypeId",
+            "in": "header",
+            "description": "1"
+          },
+          {
+            "name": "DeviceId",
+            "in": "header",
+            "description": "0912****230"
+          },
+          {
+            "name": "AppLanguage",
+            "in": "header",
+            "description": "fa"
+          },
+          {
+            "name": "DeviceVersion",
+            "in": "header",
+            "description": "1.7"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json; x-api-version=2": {
+              "schema": {
+                "$ref": "#/components/schemas/ResolveRequest"
+              }
+            },
+            "text/json; x-api-version=2": {
+              "schema": {
+                "$ref": "#/components/schemas/ResolveRequest"
+              }
+            },
+            "application/*+json; x-api-version=2": {
+              "schema": {
+                "$ref": "#/components/schemas/ResolveRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/gateway/identity/Panel/Profile": {
+      "get": {
+        "tags": [
+          "PanelAccess"
+        ],
+        "parameters": [
+          {
+            "name": "x-api-version",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "DeviceInfo",
+            "in": "header",
+            "description": "DeviceInfo"
+          },
+          {
+            "name": "AppId",
+            "in": "header",
+            "description": "Android : 1; PWA:2"
+          },
+          {
+            "name": "DeviceTypeId",
+            "in": "header",
+            "description": "1"
+          },
+          {
+            "name": "DeviceId",
+            "in": "header",
+            "description": "0912****230"
+          },
+          {
+            "name": "AppLanguage",
+            "in": "header",
+            "description": "fa"
+          },
+          {
+            "name": "DeviceVersion",
+            "in": "header",
+            "description": "1.7"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PanelProfileDtoApiResponse"
+                }
+              }
+            }
           }
         }
       }
@@ -1442,6 +1579,82 @@
             "format": "uuid"
           },
           "captchaValue": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "PanelProfileDto": {
+        "type": "object",
+        "properties": {
+          "panelUserId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "userName": {
+            "type": "string",
+            "nullable": true
+          },
+          "fullName": {
+            "type": "string",
+            "nullable": true
+          },
+          "userCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "branchCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "branchName": {
+            "type": "string",
+            "nullable": true
+          },
+          "scopeType": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "scopeId": {
+            "type": "integer",
+            "nullable": true,
+            "format": "int32"
+          },
+          "keys": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "PanelProfileDtoApiResponse": {
+        "type": "object",
+        "properties": {
+          "isSuccess": {
+            "type": "boolean"
+          },
+          "statusCode": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "message": {
+            "type": "string",
+            "nullable": true
+          },
+          "data": {
+            "$ref": "#/components/schemas/PanelProfileDto"
+          }
+        },
+        "additionalProperties": false
+      },
+      "ResolveRequest": {
+        "type": "object",
+        "properties": {
+          "token": {
             "type": "string",
             "nullable": true
           }

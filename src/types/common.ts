@@ -20,14 +20,6 @@ export interface ApiErrorBody extends Partial<ApiResponse<unknown>> {
   errors?: Record<string, string[]>;
 }
 
-export interface UserProfile {
-  id: string;
-  username: string;
-  fullName: string;
-  branch?: string;
-  roles: string[];
-}
-
 /** فایل قبلی سرور (برای نمایش در ورودی فایل) */
 export interface UploadedFile {
   id: string;

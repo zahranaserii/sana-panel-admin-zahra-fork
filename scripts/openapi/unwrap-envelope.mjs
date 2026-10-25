@@ -30,14 +30,23 @@ const addMissingPathParams = (path, operation) => {
 const ensureOperationId = (path, method, operation) => {
   if (!operation || typeof operation !== 'object' || operation.operationId) return;
   const segments = path
-    .replace(/^\/gateway\/[^/]+\//, '')
+    .replace(/^\/[^/]+\//, '')
     .split('/')
     .filter(Boolean)
     .map((segment) => (segment.startsWith('{') ? 'ById' : segment));
   operation.operationId = [...segments, method[0].toUpperCase() + method.slice(1)].join('_');
 };
 
+/** پیشوند `/gateway` جزو VITE_API_BASE_URL است و از مسیر سرویس‌ها حذف می‌شود */
+const GATEWAY_PREFIX = /^\/gateway(?=\/)/;
+
+const stripGateway = (paths = {}) =>
+  Object.fromEntries(
+    Object.entries(paths).map(([path, item]) => [path.replace(GATEWAY_PREFIX, ''), item]),
+  );
+
 export default (spec) => {
+  spec.paths = stripGateway(spec.paths);
   const schemas = spec.components?.schemas ?? {};
   const isEnvelope = (schema) =>
     schema?.type === 'object' && ENVELOPE_KEYS.every((key) => key in (schema.properties ?? {}));

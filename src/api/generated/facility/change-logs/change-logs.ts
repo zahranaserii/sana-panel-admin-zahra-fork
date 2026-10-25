@@ -64,7 +64,7 @@ export const changeLogsSearch = (
 
 
       return apiClient<CommonFacilityPagedResponseOfChangeLogItemDto>(
-      {url: `/gateway/facility-management/ChangeLogs`, method: 'GET',
+      {url: `/facility-management/ChangeLogs`, method: 'GET',
         params, signal
     },
       options);
@@ -75,7 +75,7 @@ export const changeLogsSearch = (
 
 export const getChangeLogsSearchQueryKey = (params?: ChangeLogsSearchParams,) => {
     return [
-    `/gateway/facility-management/ChangeLogs`, ...(params ? [params] : [])
+    `/facility-management/ChangeLogs`, ...(params ? [params] : [])
     ] as const;
     }
 
@@ -158,7 +158,7 @@ export const changeLogsUsers = (
 
 
       return apiClient<CommonRegistrarDto[] | null>(
-      {url: `/gateway/facility-management/ChangeLogs/Users`, method: 'GET', signal
+      {url: `/facility-management/ChangeLogs/Users`, method: 'GET', signal
     },
       options);
     }
@@ -168,7 +168,7 @@ export const changeLogsUsers = (
 
 export const getChangeLogsUsersQueryKey = () => {
     return [
-    `/gateway/facility-management/ChangeLogs/Users`
+    `/facility-management/ChangeLogs/Users`
     ] as const;
     }
 
@@ -251,7 +251,7 @@ export const changeLogsExport = (
 
 
       return apiClient<void>(
-      {url: `/gateway/facility-management/ChangeLogs/Export`, method: 'GET',
+      {url: `/facility-management/ChangeLogs/Export`, method: 'GET',
         params, signal
     },
       options);
@@ -262,7 +262,7 @@ export const changeLogsExport = (
 
 export const getChangeLogsExportQueryKey = (params?: ChangeLogsExportParams,) => {
     return [
-    `/gateway/facility-management/ChangeLogs/Export`, ...(params ? [params] : [])
+    `/facility-management/ChangeLogs/Export`, ...(params ? [params] : [])
     ] as const;
     }
 
@@ -346,7 +346,7 @@ export const changeLogsRestore = (
 
 
       return apiClient<CommandResponsesChangeLogItemDto>(
-      {url: `/gateway/facility-management/ChangeLogs/${id}/Restore`, method: 'POST',
+      {url: `/facility-management/ChangeLogs/${id}/Restore`, method: 'POST',
       headers: {'Content-Type': 'application/json', },
       data: restoreChangeCommand, signal
     },

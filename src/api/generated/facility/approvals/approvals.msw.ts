@@ -40,7 +40,7 @@ export const getApprovalsPendingCountsResponseMock = (overrideResponse: Partial<
 
 
 export const getApprovalsManagerQueueMockHandler = (overrideResponse?: CommonFacilityPagedResponseOfLoanRequestListItemDto | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<CommonFacilityPagedResponseOfLoanRequestListItemDto> | CommonFacilityPagedResponseOfLoanRequestListItemDto), options?: RequestHandlerOptions) => {
-  return http.get('*/gateway/facility-management/ManagerApprovals', async (info: Parameters<Parameters<typeof http.get>[1]>[0]) => {await delay(250);
+  return http.get('*/facility-management/ManagerApprovals', async (info: Parameters<Parameters<typeof http.get>[1]>[0]) => {await delay(250);
 
 
     return json(overrideResponse !== undefined
@@ -52,7 +52,7 @@ export const getApprovalsManagerQueueMockHandler = (overrideResponse?: CommonFac
 }
 
 export const getApprovalsManagerDecideMockHandler = (overrideResponse?: CommandResponsesDecisionResultDto | ((info: Parameters<Parameters<typeof http.post>[1]>[0]) => Promise<CommandResponsesDecisionResultDto> | CommandResponsesDecisionResultDto), options?: RequestHandlerOptions) => {
-  return http.post('*/gateway/facility-management/ManagerApprovals/Decisions', async (info: Parameters<Parameters<typeof http.post>[1]>[0]) => {await delay(250);
+  return http.post('*/facility-management/ManagerApprovals/Decisions', async (info: Parameters<Parameters<typeof http.post>[1]>[0]) => {await delay(250);
 
 
     return json(overrideResponse !== undefined
@@ -64,7 +64,7 @@ export const getApprovalsManagerDecideMockHandler = (overrideResponse?: CommandR
 }
 
 export const getApprovalsCreditQueueMockHandler = (overrideResponse?: CommonFacilityPagedResponseOfLoanRequestListItemDto | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<CommonFacilityPagedResponseOfLoanRequestListItemDto> | CommonFacilityPagedResponseOfLoanRequestListItemDto), options?: RequestHandlerOptions) => {
-  return http.get('*/gateway/facility-management/CreditApprovals', async (info: Parameters<Parameters<typeof http.get>[1]>[0]) => {await delay(250);
+  return http.get('*/facility-management/CreditApprovals', async (info: Parameters<Parameters<typeof http.get>[1]>[0]) => {await delay(250);
 
 
     return json(overrideResponse !== undefined
@@ -76,7 +76,7 @@ export const getApprovalsCreditQueueMockHandler = (overrideResponse?: CommonFaci
 }
 
 export const getApprovalsCreditDecideMockHandler = (overrideResponse?: CommandResponsesDecisionResultDto | ((info: Parameters<Parameters<typeof http.post>[1]>[0]) => Promise<CommandResponsesDecisionResultDto> | CommandResponsesDecisionResultDto), options?: RequestHandlerOptions) => {
-  return http.post('*/gateway/facility-management/CreditApprovals/Decisions', async (info: Parameters<Parameters<typeof http.post>[1]>[0]) => {await delay(250);
+  return http.post('*/facility-management/CreditApprovals/Decisions', async (info: Parameters<Parameters<typeof http.post>[1]>[0]) => {await delay(250);
 
 
     return json(overrideResponse !== undefined
@@ -88,7 +88,7 @@ export const getApprovalsCreditDecideMockHandler = (overrideResponse?: CommandRe
 }
 
 export const getApprovalsPostStageMockHandler = (overrideResponse?: CommandResponsesLoanRequestListItemDto | ((info: Parameters<Parameters<typeof http.put>[1]>[0]) => Promise<CommandResponsesLoanRequestListItemDto> | CommandResponsesLoanRequestListItemDto), options?: RequestHandlerOptions) => {
-  return http.put('*/gateway/facility-management/CreditApprovals/:requestId/PostApprovalStage', async (info: Parameters<Parameters<typeof http.put>[1]>[0]) => {await delay(250);
+  return http.put('*/facility-management/CreditApprovals/:requestId/PostApprovalStage', async (info: Parameters<Parameters<typeof http.put>[1]>[0]) => {await delay(250);
 
 
     return json(overrideResponse !== undefined
@@ -100,7 +100,7 @@ export const getApprovalsPostStageMockHandler = (overrideResponse?: CommandRespo
 }
 
 export const getApprovalsDigitalQueueMockHandler = (overrideResponse?: CommonFacilityPagedResponseOfLoanRequestListItemDto | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<CommonFacilityPagedResponseOfLoanRequestListItemDto> | CommonFacilityPagedResponseOfLoanRequestListItemDto), options?: RequestHandlerOptions) => {
-  return http.get('*/gateway/facility-management/DigitalApprovals', async (info: Parameters<Parameters<typeof http.get>[1]>[0]) => {await delay(250);
+  return http.get('*/facility-management/DigitalApprovals', async (info: Parameters<Parameters<typeof http.get>[1]>[0]) => {await delay(250);
 
 
     return json(overrideResponse !== undefined
@@ -112,7 +112,7 @@ export const getApprovalsDigitalQueueMockHandler = (overrideResponse?: CommonFac
 }
 
 export const getApprovalsDigitalDecideMockHandler = (overrideResponse?: CommandResponsesDecisionResultDto | ((info: Parameters<Parameters<typeof http.post>[1]>[0]) => Promise<CommandResponsesDecisionResultDto> | CommandResponsesDecisionResultDto), options?: RequestHandlerOptions) => {
-  return http.post('*/gateway/facility-management/DigitalApprovals/Decisions', async (info: Parameters<Parameters<typeof http.post>[1]>[0]) => {await delay(250);
+  return http.post('*/facility-management/DigitalApprovals/Decisions', async (info: Parameters<Parameters<typeof http.post>[1]>[0]) => {await delay(250);
 
 
     return json(overrideResponse !== undefined
@@ -124,7 +124,7 @@ export const getApprovalsDigitalDecideMockHandler = (overrideResponse?: CommandR
 }
 
 export const getApprovalsPendingCountsMockHandler = (overrideResponse?: ReadModelsPendingCountsDto | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<ReadModelsPendingCountsDto> | ReadModelsPendingCountsDto), options?: RequestHandlerOptions) => {
-  return http.get('*/gateway/facility-management/Approvals/PendingCounts', async (info: Parameters<Parameters<typeof http.get>[1]>[0]) => {await delay(250);
+  return http.get('*/facility-management/Approvals/PendingCounts', async (info: Parameters<Parameters<typeof http.get>[1]>[0]) => {await delay(250);
 
 
     return json(overrideResponse !== undefined

@@ -56,7 +56,7 @@ export const internalCompanyLookup = (
 
 
       return apiClient<CommonFacilityLookupItemDto[] | null>(
-      {url: `/gateway/facility-management/Internal/Companies/Lookup`, method: 'GET',
+      {url: `/facility-management/Internal/Companies/Lookup`, method: 'GET',
         params, signal
     },
       options);
@@ -67,7 +67,7 @@ export const internalCompanyLookup = (
 
 export const getInternalCompanyLookupQueryKey = (params?: InternalCompanyLookupParams,) => {
     return [
-    `/gateway/facility-management/Internal/Companies/Lookup`, ...(params ? [params] : [])
+    `/facility-management/Internal/Companies/Lookup`, ...(params ? [params] : [])
     ] as const;
     }
 

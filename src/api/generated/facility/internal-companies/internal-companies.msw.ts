@@ -23,7 +23,7 @@ export const getInternalCompanyLookupResponseMock = (): CommonFacilityLookupItem
 
 
 export const getInternalCompanyLookupMockHandler = (overrideResponse?: CommonFacilityLookupItemDto[] | null | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<CommonFacilityLookupItemDto[] | null> | CommonFacilityLookupItemDto[] | null), options?: RequestHandlerOptions) => {
-  return http.get('*/gateway/facility-management/Internal/Companies/Lookup', async (info: Parameters<Parameters<typeof http.get>[1]>[0]) => {await delay(250);
+  return http.get('*/facility-management/Internal/Companies/Lookup', async (info: Parameters<Parameters<typeof http.get>[1]>[0]) => {await delay(250);
 
 
     return json(overrideResponse !== undefined

@@ -40,7 +40,7 @@ export const getPersonnelDecideResponseMock = (): number => (faker.number.int())
 
 
 export const getPersonnelSearchMockHandler = (overrideResponse?: CommonFacilityPagedResponseOfPersonnelListItemDto | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<CommonFacilityPagedResponseOfPersonnelListItemDto> | CommonFacilityPagedResponseOfPersonnelListItemDto), options?: RequestHandlerOptions) => {
-  return http.get('*/gateway/facility-management/Companies/:companyId/Personnel', async (info: Parameters<Parameters<typeof http.get>[1]>[0]) => {await delay(250);
+  return http.get('*/facility-management/Companies/:companyId/Personnel', async (info: Parameters<Parameters<typeof http.get>[1]>[0]) => {await delay(250);
 
 
     return json(overrideResponse !== undefined
@@ -52,7 +52,7 @@ export const getPersonnelSearchMockHandler = (overrideResponse?: CommonFacilityP
 }
 
 export const getPersonnelCreateMockHandler = (overrideResponse?: ReadModelsPersonnelDetailsDto | ((info: Parameters<Parameters<typeof http.post>[1]>[0]) => Promise<ReadModelsPersonnelDetailsDto> | ReadModelsPersonnelDetailsDto), options?: RequestHandlerOptions) => {
-  return http.post('*/gateway/facility-management/Companies/:companyId/Personnel', async (info: Parameters<Parameters<typeof http.post>[1]>[0]) => {await delay(250);
+  return http.post('*/facility-management/Companies/:companyId/Personnel', async (info: Parameters<Parameters<typeof http.post>[1]>[0]) => {await delay(250);
 
 
     return json(overrideResponse !== undefined
@@ -64,7 +64,7 @@ export const getPersonnelCreateMockHandler = (overrideResponse?: ReadModelsPerso
 }
 
 export const getPersonnelGetMockHandler = (overrideResponse?: ReadModelsPersonnelDetailsDto | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<ReadModelsPersonnelDetailsDto> | ReadModelsPersonnelDetailsDto), options?: RequestHandlerOptions) => {
-  return http.get('*/gateway/facility-management/Personnel/:id', async (info: Parameters<Parameters<typeof http.get>[1]>[0]) => {await delay(250);
+  return http.get('*/facility-management/Personnel/:id', async (info: Parameters<Parameters<typeof http.get>[1]>[0]) => {await delay(250);
 
 
     return json(overrideResponse !== undefined
@@ -76,7 +76,7 @@ export const getPersonnelGetMockHandler = (overrideResponse?: ReadModelsPersonne
 }
 
 export const getPersonnelUpdateMockHandler = (overrideResponse?: ReadModelsPersonnelDetailsDto | ((info: Parameters<Parameters<typeof http.put>[1]>[0]) => Promise<ReadModelsPersonnelDetailsDto> | ReadModelsPersonnelDetailsDto), options?: RequestHandlerOptions) => {
-  return http.put('*/gateway/facility-management/Personnel/:id', async (info: Parameters<Parameters<typeof http.put>[1]>[0]) => {await delay(250);
+  return http.put('*/facility-management/Personnel/:id', async (info: Parameters<Parameters<typeof http.put>[1]>[0]) => {await delay(250);
 
 
     return json(overrideResponse !== undefined
@@ -88,7 +88,7 @@ export const getPersonnelUpdateMockHandler = (overrideResponse?: ReadModelsPerso
 }
 
 export const getPersonnelDeleteMockHandler = (overrideResponse?: boolean | ((info: Parameters<Parameters<typeof http.post>[1]>[0]) => Promise<boolean> | boolean), options?: RequestHandlerOptions) => {
-  return http.post('*/gateway/facility-management/Personnel/:id/Delete', async (info: Parameters<Parameters<typeof http.post>[1]>[0]) => {await delay(250);
+  return http.post('*/facility-management/Personnel/:id/Delete', async (info: Parameters<Parameters<typeof http.post>[1]>[0]) => {await delay(250);
 
 
     return json(overrideResponse !== undefined
@@ -100,7 +100,7 @@ export const getPersonnelDeleteMockHandler = (overrideResponse?: boolean | ((inf
 }
 
 export const getPersonnelImportTemplateMockHandler = (overrideResponse?: unknown | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<unknown> | unknown), options?: RequestHandlerOptions) => {
-  return http.get('*/gateway/facility-management/Personnel/Import/Template', async (info: Parameters<Parameters<typeof http.get>[1]>[0]) => {await delay(250);
+  return http.get('*/facility-management/Personnel/Import/Template', async (info: Parameters<Parameters<typeof http.get>[1]>[0]) => {await delay(250);
   if (typeof overrideResponse === 'function') {await overrideResponse(info); }
 
     return new HttpResponse(null,
@@ -110,7 +110,7 @@ export const getPersonnelImportTemplateMockHandler = (overrideResponse?: unknown
 }
 
 export const getPersonnelImportMockHandler = (overrideResponse?: ReadModelsPersonnelImportResultDto | ((info: Parameters<Parameters<typeof http.post>[1]>[0]) => Promise<ReadModelsPersonnelImportResultDto> | ReadModelsPersonnelImportResultDto), options?: RequestHandlerOptions) => {
-  return http.post('*/gateway/facility-management/Companies/:companyId/Personnel/Import', async (info: Parameters<Parameters<typeof http.post>[1]>[0]) => {await delay(250);
+  return http.post('*/facility-management/Companies/:companyId/Personnel/Import', async (info: Parameters<Parameters<typeof http.post>[1]>[0]) => {await delay(250);
 
 
     return json(overrideResponse !== undefined
@@ -122,7 +122,7 @@ export const getPersonnelImportMockHandler = (overrideResponse?: ReadModelsPerso
 }
 
 export const getPersonnelImportResultMockHandler = (overrideResponse?: ReadModelsPersonnelImportResultDto | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<ReadModelsPersonnelImportResultDto> | ReadModelsPersonnelImportResultDto), options?: RequestHandlerOptions) => {
-  return http.get('*/gateway/facility-management/Personnel/Import/:batchId', async (info: Parameters<Parameters<typeof http.get>[1]>[0]) => {await delay(250);
+  return http.get('*/facility-management/Personnel/Import/:batchId', async (info: Parameters<Parameters<typeof http.get>[1]>[0]) => {await delay(250);
 
 
     return json(overrideResponse !== undefined
@@ -134,7 +134,7 @@ export const getPersonnelImportResultMockHandler = (overrideResponse?: ReadModel
 }
 
 export const getPersonnelDecideMockHandler = (overrideResponse?: number | ((info: Parameters<Parameters<typeof http.post>[1]>[0]) => Promise<number> | number), options?: RequestHandlerOptions) => {
-  return http.post('*/gateway/facility-management/Personnel/Decisions', async (info: Parameters<Parameters<typeof http.post>[1]>[0]) => {await delay(250);
+  return http.post('*/facility-management/Personnel/Decisions', async (info: Parameters<Parameters<typeof http.post>[1]>[0]) => {await delay(250);
 
 
     return json(overrideResponse !== undefined

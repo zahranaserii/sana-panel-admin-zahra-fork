@@ -70,7 +70,7 @@ export const approvalsManagerQueue = (
 
 
       return apiClient<CommonFacilityPagedResponseOfLoanRequestListItemDto>(
-      {url: `/gateway/facility-management/ManagerApprovals`, method: 'GET',
+      {url: `/facility-management/ManagerApprovals`, method: 'GET',
         params, signal
     },
       options);
@@ -81,7 +81,7 @@ export const approvalsManagerQueue = (
 
 export const getApprovalsManagerQueueQueryKey = (params?: ApprovalsManagerQueueParams,) => {
     return [
-    `/gateway/facility-management/ManagerApprovals`, ...(params ? [params] : [])
+    `/facility-management/ManagerApprovals`, ...(params ? [params] : [])
     ] as const;
     }
 
@@ -164,7 +164,7 @@ export const approvalsManagerDecide = (
 
 
       return apiClient<CommandResponsesDecisionResultDto>(
-      {url: `/gateway/facility-management/ManagerApprovals/Decisions`, method: 'POST',
+      {url: `/facility-management/ManagerApprovals/Decisions`, method: 'POST',
       headers: {'Content-Type': 'application/json', },
       data: decideLoanRequestsCommand, signal
     },
@@ -232,7 +232,7 @@ export const approvalsCreditQueue = (
 
 
       return apiClient<CommonFacilityPagedResponseOfLoanRequestListItemDto>(
-      {url: `/gateway/facility-management/CreditApprovals`, method: 'GET',
+      {url: `/facility-management/CreditApprovals`, method: 'GET',
         params, signal
     },
       options);
@@ -243,7 +243,7 @@ export const approvalsCreditQueue = (
 
 export const getApprovalsCreditQueueQueryKey = (params?: ApprovalsCreditQueueParams,) => {
     return [
-    `/gateway/facility-management/CreditApprovals`, ...(params ? [params] : [])
+    `/facility-management/CreditApprovals`, ...(params ? [params] : [])
     ] as const;
     }
 
@@ -326,7 +326,7 @@ export const approvalsCreditDecide = (
 
       const formData = toAspNetFormData(approvalsCreditDecideBody)
       return apiClient<CommandResponsesDecisionResultDto>(
-      {url: `/gateway/facility-management/CreditApprovals/Decisions`, method: 'POST',
+      {url: `/facility-management/CreditApprovals/Decisions`, method: 'POST',
       headers: {'Content-Type': 'multipart/form-data', },
        data: formData, signal
     },
@@ -395,7 +395,7 @@ export const approvalsPostStage = (
 
 
       return apiClient<CommandResponsesLoanRequestListItemDto>(
-      {url: `/gateway/facility-management/CreditApprovals/${requestId}/PostApprovalStage`, method: 'PUT',
+      {url: `/facility-management/CreditApprovals/${requestId}/PostApprovalStage`, method: 'PUT',
       headers: {'Content-Type': 'application/json', },
       data: setPostApprovalStageCommand, signal
     },
@@ -462,7 +462,7 @@ export const approvalsDigitalQueue = (
 
 
       return apiClient<CommonFacilityPagedResponseOfLoanRequestListItemDto>(
-      {url: `/gateway/facility-management/DigitalApprovals`, method: 'GET',
+      {url: `/facility-management/DigitalApprovals`, method: 'GET',
         params, signal
     },
       options);
@@ -473,7 +473,7 @@ export const approvalsDigitalQueue = (
 
 export const getApprovalsDigitalQueueQueryKey = (params?: ApprovalsDigitalQueueParams,) => {
     return [
-    `/gateway/facility-management/DigitalApprovals`, ...(params ? [params] : [])
+    `/facility-management/DigitalApprovals`, ...(params ? [params] : [])
     ] as const;
     }
 
@@ -555,7 +555,7 @@ export const approvalsDigitalDecide = (
 
       const formData = toAspNetFormData(approvalsDigitalDecideBody)
       return apiClient<CommandResponsesDecisionResultDto>(
-      {url: `/gateway/facility-management/DigitalApprovals/Decisions`, method: 'POST',
+      {url: `/facility-management/DigitalApprovals/Decisions`, method: 'POST',
       headers: {'Content-Type': 'multipart/form-data', },
        data: formData, signal
     },
@@ -623,7 +623,7 @@ export const approvalsPendingCounts = (
 
 
       return apiClient<ReadModelsPendingCountsDto>(
-      {url: `/gateway/facility-management/Approvals/PendingCounts`, method: 'GET', signal
+      {url: `/facility-management/Approvals/PendingCounts`, method: 'GET', signal
     },
       options);
     }
@@ -633,7 +633,7 @@ export const approvalsPendingCounts = (
 
 export const getApprovalsPendingCountsQueryKey = () => {
     return [
-    `/gateway/facility-management/Approvals/PendingCounts`
+    `/facility-management/Approvals/PendingCounts`
     ] as const;
     }
 

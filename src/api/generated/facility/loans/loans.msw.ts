@@ -43,7 +43,7 @@ export const getLoansCancelResponseMock = (overrideResponse: Partial<Extract<Com
 
 
 export const getLoansCreditMockHandler = (overrideResponse?: ReadModelsCompanyCreditDto | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<ReadModelsCompanyCreditDto> | ReadModelsCompanyCreditDto), options?: RequestHandlerOptions) => {
-  return http.get('*/gateway/facility-management/Companies/:companyId/Credit', async (info: Parameters<Parameters<typeof http.get>[1]>[0]) => {await delay(250);
+  return http.get('*/facility-management/Companies/:companyId/Credit', async (info: Parameters<Parameters<typeof http.get>[1]>[0]) => {await delay(250);
 
 
     return json(overrideResponse !== undefined
@@ -55,7 +55,7 @@ export const getLoansCreditMockHandler = (overrideResponse?: ReadModelsCompanyCr
 }
 
 export const getLoansPreviewMockHandler = (overrideResponse?: ReadModelsLoanRequestPreviewDto | ((info: Parameters<Parameters<typeof http.post>[1]>[0]) => Promise<ReadModelsLoanRequestPreviewDto> | ReadModelsLoanRequestPreviewDto), options?: RequestHandlerOptions) => {
-  return http.post('*/gateway/facility-management/Companies/:companyId/LoanRequests/Preview', async (info: Parameters<Parameters<typeof http.post>[1]>[0]) => {await delay(250);
+  return http.post('*/facility-management/Companies/:companyId/LoanRequests/Preview', async (info: Parameters<Parameters<typeof http.post>[1]>[0]) => {await delay(250);
 
 
     return json(overrideResponse !== undefined
@@ -67,7 +67,7 @@ export const getLoansPreviewMockHandler = (overrideResponse?: ReadModelsLoanRequ
 }
 
 export const getLoansCreateMockHandler = (overrideResponse?: CommandResponsesLoanBatchDto | ((info: Parameters<Parameters<typeof http.post>[1]>[0]) => Promise<CommandResponsesLoanBatchDto> | CommandResponsesLoanBatchDto), options?: RequestHandlerOptions) => {
-  return http.post('*/gateway/facility-management/Companies/:companyId/LoanRequests', async (info: Parameters<Parameters<typeof http.post>[1]>[0]) => {await delay(250);
+  return http.post('*/facility-management/Companies/:companyId/LoanRequests', async (info: Parameters<Parameters<typeof http.post>[1]>[0]) => {await delay(250);
 
 
     return json(overrideResponse !== undefined
@@ -79,7 +79,7 @@ export const getLoansCreateMockHandler = (overrideResponse?: CommandResponsesLoa
 }
 
 export const getLoansSearchMockHandler = (overrideResponse?: CommonFacilityPagedResponseOfLoanRequestListItemDto | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<CommonFacilityPagedResponseOfLoanRequestListItemDto> | CommonFacilityPagedResponseOfLoanRequestListItemDto), options?: RequestHandlerOptions) => {
-  return http.get('*/gateway/facility-management/LoanRequests', async (info: Parameters<Parameters<typeof http.get>[1]>[0]) => {await delay(250);
+  return http.get('*/facility-management/LoanRequests', async (info: Parameters<Parameters<typeof http.get>[1]>[0]) => {await delay(250);
 
 
     return json(overrideResponse !== undefined
@@ -91,7 +91,7 @@ export const getLoansSearchMockHandler = (overrideResponse?: CommonFacilityPaged
 }
 
 export const getLoansGetMockHandler = (overrideResponse?: ReadModelsLoanRequestDetailsDto | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<ReadModelsLoanRequestDetailsDto> | ReadModelsLoanRequestDetailsDto), options?: RequestHandlerOptions) => {
-  return http.get('*/gateway/facility-management/LoanRequests/:id', async (info: Parameters<Parameters<typeof http.get>[1]>[0]) => {await delay(250);
+  return http.get('*/facility-management/LoanRequests/:id', async (info: Parameters<Parameters<typeof http.get>[1]>[0]) => {await delay(250);
 
 
     return json(overrideResponse !== undefined
@@ -103,7 +103,7 @@ export const getLoansGetMockHandler = (overrideResponse?: ReadModelsLoanRequestD
 }
 
 export const getLoansAddMemberMockHandler = (overrideResponse?: CommandResponsesLoanBatchDto | ((info: Parameters<Parameters<typeof http.post>[1]>[0]) => Promise<CommandResponsesLoanBatchDto> | CommandResponsesLoanBatchDto), options?: RequestHandlerOptions) => {
-  return http.post('*/gateway/facility-management/LoanBatches/:batchId/Members', async (info: Parameters<Parameters<typeof http.post>[1]>[0]) => {await delay(250);
+  return http.post('*/facility-management/LoanBatches/:batchId/Members', async (info: Parameters<Parameters<typeof http.post>[1]>[0]) => {await delay(250);
 
 
     return json(overrideResponse !== undefined
@@ -115,7 +115,7 @@ export const getLoansAddMemberMockHandler = (overrideResponse?: CommandResponses
 }
 
 export const getLoansRemoveMemberMockHandler = (overrideResponse?: CommandResponsesLoanBatchDto | ((info: Parameters<Parameters<typeof http.delete>[1]>[0]) => Promise<CommandResponsesLoanBatchDto> | CommandResponsesLoanBatchDto), options?: RequestHandlerOptions) => {
-  return http.delete('*/gateway/facility-management/LoanBatches/:batchId/Members/:requestId', async (info: Parameters<Parameters<typeof http.delete>[1]>[0]) => {await delay(250);
+  return http.delete('*/facility-management/LoanBatches/:batchId/Members/:requestId', async (info: Parameters<Parameters<typeof http.delete>[1]>[0]) => {await delay(250);
 
 
     return json(overrideResponse !== undefined
@@ -127,7 +127,7 @@ export const getLoansRemoveMemberMockHandler = (overrideResponse?: CommandRespon
 }
 
 export const getLoansDocumentDownloadMockHandler = (overrideResponse?: unknown | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<unknown> | unknown), options?: RequestHandlerOptions) => {
-  return http.get('*/gateway/facility-management/LoanRequests/:id/Documents/:fileId', async (info: Parameters<Parameters<typeof http.get>[1]>[0]) => {await delay(250);
+  return http.get('*/facility-management/LoanRequests/:id/Documents/:fileId', async (info: Parameters<Parameters<typeof http.get>[1]>[0]) => {await delay(250);
   if (typeof overrideResponse === 'function') {await overrideResponse(info); }
 
     return new HttpResponse(null,
@@ -137,7 +137,7 @@ export const getLoansDocumentDownloadMockHandler = (overrideResponse?: unknown |
 }
 
 export const getLoansCancelMockHandler = (overrideResponse?: CommandResponsesLoanRequestListItemDto | ((info: Parameters<Parameters<typeof http.post>[1]>[0]) => Promise<CommandResponsesLoanRequestListItemDto> | CommandResponsesLoanRequestListItemDto), options?: RequestHandlerOptions) => {
-  return http.post('*/gateway/facility-management/LoanRequests/:id/Cancel', async (info: Parameters<Parameters<typeof http.post>[1]>[0]) => {await delay(250);
+  return http.post('*/facility-management/LoanRequests/:id/Cancel', async (info: Parameters<Parameters<typeof http.post>[1]>[0]) => {await delay(250);
 
 
     return json(overrideResponse !== undefined

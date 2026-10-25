@@ -50,7 +50,7 @@ export const getCompaniesBalanceDocumentDeleteResponseMock = (): boolean => (fak
 
 
 export const getCompaniesSearchMockHandler = (overrideResponse?: ReadModelsCompanySearchResultDto | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<ReadModelsCompanySearchResultDto> | ReadModelsCompanySearchResultDto), options?: RequestHandlerOptions) => {
-  return http.get('*/gateway/facility-management/Companies', async (info: Parameters<Parameters<typeof http.get>[1]>[0]) => {await delay(250);
+  return http.get('*/facility-management/Companies', async (info: Parameters<Parameters<typeof http.get>[1]>[0]) => {await delay(250);
 
 
     return json(overrideResponse !== undefined
@@ -62,7 +62,7 @@ export const getCompaniesSearchMockHandler = (overrideResponse?: ReadModelsCompa
 }
 
 export const getCompaniesCreateMockHandler = (overrideResponse?: ReadModelsCompanyDetailsDto | ((info: Parameters<Parameters<typeof http.post>[1]>[0]) => Promise<ReadModelsCompanyDetailsDto> | ReadModelsCompanyDetailsDto), options?: RequestHandlerOptions) => {
-  return http.post('*/gateway/facility-management/Companies', async (info: Parameters<Parameters<typeof http.post>[1]>[0]) => {await delay(250);
+  return http.post('*/facility-management/Companies', async (info: Parameters<Parameters<typeof http.post>[1]>[0]) => {await delay(250);
 
 
     return json(overrideResponse !== undefined
@@ -74,7 +74,7 @@ export const getCompaniesCreateMockHandler = (overrideResponse?: ReadModelsCompa
 }
 
 export const getCompaniesLookupMockHandler = (overrideResponse?: CommonFacilityLookupItemDto[] | null | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<CommonFacilityLookupItemDto[] | null> | CommonFacilityLookupItemDto[] | null), options?: RequestHandlerOptions) => {
-  return http.get('*/gateway/facility-management/Companies/Lookup', async (info: Parameters<Parameters<typeof http.get>[1]>[0]) => {await delay(250);
+  return http.get('*/facility-management/Companies/Lookup', async (info: Parameters<Parameters<typeof http.get>[1]>[0]) => {await delay(250);
 
 
     return json(overrideResponse !== undefined
@@ -86,7 +86,7 @@ export const getCompaniesLookupMockHandler = (overrideResponse?: CommonFacilityL
 }
 
 export const getCompaniesGetMockHandler = (overrideResponse?: ReadModelsCompanyDetailsDto | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<ReadModelsCompanyDetailsDto> | ReadModelsCompanyDetailsDto), options?: RequestHandlerOptions) => {
-  return http.get('*/gateway/facility-management/Companies/:id', async (info: Parameters<Parameters<typeof http.get>[1]>[0]) => {await delay(250);
+  return http.get('*/facility-management/Companies/:id', async (info: Parameters<Parameters<typeof http.get>[1]>[0]) => {await delay(250);
 
 
     return json(overrideResponse !== undefined
@@ -98,7 +98,7 @@ export const getCompaniesGetMockHandler = (overrideResponse?: ReadModelsCompanyD
 }
 
 export const getCompaniesUpdateMockHandler = (overrideResponse?: ReadModelsCompanyDetailsDto | ((info: Parameters<Parameters<typeof http.put>[1]>[0]) => Promise<ReadModelsCompanyDetailsDto> | ReadModelsCompanyDetailsDto), options?: RequestHandlerOptions) => {
-  return http.put('*/gateway/facility-management/Companies/:id', async (info: Parameters<Parameters<typeof http.put>[1]>[0]) => {await delay(250);
+  return http.put('*/facility-management/Companies/:id', async (info: Parameters<Parameters<typeof http.put>[1]>[0]) => {await delay(250);
 
 
     return json(overrideResponse !== undefined
@@ -110,7 +110,7 @@ export const getCompaniesUpdateMockHandler = (overrideResponse?: ReadModelsCompa
 }
 
 export const getCompaniesDeleteMockHandler = (overrideResponse?: boolean | ((info: Parameters<Parameters<typeof http.delete>[1]>[0]) => Promise<boolean> | boolean), options?: RequestHandlerOptions) => {
-  return http.delete('*/gateway/facility-management/Companies/:id', async (info: Parameters<Parameters<typeof http.delete>[1]>[0]) => {await delay(250);
+  return http.delete('*/facility-management/Companies/:id', async (info: Parameters<Parameters<typeof http.delete>[1]>[0]) => {await delay(250);
 
 
     return json(overrideResponse !== undefined
@@ -122,7 +122,7 @@ export const getCompaniesDeleteMockHandler = (overrideResponse?: boolean | ((inf
 }
 
 export const getCompaniesCancelContractMockHandler = (overrideResponse?: ReadModelsCompanyDetailsDto | ((info: Parameters<Parameters<typeof http.post>[1]>[0]) => Promise<ReadModelsCompanyDetailsDto> | ReadModelsCompanyDetailsDto), options?: RequestHandlerOptions) => {
-  return http.post('*/gateway/facility-management/Companies/:id/Cancel', async (info: Parameters<Parameters<typeof http.post>[1]>[0]) => {await delay(250);
+  return http.post('*/facility-management/Companies/:id/Cancel', async (info: Parameters<Parameters<typeof http.post>[1]>[0]) => {await delay(250);
 
 
     return json(overrideResponse !== undefined
@@ -134,7 +134,7 @@ export const getCompaniesCancelContractMockHandler = (overrideResponse?: ReadMod
 }
 
 export const getCompaniesAgreementFileMockHandler = (overrideResponse?: unknown | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<unknown> | unknown), options?: RequestHandlerOptions) => {
-  return http.get('*/gateway/facility-management/Companies/:id/AgreementFile', async (info: Parameters<Parameters<typeof http.get>[1]>[0]) => {await delay(250);
+  return http.get('*/facility-management/Companies/:id/AgreementFile', async (info: Parameters<Parameters<typeof http.get>[1]>[0]) => {await delay(250);
   if (typeof overrideResponse === 'function') {await overrideResponse(info); }
 
     return new HttpResponse(null,
@@ -144,7 +144,7 @@ export const getCompaniesAgreementFileMockHandler = (overrideResponse?: unknown 
 }
 
 export const getCompaniesBalancesMockHandler = (overrideResponse?: ReadModelsCompanyBalancesDto | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<ReadModelsCompanyBalancesDto> | ReadModelsCompanyBalancesDto), options?: RequestHandlerOptions) => {
-  return http.get('*/gateway/facility-management/Companies/:id/Balances', async (info: Parameters<Parameters<typeof http.get>[1]>[0]) => {await delay(250);
+  return http.get('*/facility-management/Companies/:id/Balances', async (info: Parameters<Parameters<typeof http.get>[1]>[0]) => {await delay(250);
 
 
     return json(overrideResponse !== undefined
@@ -156,7 +156,7 @@ export const getCompaniesBalancesMockHandler = (overrideResponse?: ReadModelsCom
 }
 
 export const getCompaniesBalancesSaveMockHandler = (overrideResponse?: ReadModelsCompanyBalancesDto | ((info: Parameters<Parameters<typeof http.put>[1]>[0]) => Promise<ReadModelsCompanyBalancesDto> | ReadModelsCompanyBalancesDto), options?: RequestHandlerOptions) => {
-  return http.put('*/gateway/facility-management/Companies/:id/Balances', async (info: Parameters<Parameters<typeof http.put>[1]>[0]) => {await delay(250);
+  return http.put('*/facility-management/Companies/:id/Balances', async (info: Parameters<Parameters<typeof http.put>[1]>[0]) => {await delay(250);
 
 
     return json(overrideResponse !== undefined
@@ -168,7 +168,7 @@ export const getCompaniesBalancesSaveMockHandler = (overrideResponse?: ReadModel
 }
 
 export const getCompaniesBalanceDocumentsMockHandler = (overrideResponse?: ReadModelsBalanceDocumentDto[] | null | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<ReadModelsBalanceDocumentDto[] | null> | ReadModelsBalanceDocumentDto[] | null), options?: RequestHandlerOptions) => {
-  return http.get('*/gateway/facility-management/Companies/:id/Balances/Documents', async (info: Parameters<Parameters<typeof http.get>[1]>[0]) => {await delay(250);
+  return http.get('*/facility-management/Companies/:id/Balances/Documents', async (info: Parameters<Parameters<typeof http.get>[1]>[0]) => {await delay(250);
 
 
     return json(overrideResponse !== undefined
@@ -180,7 +180,7 @@ export const getCompaniesBalanceDocumentsMockHandler = (overrideResponse?: ReadM
 }
 
 export const getCompaniesBalanceDocumentsUploadMockHandler = (overrideResponse?: ReadModelsBalanceDocumentDto[] | null | ((info: Parameters<Parameters<typeof http.post>[1]>[0]) => Promise<ReadModelsBalanceDocumentDto[] | null> | ReadModelsBalanceDocumentDto[] | null), options?: RequestHandlerOptions) => {
-  return http.post('*/gateway/facility-management/Companies/:id/Balances/Documents', async (info: Parameters<Parameters<typeof http.post>[1]>[0]) => {await delay(250);
+  return http.post('*/facility-management/Companies/:id/Balances/Documents', async (info: Parameters<Parameters<typeof http.post>[1]>[0]) => {await delay(250);
 
 
     return json(overrideResponse !== undefined
@@ -192,7 +192,7 @@ export const getCompaniesBalanceDocumentsUploadMockHandler = (overrideResponse?:
 }
 
 export const getCompaniesBalanceDocumentDownloadMockHandler = (overrideResponse?: unknown | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<unknown> | unknown), options?: RequestHandlerOptions) => {
-  return http.get('*/gateway/facility-management/Companies/:id/Balances/Documents/:documentId', async (info: Parameters<Parameters<typeof http.get>[1]>[0]) => {await delay(250);
+  return http.get('*/facility-management/Companies/:id/Balances/Documents/:documentId', async (info: Parameters<Parameters<typeof http.get>[1]>[0]) => {await delay(250);
   if (typeof overrideResponse === 'function') {await overrideResponse(info); }
 
     return new HttpResponse(null,
@@ -202,7 +202,7 @@ export const getCompaniesBalanceDocumentDownloadMockHandler = (overrideResponse?
 }
 
 export const getCompaniesBalanceDocumentDeleteMockHandler = (overrideResponse?: boolean | ((info: Parameters<Parameters<typeof http.delete>[1]>[0]) => Promise<boolean> | boolean), options?: RequestHandlerOptions) => {
-  return http.delete('*/gateway/facility-management/Companies/:id/Balances/Documents/:documentId', async (info: Parameters<Parameters<typeof http.delete>[1]>[0]) => {await delay(250);
+  return http.delete('*/facility-management/Companies/:id/Balances/Documents/:documentId', async (info: Parameters<Parameters<typeof http.delete>[1]>[0]) => {await delay(250);
 
 
     return json(overrideResponse !== undefined

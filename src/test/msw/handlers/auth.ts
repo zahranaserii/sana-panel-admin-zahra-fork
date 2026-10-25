@@ -2,7 +2,6 @@ import { delay, http } from 'msw';
 
 import { ENDPOINTS } from '@/constant/endpoints';
 import { BRANCH_MENU_URLS, MOCK_MAIN_MENU, MOCK_USERS } from '@/constant/mock';
-import { ROLES } from '@/constant/roles';
 import { type LoginRequest } from '@/features/auth/types';
 
 import { findUserByToken } from '../db';
@@ -21,24 +20,24 @@ export const authHandlers = [
     return json({ token: user.token });
   }),
 
-  http.get(api(ENDPOINTS.AUTH.LOGOUT), async () => {
+  http.get(api(ENDPOINTS.AUTH.LOGOUT), async ({ request }) => {
     await delay(150);
-    return json(true);
+    const token = new URL(request.url).searchParams.get('Token');
+    return findUserByToken(`Bearer ${token}`) ? json(true) : unauthorized();
   }),
 
   http.get(api(ENDPOINTS.AUTH.MAIN_MENU), async ({ request }) => {
     await delay(200);
     const user = findUserByToken(request.headers.get('Authorization'));
     if (!user) return unauthorized();
-    const isBranch = user.profile.roles.includes(ROLES.BRANCH);
     return json(
-      isBranch
+      user.isBranch
         ? MOCK_MAIN_MENU.filter((item) => !item.url || BRANCH_MENU_URLS.includes(item.url))
         : MOCK_MAIN_MENU,
     );
   }),
 
-  http.get(api(ENDPOINTS.AUTH.PROFILE), async ({ request }) => {
+  http.get(api('/identity/Panel/Profile'), async ({ request }) => {
     await delay(200);
     const user = findUserByToken(request.headers.get('Authorization'));
     return user ? json(user.profile) : unauthorized();

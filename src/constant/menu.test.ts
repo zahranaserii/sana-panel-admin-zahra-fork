@@ -10,34 +10,45 @@ const paths = (menu: typeof groups) =>
 
 describe('buildMenu', () => {
   it('maps backend urls to our routes and groups roots that have children', () => {
-    expect(groups.map((group) => group.title)).toEqual(['', 'عملیات اعتباری', '']);
-    expect(groups[0]?.items.map((item) => item.path)).toEqual([ROUTES.HOME]);
-    expect(groups[1]?.items.map((item) => item.path)).toEqual([
-      ROUTES.BASE_INFO,
-      ROUTES.CREDIT,
-      ROUTES.CREDIT_APPROVE,
+    expect(groups.map((group) => group.title)).toEqual([
+      '',
+      'تنظیمات',
+      'مدیریت',
+      'عملیات اعتباری',
+      'گزارش و کنترل',
+    ]);
+    expect(groups.map((group) => group.items.map((item) => item.path))).toEqual([
+      [ROUTES.HOME],
+      [ROUTES.BASE_INFO],
+      [ROUTES.COMPANIES, ROUTES.STAFF],
+      [ROUTES.MANAGER_APPROVE, ROUTES.CREDIT, ROUTES.CREDIT_APPROVE],
+      [ROUTES.DASHBOARD, ROUTES.USERS, ROUTES.CHANGE_LOG],
     ]);
   });
 
   it('shows items whose parent is missing without a group', () => {
-    expect(groups[2]?.items.map((item) => item.path)).toEqual([
-      ROUTES.COMPANIES,
-      ROUTES.STAFF,
-      ROUTES.DASHBOARD,
-      ROUTES.USERS,
-      ROUTES.CHANGE_LOG,
+    const menu = buildMenu(MOCK_MAIN_MENU.filter((item) => item.title !== 'مدیریت'));
+    expect(menu.map((group) => group.title)).toEqual([
+      '',
+      'تنظیمات',
+      'عملیات اعتباری',
+      '',
+      'گزارش و کنترل',
     ]);
+    expect(menu[3]?.items.map((item) => item.path)).toEqual([ROUTES.COMPANIES, ROUTES.STAFF]);
   });
 
   it('hides inactive items, unknown urls and empty groups', () => {
     const changed: Record<string, Partial<MenuItemDto>> = {
       '/base-info': { isActive: false },
+      '/facility/base-info': { isActive: false },
       '/facility/loan-allocation': { url: '/unknown' },
       '/facility/credit-approval': { isActive: false },
     };
     const menu = buildMenu(
       MOCK_MAIN_MENU.map((item) => ({ ...item, ...(item.url ? changed[item.url] : undefined) })),
     );
+    expect(menu.some((group) => group.title === 'تنظیمات')).toBe(false);
     expect(menu.some((group) => group.title === 'عملیات اعتباری')).toBe(false);
     expect(paths(menu)).not.toContain(ROUTES.BASE_INFO);
     expect(paths(menu)).not.toContain(ROUTES.CREDIT);

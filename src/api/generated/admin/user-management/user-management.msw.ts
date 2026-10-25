@@ -13,7 +13,7 @@ import type {
 
 
 export const getUserManagementAccessesGetMockHandler = (overrideResponse?: void | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<void> | void), options?: RequestHandlerOptions) => {
-  return http.get('*/gateway/identity/UserManagement/Accesses', async (info: Parameters<Parameters<typeof http.get>[1]>[0]) => {await delay(250);
+  return http.get('*/identity/UserManagement/Accesses', async (info: Parameters<Parameters<typeof http.get>[1]>[0]) => {await delay(250);
   if (typeof overrideResponse === 'function') {await overrideResponse(info); }
 
     return new HttpResponse(null,
@@ -23,7 +23,7 @@ export const getUserManagementAccessesGetMockHandler = (overrideResponse?: void 
 }
 
 export const getUserManagementAccessesPostMockHandler = (overrideResponse?: void | ((info: Parameters<Parameters<typeof http.post>[1]>[0]) => Promise<void> | void), options?: RequestHandlerOptions) => {
-  return http.post('*/gateway/identity/UserManagement/Accesses', async (info: Parameters<Parameters<typeof http.post>[1]>[0]) => {await delay(250);
+  return http.post('*/identity/UserManagement/Accesses', async (info: Parameters<Parameters<typeof http.post>[1]>[0]) => {await delay(250);
   if (typeof overrideResponse === 'function') {await overrideResponse(info); }
 
     return new HttpResponse(null,
@@ -33,7 +33,7 @@ export const getUserManagementAccessesPostMockHandler = (overrideResponse?: void
 }
 
 export const getUserManagementAccessesByIdGetMockHandler = (overrideResponse?: void | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<void> | void), options?: RequestHandlerOptions) => {
-  return http.get('*/gateway/identity/UserManagement/Accesses/:id', async (info: Parameters<Parameters<typeof http.get>[1]>[0]) => {await delay(250);
+  return http.get('*/identity/UserManagement/Accesses/:id', async (info: Parameters<Parameters<typeof http.get>[1]>[0]) => {await delay(250);
   if (typeof overrideResponse === 'function') {await overrideResponse(info); }
 
     return new HttpResponse(null,
@@ -43,7 +43,7 @@ export const getUserManagementAccessesByIdGetMockHandler = (overrideResponse?: v
 }
 
 export const getUserManagementAccessesByIdPutMockHandler = (overrideResponse?: void | ((info: Parameters<Parameters<typeof http.put>[1]>[0]) => Promise<void> | void), options?: RequestHandlerOptions) => {
-  return http.put('*/gateway/identity/UserManagement/Accesses/:id', async (info: Parameters<Parameters<typeof http.put>[1]>[0]) => {await delay(250);
+  return http.put('*/identity/UserManagement/Accesses/:id', async (info: Parameters<Parameters<typeof http.put>[1]>[0]) => {await delay(250);
   if (typeof overrideResponse === 'function') {await overrideResponse(info); }
 
     return new HttpResponse(null,
@@ -53,7 +53,7 @@ export const getUserManagementAccessesByIdPutMockHandler = (overrideResponse?: v
 }
 
 export const getUserManagementRolesGetMockHandler = (overrideResponse?: void | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<void> | void), options?: RequestHandlerOptions) => {
-  return http.get('*/gateway/identity/UserManagement/Roles', async (info: Parameters<Parameters<typeof http.get>[1]>[0]) => {await delay(250);
+  return http.get('*/identity/UserManagement/Roles', async (info: Parameters<Parameters<typeof http.get>[1]>[0]) => {await delay(250);
   if (typeof overrideResponse === 'function') {await overrideResponse(info); }
 
     return new HttpResponse(null,
@@ -63,7 +63,7 @@ export const getUserManagementRolesGetMockHandler = (overrideResponse?: void | (
 }
 
 export const getUserManagementRolesPostMockHandler = (overrideResponse?: void | ((info: Parameters<Parameters<typeof http.post>[1]>[0]) => Promise<void> | void), options?: RequestHandlerOptions) => {
-  return http.post('*/gateway/identity/UserManagement/Roles', async (info: Parameters<Parameters<typeof http.post>[1]>[0]) => {await delay(250);
+  return http.post('*/identity/UserManagement/Roles', async (info: Parameters<Parameters<typeof http.post>[1]>[0]) => {await delay(250);
   if (typeof overrideResponse === 'function') {await overrideResponse(info); }
 
     return new HttpResponse(null,
@@ -73,7 +73,7 @@ export const getUserManagementRolesPostMockHandler = (overrideResponse?: void | 
 }
 
 export const getUserManagementRolesByIdGetMockHandler = (overrideResponse?: void | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<void> | void), options?: RequestHandlerOptions) => {
-  return http.get('*/gateway/identity/UserManagement/Roles/:id', async (info: Parameters<Parameters<typeof http.get>[1]>[0]) => {await delay(250);
+  return http.get('*/identity/UserManagement/Roles/:id', async (info: Parameters<Parameters<typeof http.get>[1]>[0]) => {await delay(250);
   if (typeof overrideResponse === 'function') {await overrideResponse(info); }
 
     return new HttpResponse(null,
@@ -83,7 +83,7 @@ export const getUserManagementRolesByIdGetMockHandler = (overrideResponse?: void
 }
 
 export const getUserManagementRolesByIdPutMockHandler = (overrideResponse?: void | ((info: Parameters<Parameters<typeof http.put>[1]>[0]) => Promise<void> | void), options?: RequestHandlerOptions) => {
-  return http.put('*/gateway/identity/UserManagement/Roles/:id', async (info: Parameters<Parameters<typeof http.put>[1]>[0]) => {await delay(250);
+  return http.put('*/identity/UserManagement/Roles/:id', async (info: Parameters<Parameters<typeof http.put>[1]>[0]) => {await delay(250);
   if (typeof overrideResponse === 'function') {await overrideResponse(info); }
 
     return new HttpResponse(null,
@@ -93,7 +93,7 @@ export const getUserManagementRolesByIdPutMockHandler = (overrideResponse?: void
 }
 
 export const getUserManagementGroupsGetMockHandler = (overrideResponse?: void | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<void> | void), options?: RequestHandlerOptions) => {
-  return http.get('*/gateway/identity/UserManagement/Groups', async (info: Parameters<Parameters<typeof http.get>[1]>[0]) => {await delay(250);
+  return http.get('*/identity/UserManagement/Groups', async (info: Parameters<Parameters<typeof http.get>[1]>[0]) => {await delay(250);
   if (typeof overrideResponse === 'function') {await overrideResponse(info); }
 
     return new HttpResponse(null,
@@ -103,7 +103,7 @@ export const getUserManagementGroupsGetMockHandler = (overrideResponse?: void | 
 }
 
 export const getUserManagementGroupsPostMockHandler = (overrideResponse?: void | ((info: Parameters<Parameters<typeof http.post>[1]>[0]) => Promise<void> | void), options?: RequestHandlerOptions) => {
-  return http.post('*/gateway/identity/UserManagement/Groups', async (info: Parameters<Parameters<typeof http.post>[1]>[0]) => {await delay(250);
+  return http.post('*/identity/UserManagement/Groups', async (info: Parameters<Parameters<typeof http.post>[1]>[0]) => {await delay(250);
   if (typeof overrideResponse === 'function') {await overrideResponse(info); }
 
     return new HttpResponse(null,
@@ -113,7 +113,7 @@ export const getUserManagementGroupsPostMockHandler = (overrideResponse?: void |
 }
 
 export const getUserManagementGroupsByIdGetMockHandler = (overrideResponse?: void | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<void> | void), options?: RequestHandlerOptions) => {
-  return http.get('*/gateway/identity/UserManagement/Groups/:id', async (info: Parameters<Parameters<typeof http.get>[1]>[0]) => {await delay(250);
+  return http.get('*/identity/UserManagement/Groups/:id', async (info: Parameters<Parameters<typeof http.get>[1]>[0]) => {await delay(250);
   if (typeof overrideResponse === 'function') {await overrideResponse(info); }
 
     return new HttpResponse(null,
@@ -123,7 +123,7 @@ export const getUserManagementGroupsByIdGetMockHandler = (overrideResponse?: voi
 }
 
 export const getUserManagementGroupsByIdPutMockHandler = (overrideResponse?: void | ((info: Parameters<Parameters<typeof http.put>[1]>[0]) => Promise<void> | void), options?: RequestHandlerOptions) => {
-  return http.put('*/gateway/identity/UserManagement/Groups/:id', async (info: Parameters<Parameters<typeof http.put>[1]>[0]) => {await delay(250);
+  return http.put('*/identity/UserManagement/Groups/:id', async (info: Parameters<Parameters<typeof http.put>[1]>[0]) => {await delay(250);
   if (typeof overrideResponse === 'function') {await overrideResponse(info); }
 
     return new HttpResponse(null,
@@ -133,7 +133,7 @@ export const getUserManagementGroupsByIdPutMockHandler = (overrideResponse?: voi
 }
 
 export const getUserManagementPanelUsersGetMockHandler = (overrideResponse?: void | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<void> | void), options?: RequestHandlerOptions) => {
-  return http.get('*/gateway/identity/UserManagement/PanelUsers', async (info: Parameters<Parameters<typeof http.get>[1]>[0]) => {await delay(250);
+  return http.get('*/identity/UserManagement/PanelUsers', async (info: Parameters<Parameters<typeof http.get>[1]>[0]) => {await delay(250);
   if (typeof overrideResponse === 'function') {await overrideResponse(info); }
 
     return new HttpResponse(null,
@@ -143,7 +143,7 @@ export const getUserManagementPanelUsersGetMockHandler = (overrideResponse?: voi
 }
 
 export const getUserManagementPanelUsersByIdGetMockHandler = (overrideResponse?: void | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<void> | void), options?: RequestHandlerOptions) => {
-  return http.get('*/gateway/identity/UserManagement/PanelUsers/:id', async (info: Parameters<Parameters<typeof http.get>[1]>[0]) => {await delay(250);
+  return http.get('*/identity/UserManagement/PanelUsers/:id', async (info: Parameters<Parameters<typeof http.get>[1]>[0]) => {await delay(250);
   if (typeof overrideResponse === 'function') {await overrideResponse(info); }
 
     return new HttpResponse(null,
@@ -153,7 +153,7 @@ export const getUserManagementPanelUsersByIdGetMockHandler = (overrideResponse?:
 }
 
 export const getUserManagementPanelUsersByIdActivePutMockHandler = (overrideResponse?: void | ((info: Parameters<Parameters<typeof http.put>[1]>[0]) => Promise<void> | void), options?: RequestHandlerOptions) => {
-  return http.put('*/gateway/identity/UserManagement/PanelUsers/:id/Active', async (info: Parameters<Parameters<typeof http.put>[1]>[0]) => {await delay(250);
+  return http.put('*/identity/UserManagement/PanelUsers/:id/Active', async (info: Parameters<Parameters<typeof http.put>[1]>[0]) => {await delay(250);
   if (typeof overrideResponse === 'function') {await overrideResponse(info); }
 
     return new HttpResponse(null,
@@ -163,7 +163,7 @@ export const getUserManagementPanelUsersByIdActivePutMockHandler = (overrideResp
 }
 
 export const getUserManagementAccessMatrixGetMockHandler = (overrideResponse?: void | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<void> | void), options?: RequestHandlerOptions) => {
-  return http.get('*/gateway/identity/UserManagement/AccessMatrix', async (info: Parameters<Parameters<typeof http.get>[1]>[0]) => {await delay(250);
+  return http.get('*/identity/UserManagement/AccessMatrix', async (info: Parameters<Parameters<typeof http.get>[1]>[0]) => {await delay(250);
   if (typeof overrideResponse === 'function') {await overrideResponse(info); }
 
     return new HttpResponse(null,

@@ -62,7 +62,7 @@ export const userManagementAccessesGet = (
 
 
       return apiClient<void>(
-      {url: `/gateway/identity/UserManagement/Accesses`, method: 'GET',
+      {url: `/identity/UserManagement/Accesses`, method: 'GET',
         params, signal
     },
       options);
@@ -73,7 +73,7 @@ export const userManagementAccessesGet = (
 
 export const getUserManagementAccessesGetQueryKey = (params?: UserManagementAccessesGetParams,) => {
     return [
-    `/gateway/identity/UserManagement/Accesses`, ...(params ? [params] : [])
+    `/identity/UserManagement/Accesses`, ...(params ? [params] : [])
     ] as const;
     }
 
@@ -149,7 +149,7 @@ export const userManagementAccessesPost = (
 
 
       return apiClient<void>(
-      {url: `/gateway/identity/UserManagement/Accesses`, method: 'POST',
+      {url: `/identity/UserManagement/Accesses`, method: 'POST',
       headers: {'Content-Type': 'application/json; x-api-version=2', },
       data: createAccessCommand, signal
     },
@@ -210,7 +210,7 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
 
       return apiClient<void>(
-      {url: `/gateway/identity/UserManagement/Accesses/${id}`, method: 'GET', signal
+      {url: `/identity/UserManagement/Accesses/${id}`, method: 'GET', signal
     },
       options);
     }
@@ -220,7 +220,7 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
 export const getUserManagementAccessesByIdGetQueryKey = (id: number,) => {
     return [
-    `/gateway/identity/UserManagement/Accesses/${id}`
+    `/identity/UserManagement/Accesses/${id}`
     ] as const;
     }
 
@@ -297,7 +297,7 @@ export const userManagementAccessesByIdPut = (
 
 
       return apiClient<void>(
-      {url: `/gateway/identity/UserManagement/Accesses/${id}`, method: 'PUT',
+      {url: `/identity/UserManagement/Accesses/${id}`, method: 'PUT',
       headers: {'Content-Type': 'application/json; x-api-version=2', },
       data: updateAccessCommand, signal
     },
@@ -358,7 +358,7 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
 
       return apiClient<void>(
-      {url: `/gateway/identity/UserManagement/Roles`, method: 'GET',
+      {url: `/identity/UserManagement/Roles`, method: 'GET',
         params, signal
     },
       options);
@@ -369,7 +369,7 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
 export const getUserManagementRolesGetQueryKey = (params?: UserManagementRolesGetParams,) => {
     return [
-    `/gateway/identity/UserManagement/Roles`, ...(params ? [params] : [])
+    `/identity/UserManagement/Roles`, ...(params ? [params] : [])
     ] as const;
     }
 
@@ -445,7 +445,7 @@ export const userManagementRolesPost = (
 
 
       return apiClient<void>(
-      {url: `/gateway/identity/UserManagement/Roles`, method: 'POST',
+      {url: `/identity/UserManagement/Roles`, method: 'POST',
       headers: {'Content-Type': 'application/json; x-api-version=2', },
       data: createRoleCommand, signal
     },
@@ -506,7 +506,7 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
 
       return apiClient<void>(
-      {url: `/gateway/identity/UserManagement/Roles/${id}`, method: 'GET', signal
+      {url: `/identity/UserManagement/Roles/${id}`, method: 'GET', signal
     },
       options);
     }
@@ -516,7 +516,7 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
 export const getUserManagementRolesByIdGetQueryKey = (id: number,) => {
     return [
-    `/gateway/identity/UserManagement/Roles/${id}`
+    `/identity/UserManagement/Roles/${id}`
     ] as const;
     }
 
@@ -593,7 +593,7 @@ export const userManagementRolesByIdPut = (
 
 
       return apiClient<void>(
-      {url: `/gateway/identity/UserManagement/Roles/${id}`, method: 'PUT',
+      {url: `/identity/UserManagement/Roles/${id}`, method: 'PUT',
       headers: {'Content-Type': 'application/json; x-api-version=2', },
       data: updateRoleCommand, signal
     },
@@ -654,7 +654,7 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
 
       return apiClient<void>(
-      {url: `/gateway/identity/UserManagement/Groups`, method: 'GET',
+      {url: `/identity/UserManagement/Groups`, method: 'GET',
         params, signal
     },
       options);
@@ -665,7 +665,7 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
 export const getUserManagementGroupsGetQueryKey = (params?: UserManagementGroupsGetParams,) => {
     return [
-    `/gateway/identity/UserManagement/Groups`, ...(params ? [params] : [])
+    `/identity/UserManagement/Groups`, ...(params ? [params] : [])
     ] as const;
     }
 
@@ -741,7 +741,7 @@ export const userManagementGroupsPost = (
 
 
       return apiClient<void>(
-      {url: `/gateway/identity/UserManagement/Groups`, method: 'POST',
+      {url: `/identity/UserManagement/Groups`, method: 'POST',
       headers: {'Content-Type': 'application/json; x-api-version=2', },
       data: createRoleCommand, signal
     },
@@ -802,7 +802,7 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
 
       return apiClient<void>(
-      {url: `/gateway/identity/UserManagement/Groups/${id}`, method: 'GET', signal
+      {url: `/identity/UserManagement/Groups/${id}`, method: 'GET', signal
     },
       options);
     }
@@ -812,7 +812,7 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
 export const getUserManagementGroupsByIdGetQueryKey = (id: number,) => {
     return [
-    `/gateway/identity/UserManagement/Groups/${id}`
+    `/identity/UserManagement/Groups/${id}`
     ] as const;
     }
 
@@ -889,7 +889,7 @@ export const userManagementGroupsByIdPut = (
 
 
       return apiClient<void>(
-      {url: `/gateway/identity/UserManagement/Groups/${id}`, method: 'PUT',
+      {url: `/identity/UserManagement/Groups/${id}`, method: 'PUT',
       headers: {'Content-Type': 'application/json; x-api-version=2', },
       data: updateRoleCommand, signal
     },
@@ -950,7 +950,7 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
 
       return apiClient<void>(
-      {url: `/gateway/identity/UserManagement/PanelUsers`, method: 'GET',
+      {url: `/identity/UserManagement/PanelUsers`, method: 'GET',
         params, signal
     },
       options);
@@ -961,7 +961,7 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
 export const getUserManagementPanelUsersGetQueryKey = (params?: UserManagementPanelUsersGetParams,) => {
     return [
-    `/gateway/identity/UserManagement/PanelUsers`, ...(params ? [params] : [])
+    `/identity/UserManagement/PanelUsers`, ...(params ? [params] : [])
     ] as const;
     }
 
@@ -1037,7 +1037,7 @@ export const userManagementPanelUsersByIdGet = (
 
 
       return apiClient<void>(
-      {url: `/gateway/identity/UserManagement/PanelUsers/${id}`, method: 'GET', signal
+      {url: `/identity/UserManagement/PanelUsers/${id}`, method: 'GET', signal
     },
       options);
     }
@@ -1047,7 +1047,7 @@ export const userManagementPanelUsersByIdGet = (
 
 export const getUserManagementPanelUsersByIdGetQueryKey = (id: number,) => {
     return [
-    `/gateway/identity/UserManagement/PanelUsers/${id}`
+    `/identity/UserManagement/PanelUsers/${id}`
     ] as const;
     }
 
@@ -1124,7 +1124,7 @@ export const userManagementPanelUsersByIdActivePut = (
 
 
       return apiClient<void>(
-      {url: `/gateway/identity/UserManagement/PanelUsers/${id}/Active`, method: 'PUT',
+      {url: `/identity/UserManagement/PanelUsers/${id}/Active`, method: 'PUT',
         params, signal
     },
       options);
@@ -1184,7 +1184,7 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
 
       return apiClient<void>(
-      {url: `/gateway/identity/UserManagement/AccessMatrix`, method: 'GET', signal
+      {url: `/identity/UserManagement/AccessMatrix`, method: 'GET', signal
     },
       options);
     }
@@ -1194,7 +1194,7 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
 export const getUserManagementAccessMatrixGetQueryKey = () => {
     return [
-    `/gateway/identity/UserManagement/AccessMatrix`
+    `/identity/UserManagement/AccessMatrix`
     ] as const;
     }
 

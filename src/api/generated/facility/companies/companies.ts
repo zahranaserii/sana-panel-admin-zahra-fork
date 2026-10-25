@@ -73,7 +73,7 @@ export const companiesSearch = (
 
 
       return apiClient<ReadModelsCompanySearchResultDto>(
-      {url: `/gateway/facility-management/Companies`, method: 'GET',
+      {url: `/facility-management/Companies`, method: 'GET',
         params, signal
     },
       options);
@@ -84,7 +84,7 @@ export const companiesSearch = (
 
 export const getCompaniesSearchQueryKey = (params?: CompaniesSearchParams,) => {
     return [
-    `/gateway/facility-management/Companies`, ...(params ? [params] : [])
+    `/facility-management/Companies`, ...(params ? [params] : [])
     ] as const;
     }
 
@@ -167,7 +167,7 @@ export const companiesCreate = (
 
       const formData = toAspNetFormData(companiesCreateBody)
       return apiClient<ReadModelsCompanyDetailsDto>(
-      {url: `/gateway/facility-management/Companies`, method: 'POST',
+      {url: `/facility-management/Companies`, method: 'POST',
       headers: {'Content-Type': 'multipart/form-data', },
        data: formData, signal
     },
@@ -235,7 +235,7 @@ export const companiesLookup = (
 
 
       return apiClient<CommonFacilityLookupItemDto[] | null>(
-      {url: `/gateway/facility-management/Companies/Lookup`, method: 'GET',
+      {url: `/facility-management/Companies/Lookup`, method: 'GET',
         params, signal
     },
       options);
@@ -246,7 +246,7 @@ export const companiesLookup = (
 
 export const getCompaniesLookupQueryKey = (params?: CompaniesLookupParams,) => {
     return [
-    `/gateway/facility-management/Companies/Lookup`, ...(params ? [params] : [])
+    `/facility-management/Companies/Lookup`, ...(params ? [params] : [])
     ] as const;
     }
 
@@ -328,7 +328,7 @@ export const companiesGet = (
 
 
       return apiClient<ReadModelsCompanyDetailsDto>(
-      {url: `/gateway/facility-management/Companies/${id}`, method: 'GET', signal
+      {url: `/facility-management/Companies/${id}`, method: 'GET', signal
     },
       options);
     }
@@ -338,7 +338,7 @@ export const companiesGet = (
 
 export const getCompaniesGetQueryKey = (id: number,) => {
     return [
-    `/gateway/facility-management/Companies/${id}`
+    `/facility-management/Companies/${id}`
     ] as const;
     }
 
@@ -421,7 +421,7 @@ export const companiesUpdate = (
 
       const formData = toAspNetFormData(companiesUpdateBody)
       return apiClient<ReadModelsCompanyDetailsDto>(
-      {url: `/gateway/facility-management/Companies/${id}`, method: 'PUT',
+      {url: `/facility-management/Companies/${id}`, method: 'PUT',
       headers: {'Content-Type': 'multipart/form-data', },
        data: formData, signal
     },
@@ -490,7 +490,7 @@ export const companiesDelete = (
 
 
       return apiClient<boolean>(
-      {url: `/gateway/facility-management/Companies/${id}`, method: 'DELETE',
+      {url: `/facility-management/Companies/${id}`, method: 'DELETE',
       headers: {'Content-Type': 'application/json', },
       data: deleteCompanyCommand, signal
     },
@@ -559,7 +559,7 @@ export const companiesCancelContract = (
 
       const formData = toAspNetFormData(companiesCancelContractBody)
       return apiClient<ReadModelsCompanyDetailsDto>(
-      {url: `/gateway/facility-management/Companies/${id}/Cancel`, method: 'POST',
+      {url: `/facility-management/Companies/${id}/Cancel`, method: 'POST',
       headers: {'Content-Type': 'multipart/form-data', },
        data: formData, signal
     },
@@ -626,7 +626,7 @@ export const companiesAgreementFile = (
 
 
       return apiClient<unknown>(
-      {url: `/gateway/facility-management/Companies/${id}/AgreementFile`, method: 'GET', signal
+      {url: `/facility-management/Companies/${id}/AgreementFile`, method: 'GET', signal
     },
       options);
     }
@@ -636,7 +636,7 @@ export const companiesAgreementFile = (
 
 export const getCompaniesAgreementFileQueryKey = (id: number,) => {
     return [
-    `/gateway/facility-management/Companies/${id}/AgreementFile`
+    `/facility-management/Companies/${id}/AgreementFile`
     ] as const;
     }
 
@@ -718,7 +718,7 @@ export const companiesBalances = (
 
 
       return apiClient<ReadModelsCompanyBalancesDto>(
-      {url: `/gateway/facility-management/Companies/${id}/Balances`, method: 'GET', signal
+      {url: `/facility-management/Companies/${id}/Balances`, method: 'GET', signal
     },
       options);
     }
@@ -728,7 +728,7 @@ export const companiesBalances = (
 
 export const getCompaniesBalancesQueryKey = (id: number,) => {
     return [
-    `/gateway/facility-management/Companies/${id}/Balances`
+    `/facility-management/Companies/${id}/Balances`
     ] as const;
     }
 
@@ -812,7 +812,7 @@ export const companiesBalancesSave = (
 
       const formData = toAspNetFormData(companiesBalancesSaveBody)
       return apiClient<ReadModelsCompanyBalancesDto>(
-      {url: `/gateway/facility-management/Companies/${id}/Balances`, method: 'PUT',
+      {url: `/facility-management/Companies/${id}/Balances`, method: 'PUT',
       headers: {'Content-Type': 'multipart/form-data', },
        data: formData, signal
     },
@@ -880,7 +880,7 @@ export const companiesBalanceDocuments = (
 
 
       return apiClient<ReadModelsBalanceDocumentDto[] | null>(
-      {url: `/gateway/facility-management/Companies/${id}/Balances/Documents`, method: 'GET',
+      {url: `/facility-management/Companies/${id}/Balances/Documents`, method: 'GET',
         params, signal
     },
       options);
@@ -892,7 +892,7 @@ export const companiesBalanceDocuments = (
 export const getCompaniesBalanceDocumentsQueryKey = (id: number,
     params?: CompaniesBalanceDocumentsParams,) => {
     return [
-    `/gateway/facility-management/Companies/${id}/Balances/Documents`, ...(params ? [params] : [])
+    `/facility-management/Companies/${id}/Balances/Documents`, ...(params ? [params] : [])
     ] as const;
     }
 
@@ -981,7 +981,7 @@ export const companiesBalanceDocumentsUpload = (
 
       const formData = toAspNetFormData(companiesBalanceDocumentsUploadBody)
       return apiClient<ReadModelsBalanceDocumentDto[] | null>(
-      {url: `/gateway/facility-management/Companies/${id}/Balances/Documents`, method: 'POST',
+      {url: `/facility-management/Companies/${id}/Balances/Documents`, method: 'POST',
       headers: {'Content-Type': 'multipart/form-data', },
        data: formData, signal
     },
@@ -1049,7 +1049,7 @@ export const companiesBalanceDocumentDownload = (
 
 
       return apiClient<unknown>(
-      {url: `/gateway/facility-management/Companies/${id}/Balances/Documents/${documentId}`, method: 'GET', signal
+      {url: `/facility-management/Companies/${id}/Balances/Documents/${documentId}`, method: 'GET', signal
     },
       options);
     }
@@ -1060,7 +1060,7 @@ export const companiesBalanceDocumentDownload = (
 export const getCompaniesBalanceDocumentDownloadQueryKey = (id: number,
     documentId: number,) => {
     return [
-    `/gateway/facility-management/Companies/${id}/Balances/Documents/${documentId}`
+    `/facility-management/Companies/${id}/Balances/Documents/${documentId}`
     ] as const;
     }
 
@@ -1148,7 +1148,7 @@ export const companiesBalanceDocumentDelete = (
 
 
       return apiClient<boolean>(
-      {url: `/gateway/facility-management/Companies/${id}/Balances/Documents/${documentId}`, method: 'DELETE', signal
+      {url: `/facility-management/Companies/${id}/Balances/Documents/${documentId}`, method: 'DELETE', signal
     },
       options);
     }

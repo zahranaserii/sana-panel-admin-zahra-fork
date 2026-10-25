@@ -57,7 +57,7 @@ export const lookupsEnums = (
 
 
       return apiClient<CommonEnumCatalogDto>(
-      {url: `/gateway/facility-management/Lookups/Enums`, method: 'GET', signal
+      {url: `/facility-management/Lookups/Enums`, method: 'GET', signal
     },
       options);
     }
@@ -67,7 +67,7 @@ export const lookupsEnums = (
 
 export const getLookupsEnumsQueryKey = () => {
     return [
-    `/gateway/facility-management/Lookups/Enums`
+    `/facility-management/Lookups/Enums`
     ] as const;
     }
 

@@ -60,7 +60,7 @@ export const dashboardGet = (
 
 
       return apiClient<ReadModelsDashboardDto>(
-      {url: `/gateway/facility-management/Dashboard`, method: 'GET',
+      {url: `/facility-management/Dashboard`, method: 'GET',
         params, signal
     },
       options);
@@ -71,7 +71,7 @@ export const dashboardGet = (
 
 export const getDashboardGetQueryKey = (params?: DashboardGetParams,) => {
     return [
-    `/gateway/facility-management/Dashboard`, ...(params ? [params] : [])
+    `/facility-management/Dashboard`, ...(params ? [params] : [])
     ] as const;
     }
 
@@ -154,7 +154,7 @@ export const dashboardRanking = (
 
 
       return apiClient<ReadModelsCompanyRankingDto[] | null>(
-      {url: `/gateway/facility-management/Dashboard/CompanyRanking`, method: 'GET',
+      {url: `/facility-management/Dashboard/CompanyRanking`, method: 'GET',
         params, signal
     },
       options);
@@ -165,7 +165,7 @@ export const dashboardRanking = (
 
 export const getDashboardRankingQueryKey = (params?: DashboardRankingParams,) => {
     return [
-    `/gateway/facility-management/Dashboard/CompanyRanking`, ...(params ? [params] : [])
+    `/facility-management/Dashboard/CompanyRanking`, ...(params ? [params] : [])
     ] as const;
     }
 
@@ -248,7 +248,7 @@ export const dashboardMonths = (
 
 
       return apiClient<ReadModelsMonthOptionDto[] | null>(
-      {url: `/gateway/facility-management/Dashboard/Months`, method: 'GET', signal
+      {url: `/facility-management/Dashboard/Months`, method: 'GET', signal
     },
       options);
     }
@@ -258,7 +258,7 @@ export const dashboardMonths = (
 
 export const getDashboardMonthsQueryKey = () => {
     return [
-    `/gateway/facility-management/Dashboard/Months`
+    `/facility-management/Dashboard/Months`
     ] as const;
     }
 
@@ -341,7 +341,7 @@ export const dashboardExport = (
 
 
       return apiClient<unknown>(
-      {url: `/gateway/facility-management/Dashboard/Exports/${report}`, method: 'GET', signal
+      {url: `/facility-management/Dashboard/Exports/${report}`, method: 'GET', signal
     },
       options);
     }
@@ -351,7 +351,7 @@ export const dashboardExport = (
 
 export const getDashboardExportQueryKey = (report: ReadModelsDashboardExport,) => {
     return [
-    `/gateway/facility-management/Dashboard/Exports/${report}`
+    `/facility-management/Dashboard/Exports/${report}`
     ] as const;
     }
 

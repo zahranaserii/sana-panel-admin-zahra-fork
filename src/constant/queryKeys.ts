@@ -1,5 +1,4 @@
 export const QUERY_KEYS = {
-  PROFILE: ['profile'],
   USERS: {
     ALL: ['users'],
     LIST: (page: number) => ['users', 'list', page],

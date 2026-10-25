@@ -29,7 +29,7 @@ const PAGES: Record<string, PageConfig> = {
   '/home': { path: ROUTES.HOME, icon: HomeOutlined },
   '/base-info': { path: ROUTES.BASE_INFO, icon: ControlOutlined },
   '/facility/management-companies': { path: ROUTES.COMPANIES, icon: ShopOutlined },
-  '/manager-approve': { path: ROUTES.MANAGER_APPROVE, icon: ShopOutlined },
+  '/facility/base-info': { path: ROUTES.MANAGER_APPROVE, icon: ShopOutlined },
   '/facility/personnel': { path: ROUTES.STAFF, icon: TeamOutlined },
   '/facility/loan-allocation': { path: ROUTES.CREDIT, icon: CreditCardOutlined },
   '/facility/credit-approval': { path: ROUTES.CREDIT_APPROVE, icon: CheckCircleOutlined },

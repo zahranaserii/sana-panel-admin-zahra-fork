@@ -60,14 +60,17 @@ test('actions drawer: theme keeps it open, logout closes it and asks for confirm
 });
 
 test('session-expired modal (401) closes open drawers and stays on top', async ({ page }) => {
-  await page.clock.install();
   await login(page);
   await page.getByRole('button', { name: 'منو' }).click();
   await expect(menuDrawer(page)).toBeVisible();
 
-  // درخواست بعدی تعداد در انتظار (هر ۶۰ ثانیه) ۴۰۱ می‌گیرد
-  await page.evaluate(() => localStorage.setItem('mock-fail-once', '401:Approvals/PendingCounts'));
-  await page.clock.fastForward(61_000);
+  // با دراور باز، صفحه شرکت‌ها (بدون کلیک روی منو) باز می‌شود و سرویس آن ۴۰۱ می‌گیرد
+  await page.evaluate(() =>
+    localStorage.setItem('mock-fail-once', '401:facility-management/Companies'),
+  );
+  await page.evaluate(
+    "history.pushState({}, '', '/companies'); dispatchEvent(new PopStateEvent('popstate'))",
+  );
 
   const modal = page.getByRole('dialog', { name: 'پایان نشست' });
   await expect(modal).toBeVisible();

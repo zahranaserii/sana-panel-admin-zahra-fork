@@ -30,7 +30,7 @@ export const getChangeLogsRestoreResponseMock = (overrideResponse: Partial<Extra
 
 
 export const getChangeLogsSearchMockHandler = (overrideResponse?: CommonFacilityPagedResponseOfChangeLogItemDto | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<CommonFacilityPagedResponseOfChangeLogItemDto> | CommonFacilityPagedResponseOfChangeLogItemDto), options?: RequestHandlerOptions) => {
-  return http.get('*/gateway/facility-management/ChangeLogs', async (info: Parameters<Parameters<typeof http.get>[1]>[0]) => {await delay(250);
+  return http.get('*/facility-management/ChangeLogs', async (info: Parameters<Parameters<typeof http.get>[1]>[0]) => {await delay(250);
 
 
     return json(overrideResponse !== undefined
@@ -42,7 +42,7 @@ export const getChangeLogsSearchMockHandler = (overrideResponse?: CommonFacility
 }
 
 export const getChangeLogsUsersMockHandler = (overrideResponse?: CommonRegistrarDto[] | null | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<CommonRegistrarDto[] | null> | CommonRegistrarDto[] | null), options?: RequestHandlerOptions) => {
-  return http.get('*/gateway/facility-management/ChangeLogs/Users', async (info: Parameters<Parameters<typeof http.get>[1]>[0]) => {await delay(250);
+  return http.get('*/facility-management/ChangeLogs/Users', async (info: Parameters<Parameters<typeof http.get>[1]>[0]) => {await delay(250);
 
 
     return json(overrideResponse !== undefined
@@ -54,7 +54,7 @@ export const getChangeLogsUsersMockHandler = (overrideResponse?: CommonRegistrar
 }
 
 export const getChangeLogsExportMockHandler = (overrideResponse?: void | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<void> | void), options?: RequestHandlerOptions) => {
-  return http.get('*/gateway/facility-management/ChangeLogs/Export', async (info: Parameters<Parameters<typeof http.get>[1]>[0]) => {await delay(250);
+  return http.get('*/facility-management/ChangeLogs/Export', async (info: Parameters<Parameters<typeof http.get>[1]>[0]) => {await delay(250);
   if (typeof overrideResponse === 'function') {await overrideResponse(info); }
 
     return new HttpResponse(null,
@@ -64,7 +64,7 @@ export const getChangeLogsExportMockHandler = (overrideResponse?: void | ((info:
 }
 
 export const getChangeLogsRestoreMockHandler = (overrideResponse?: CommandResponsesChangeLogItemDto | ((info: Parameters<Parameters<typeof http.post>[1]>[0]) => Promise<CommandResponsesChangeLogItemDto> | CommandResponsesChangeLogItemDto), options?: RequestHandlerOptions) => {
-  return http.post('*/gateway/facility-management/ChangeLogs/:id/Restore', async (info: Parameters<Parameters<typeof http.post>[1]>[0]) => {await delay(250);
+  return http.post('*/facility-management/ChangeLogs/:id/Restore', async (info: Parameters<Parameters<typeof http.post>[1]>[0]) => {await delay(250);
 
 
     return json(overrideResponse !== undefined

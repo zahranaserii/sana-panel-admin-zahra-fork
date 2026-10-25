@@ -1,11 +1,13 @@
-import { ROLES } from '@/constant/roles';
-import { type UserProfile } from '@/types/common';
+import { type PanelProfileDto } from '@/api/generated/admin/adminApi.schemas';
 
 export interface MockUser {
   username: string;
   password: string;
   token: string;
-  profile: UserProfile;
+  /** پاسخ Panel/Profile */
+  profile: PanelProfileDto;
+  /** فقط برای ماک: کاربر شعبه بخشی از منو را می‌بیند */
+  isBranch?: boolean;
 }
 
 export const MOCK_USERS: MockUser[] = [
@@ -14,23 +16,32 @@ export const MOCK_USERS: MockUser[] = [
     password: 'admin',
     token: 'mock-token-admin',
     profile: {
-      id: '1',
-      username: 'admin',
+      panelUserId: 1,
+      userName: 'admin',
       fullName: 'مدیر سامانه',
-      branch: 'شعبه مرکزی',
-      roles: [ROLES.ADMIN],
+      userCode: null,
+      branchCode: null,
+      branchName: null,
+      scopeType: 0,
+      scopeId: null,
+      keys: ['GetAll', 'Read', 'UploadExel'],
     },
   },
   {
     username: 'branch',
     password: 'branch',
     token: 'mock-token-branch',
+    isBranch: true,
     profile: {
-      id: '2',
-      username: 'branch',
+      panelUserId: 2,
+      userName: 'branch',
       fullName: 'کاربر شعبه',
-      branch: 'شعبه ونک',
-      roles: [ROLES.BRANCH],
+      userCode: '399',
+      branchCode: '150002',
+      branchName: 'شعبه ونک',
+      scopeType: 0,
+      scopeId: null,
+      keys: ['Read'],
     },
   },
 ];

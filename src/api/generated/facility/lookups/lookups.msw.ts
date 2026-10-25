@@ -23,7 +23,7 @@ export const getLookupsEnumsResponseMock = (overrideResponse: Partial<Extract<Co
 
 
 export const getLookupsEnumsMockHandler = (overrideResponse?: CommonEnumCatalogDto | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<CommonEnumCatalogDto> | CommonEnumCatalogDto), options?: RequestHandlerOptions) => {
-  return http.get('*/gateway/facility-management/Lookups/Enums', async (info: Parameters<Parameters<typeof http.get>[1]>[0]) => {await delay(250);
+  return http.get('*/facility-management/Lookups/Enums', async (info: Parameters<Parameters<typeof http.get>[1]>[0]) => {await delay(250);
 
 
     return json(overrideResponse !== undefined

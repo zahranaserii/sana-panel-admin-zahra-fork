@@ -54,7 +54,7 @@ export const getBasicInfoReasonDeleteResponseMock = (): boolean => (faker.dataty
 
 
 export const getBasicInfoSchemesMockHandler = (overrideResponse?: ReadModelsSchemeDto[] | null | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<ReadModelsSchemeDto[] | null> | ReadModelsSchemeDto[] | null), options?: RequestHandlerOptions) => {
-  return http.get('*/gateway/facility-management/BasicInfo/Schemes', async (info: Parameters<Parameters<typeof http.get>[1]>[0]) => {await delay(250);
+  return http.get('*/facility-management/BasicInfo/Schemes', async (info: Parameters<Parameters<typeof http.get>[1]>[0]) => {await delay(250);
 
 
     return json(overrideResponse !== undefined
@@ -66,7 +66,7 @@ export const getBasicInfoSchemesMockHandler = (overrideResponse?: ReadModelsSche
 }
 
 export const getBasicInfoSchemeCreateMockHandler = (overrideResponse?: ReadModelsSchemeFormDto | ((info: Parameters<Parameters<typeof http.post>[1]>[0]) => Promise<ReadModelsSchemeFormDto> | ReadModelsSchemeFormDto), options?: RequestHandlerOptions) => {
-  return http.post('*/gateway/facility-management/BasicInfo/Schemes', async (info: Parameters<Parameters<typeof http.post>[1]>[0]) => {await delay(250);
+  return http.post('*/facility-management/BasicInfo/Schemes', async (info: Parameters<Parameters<typeof http.post>[1]>[0]) => {await delay(250);
 
 
     return json(overrideResponse !== undefined
@@ -78,7 +78,7 @@ export const getBasicInfoSchemeCreateMockHandler = (overrideResponse?: ReadModel
 }
 
 export const getBasicInfoSchemeSearchMockHandler = (overrideResponse?: CommonFacilityPagedResponseOfSchemeListItemDto | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<CommonFacilityPagedResponseOfSchemeListItemDto> | CommonFacilityPagedResponseOfSchemeListItemDto), options?: RequestHandlerOptions) => {
-  return http.get('*/gateway/facility-management/BasicInfo/Schemes/Search', async (info: Parameters<Parameters<typeof http.get>[1]>[0]) => {await delay(250);
+  return http.get('*/facility-management/BasicInfo/Schemes/Search', async (info: Parameters<Parameters<typeof http.get>[1]>[0]) => {await delay(250);
 
 
     return json(overrideResponse !== undefined
@@ -90,7 +90,7 @@ export const getBasicInfoSchemeSearchMockHandler = (overrideResponse?: CommonFac
 }
 
 export const getBasicInfoSchemeGetMockHandler = (overrideResponse?: ReadModelsSchemeFormDto | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<ReadModelsSchemeFormDto> | ReadModelsSchemeFormDto), options?: RequestHandlerOptions) => {
-  return http.get('*/gateway/facility-management/BasicInfo/Schemes/:schemeId', async (info: Parameters<Parameters<typeof http.get>[1]>[0]) => {await delay(250);
+  return http.get('*/facility-management/BasicInfo/Schemes/:schemeId', async (info: Parameters<Parameters<typeof http.get>[1]>[0]) => {await delay(250);
 
 
     return json(overrideResponse !== undefined
@@ -102,7 +102,7 @@ export const getBasicInfoSchemeGetMockHandler = (overrideResponse?: ReadModelsSc
 }
 
 export const getBasicInfoSchemeUpdateMockHandler = (overrideResponse?: ReadModelsSchemeFormDto | ((info: Parameters<Parameters<typeof http.put>[1]>[0]) => Promise<ReadModelsSchemeFormDto> | ReadModelsSchemeFormDto), options?: RequestHandlerOptions) => {
-  return http.put('*/gateway/facility-management/BasicInfo/Schemes/:schemeId', async (info: Parameters<Parameters<typeof http.put>[1]>[0]) => {await delay(250);
+  return http.put('*/facility-management/BasicInfo/Schemes/:schemeId', async (info: Parameters<Parameters<typeof http.put>[1]>[0]) => {await delay(250);
 
 
     return json(overrideResponse !== undefined
@@ -114,7 +114,7 @@ export const getBasicInfoSchemeUpdateMockHandler = (overrideResponse?: ReadModel
 }
 
 export const getBasicInfoSchemeDeleteMockHandler = (overrideResponse?: boolean | ((info: Parameters<Parameters<typeof http.delete>[1]>[0]) => Promise<boolean> | boolean), options?: RequestHandlerOptions) => {
-  return http.delete('*/gateway/facility-management/BasicInfo/Schemes/:schemeId', async (info: Parameters<Parameters<typeof http.delete>[1]>[0]) => {await delay(250);
+  return http.delete('*/facility-management/BasicInfo/Schemes/:schemeId', async (info: Parameters<Parameters<typeof http.delete>[1]>[0]) => {await delay(250);
 
 
     return json(overrideResponse !== undefined
@@ -126,7 +126,7 @@ export const getBasicInfoSchemeDeleteMockHandler = (overrideResponse?: boolean |
 }
 
 export const getBasicInfoGetMockHandler = (overrideResponse?: ReadModelsBasicInfoDto | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<ReadModelsBasicInfoDto> | ReadModelsBasicInfoDto), options?: RequestHandlerOptions) => {
-  return http.get('*/gateway/facility-management/BasicInfo/:schemeId', async (info: Parameters<Parameters<typeof http.get>[1]>[0]) => {await delay(250);
+  return http.get('*/facility-management/BasicInfo/:schemeId', async (info: Parameters<Parameters<typeof http.get>[1]>[0]) => {await delay(250);
 
 
     return json(overrideResponse !== undefined
@@ -138,7 +138,7 @@ export const getBasicInfoGetMockHandler = (overrideResponse?: ReadModelsBasicInf
 }
 
 export const getBasicInfoUpdateMockHandler = (overrideResponse?: ReadModelsBasicInfoDto | ((info: Parameters<Parameters<typeof http.put>[1]>[0]) => Promise<ReadModelsBasicInfoDto> | ReadModelsBasicInfoDto), options?: RequestHandlerOptions) => {
-  return http.put('*/gateway/facility-management/BasicInfo/:schemeId', async (info: Parameters<Parameters<typeof http.put>[1]>[0]) => {await delay(250);
+  return http.put('*/facility-management/BasicInfo/:schemeId', async (info: Parameters<Parameters<typeof http.put>[1]>[0]) => {await delay(250);
 
 
     return json(overrideResponse !== undefined
@@ -150,7 +150,7 @@ export const getBasicInfoUpdateMockHandler = (overrideResponse?: ReadModelsBasic
 }
 
 export const getBasicInfoPlansMockHandler = (overrideResponse?: ReadModelsPlanListDto | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<ReadModelsPlanListDto> | ReadModelsPlanListDto), options?: RequestHandlerOptions) => {
-  return http.get('*/gateway/facility-management/BasicInfo/:schemeId/Plans', async (info: Parameters<Parameters<typeof http.get>[1]>[0]) => {await delay(250);
+  return http.get('*/facility-management/BasicInfo/:schemeId/Plans', async (info: Parameters<Parameters<typeof http.get>[1]>[0]) => {await delay(250);
 
 
     return json(overrideResponse !== undefined
@@ -162,7 +162,7 @@ export const getBasicInfoPlansMockHandler = (overrideResponse?: ReadModelsPlanLi
 }
 
 export const getBasicInfoSchemeReasonsMockHandler = (overrideResponse?: ReadModelsReasonDto[] | null | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<ReadModelsReasonDto[] | null> | ReadModelsReasonDto[] | null), options?: RequestHandlerOptions) => {
-  return http.get('*/gateway/facility-management/BasicInfo/Schemes/:schemeId/Reasons', async (info: Parameters<Parameters<typeof http.get>[1]>[0]) => {await delay(250);
+  return http.get('*/facility-management/BasicInfo/Schemes/:schemeId/Reasons', async (info: Parameters<Parameters<typeof http.get>[1]>[0]) => {await delay(250);
 
 
     return json(overrideResponse !== undefined
@@ -174,7 +174,7 @@ export const getBasicInfoSchemeReasonsMockHandler = (overrideResponse?: ReadMode
 }
 
 export const getBasicInfoReasonCreateMockHandler = (overrideResponse?: ReadModelsReasonDto | ((info: Parameters<Parameters<typeof http.post>[1]>[0]) => Promise<ReadModelsReasonDto> | ReadModelsReasonDto), options?: RequestHandlerOptions) => {
-  return http.post('*/gateway/facility-management/BasicInfo/Schemes/:schemeId/Reasons', async (info: Parameters<Parameters<typeof http.post>[1]>[0]) => {await delay(250);
+  return http.post('*/facility-management/BasicInfo/Schemes/:schemeId/Reasons', async (info: Parameters<Parameters<typeof http.post>[1]>[0]) => {await delay(250);
 
 
     return json(overrideResponse !== undefined
@@ -186,7 +186,7 @@ export const getBasicInfoReasonCreateMockHandler = (overrideResponse?: ReadModel
 }
 
 export const getBasicInfoReasonsMockHandler = (overrideResponse?: ReadModelsReasonDto[] | null | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<ReadModelsReasonDto[] | null> | ReadModelsReasonDto[] | null), options?: RequestHandlerOptions) => {
-  return http.get('*/gateway/facility-management/BasicInfo/Reasons', async (info: Parameters<Parameters<typeof http.get>[1]>[0]) => {await delay(250);
+  return http.get('*/facility-management/BasicInfo/Reasons', async (info: Parameters<Parameters<typeof http.get>[1]>[0]) => {await delay(250);
 
 
     return json(overrideResponse !== undefined
@@ -198,7 +198,7 @@ export const getBasicInfoReasonsMockHandler = (overrideResponse?: ReadModelsReas
 }
 
 export const getBasicInfoReasonUpdateMockHandler = (overrideResponse?: ReadModelsReasonDto | ((info: Parameters<Parameters<typeof http.put>[1]>[0]) => Promise<ReadModelsReasonDto> | ReadModelsReasonDto), options?: RequestHandlerOptions) => {
-  return http.put('*/gateway/facility-management/BasicInfo/Schemes/:schemeId/Reasons/:id', async (info: Parameters<Parameters<typeof http.put>[1]>[0]) => {await delay(250);
+  return http.put('*/facility-management/BasicInfo/Schemes/:schemeId/Reasons/:id', async (info: Parameters<Parameters<typeof http.put>[1]>[0]) => {await delay(250);
 
 
     return json(overrideResponse !== undefined
@@ -210,7 +210,7 @@ export const getBasicInfoReasonUpdateMockHandler = (overrideResponse?: ReadModel
 }
 
 export const getBasicInfoReasonDeleteMockHandler = (overrideResponse?: boolean | ((info: Parameters<Parameters<typeof http.delete>[1]>[0]) => Promise<boolean> | boolean), options?: RequestHandlerOptions) => {
-  return http.delete('*/gateway/facility-management/BasicInfo/Schemes/:schemeId/Reasons/:id', async (info: Parameters<Parameters<typeof http.delete>[1]>[0]) => {await delay(250);
+  return http.delete('*/facility-management/BasicInfo/Schemes/:schemeId/Reasons/:id', async (info: Parameters<Parameters<typeof http.delete>[1]>[0]) => {await delay(250);
 
 
     return json(overrideResponse !== undefined

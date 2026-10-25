@@ -32,7 +32,7 @@ export const getDashboardMonthsResponseMock = (): ReadModelsMonthOptionDto[] | n
 
 
 export const getDashboardGetMockHandler = (overrideResponse?: ReadModelsDashboardDto | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<ReadModelsDashboardDto> | ReadModelsDashboardDto), options?: RequestHandlerOptions) => {
-  return http.get('*/gateway/facility-management/Dashboard', async (info: Parameters<Parameters<typeof http.get>[1]>[0]) => {await delay(250);
+  return http.get('*/facility-management/Dashboard', async (info: Parameters<Parameters<typeof http.get>[1]>[0]) => {await delay(250);
 
 
     return json(overrideResponse !== undefined
@@ -44,7 +44,7 @@ export const getDashboardGetMockHandler = (overrideResponse?: ReadModelsDashboar
 }
 
 export const getDashboardRankingMockHandler = (overrideResponse?: ReadModelsCompanyRankingDto[] | null | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<ReadModelsCompanyRankingDto[] | null> | ReadModelsCompanyRankingDto[] | null), options?: RequestHandlerOptions) => {
-  return http.get('*/gateway/facility-management/Dashboard/CompanyRanking', async (info: Parameters<Parameters<typeof http.get>[1]>[0]) => {await delay(250);
+  return http.get('*/facility-management/Dashboard/CompanyRanking', async (info: Parameters<Parameters<typeof http.get>[1]>[0]) => {await delay(250);
 
 
     return json(overrideResponse !== undefined
@@ -56,7 +56,7 @@ export const getDashboardRankingMockHandler = (overrideResponse?: ReadModelsComp
 }
 
 export const getDashboardMonthsMockHandler = (overrideResponse?: ReadModelsMonthOptionDto[] | null | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<ReadModelsMonthOptionDto[] | null> | ReadModelsMonthOptionDto[] | null), options?: RequestHandlerOptions) => {
-  return http.get('*/gateway/facility-management/Dashboard/Months', async (info: Parameters<Parameters<typeof http.get>[1]>[0]) => {await delay(250);
+  return http.get('*/facility-management/Dashboard/Months', async (info: Parameters<Parameters<typeof http.get>[1]>[0]) => {await delay(250);
 
 
     return json(overrideResponse !== undefined
@@ -68,7 +68,7 @@ export const getDashboardMonthsMockHandler = (overrideResponse?: ReadModelsMonth
 }
 
 export const getDashboardExportMockHandler = (overrideResponse?: unknown | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<unknown> | unknown), options?: RequestHandlerOptions) => {
-  return http.get('*/gateway/facility-management/Dashboard/Exports/:report', async (info: Parameters<Parameters<typeof http.get>[1]>[0]) => {await delay(250);
+  return http.get('*/facility-management/Dashboard/Exports/:report', async (info: Parameters<Parameters<typeof http.get>[1]>[0]) => {await delay(250);
   if (typeof overrideResponse === 'function') {await overrideResponse(info); }
 
     return new HttpResponse(null,

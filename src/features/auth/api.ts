@@ -1,6 +1,6 @@
 import { ENDPOINTS } from '@/constant/endpoints';
 import { http } from '@/services/http';
-import { type UserProfile } from '@/types/common';
+import { useAuthStore } from '@/store/useAuthStore';
 
 import { type LoginFormValues, type LoginRequest, type LoginResponse } from './types';
 
@@ -20,10 +20,11 @@ export const login = (values: LoginFormValues) =>
  * (۴۰۱ هم مودال پایان نشست را باز نمی‌کند).
  */
 export const logout = () =>
-  http.get<unknown>(ENDPOINTS.AUTH.LOGOUT, { silent: true, onError: { 401: () => undefined } });
-
-/** بکند ندارد — سرویس پروفایل در نسخه بعدی سوئگر منتشر می‌شود (فعلاً از ماک) */
-export const getProfile = () => http.get<UserProfile>(ENDPOINTS.AUTH.PROFILE);
+  http.get<unknown>(ENDPOINTS.AUTH.LOGOUT, {
+    params: { Token: useAuthStore.getState().token },
+    silent: true,
+    onError: { 401: () => undefined },
+  });
 
 // کپچا: به‌خاطر ایراد زیرساختی بک‌اند فعلاً استفاده نمی‌شود
 // export const getCaptcha = () => http.get<unknown>(ENDPOINTS.AUTH.CAPTCHA);

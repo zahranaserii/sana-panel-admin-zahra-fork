@@ -71,7 +71,7 @@ export const basicInfoSchemes = (
 
 
       return apiClient<ReadModelsSchemeDto[] | null>(
-      {url: `/gateway/facility-management/BasicInfo/Schemes`, method: 'GET', signal
+      {url: `/facility-management/BasicInfo/Schemes`, method: 'GET', signal
     },
       options);
     }
@@ -81,7 +81,7 @@ export const basicInfoSchemes = (
 
 export const getBasicInfoSchemesQueryKey = () => {
     return [
-    `/gateway/facility-management/BasicInfo/Schemes`
+    `/facility-management/BasicInfo/Schemes`
     ] as const;
     }
 
@@ -164,7 +164,7 @@ export const basicInfoSchemeCreate = (
 
 
       return apiClient<ReadModelsSchemeFormDto>(
-      {url: `/gateway/facility-management/BasicInfo/Schemes`, method: 'POST',
+      {url: `/facility-management/BasicInfo/Schemes`, method: 'POST',
       headers: {'Content-Type': 'application/json', },
       data: saveSchemeCommand, signal
     },
@@ -232,7 +232,7 @@ export const basicInfoSchemeSearch = (
 
 
       return apiClient<CommonFacilityPagedResponseOfSchemeListItemDto>(
-      {url: `/gateway/facility-management/BasicInfo/Schemes/Search`, method: 'GET',
+      {url: `/facility-management/BasicInfo/Schemes/Search`, method: 'GET',
         params, signal
     },
       options);
@@ -243,7 +243,7 @@ export const basicInfoSchemeSearch = (
 
 export const getBasicInfoSchemeSearchQueryKey = (params?: BasicInfoSchemeSearchParams,) => {
     return [
-    `/gateway/facility-management/BasicInfo/Schemes/Search`, ...(params ? [params] : [])
+    `/facility-management/BasicInfo/Schemes/Search`, ...(params ? [params] : [])
     ] as const;
     }
 
@@ -326,7 +326,7 @@ export const basicInfoSchemeGet = (
 
 
       return apiClient<ReadModelsSchemeFormDto>(
-      {url: `/gateway/facility-management/BasicInfo/Schemes/${schemeId}`, method: 'GET', signal
+      {url: `/facility-management/BasicInfo/Schemes/${schemeId}`, method: 'GET', signal
     },
       options);
     }
@@ -336,7 +336,7 @@ export const basicInfoSchemeGet = (
 
 export const getBasicInfoSchemeGetQueryKey = (schemeId: number,) => {
     return [
-    `/gateway/facility-management/BasicInfo/Schemes/${schemeId}`
+    `/facility-management/BasicInfo/Schemes/${schemeId}`
     ] as const;
     }
 
@@ -420,7 +420,7 @@ export const basicInfoSchemeUpdate = (
 
 
       return apiClient<ReadModelsSchemeFormDto>(
-      {url: `/gateway/facility-management/BasicInfo/Schemes/${schemeId}`, method: 'PUT',
+      {url: `/facility-management/BasicInfo/Schemes/${schemeId}`, method: 'PUT',
       headers: {'Content-Type': 'application/json', },
       data: saveSchemeCommand, signal
     },
@@ -488,7 +488,7 @@ export const basicInfoSchemeDelete = (
 
 
       return apiClient<boolean>(
-      {url: `/gateway/facility-management/BasicInfo/Schemes/${schemeId}`, method: 'DELETE', signal
+      {url: `/facility-management/BasicInfo/Schemes/${schemeId}`, method: 'DELETE', signal
     },
       options);
     }
@@ -554,7 +554,7 @@ export const basicInfoGet = (
 
 
       return apiClient<ReadModelsBasicInfoDto>(
-      {url: `/gateway/facility-management/BasicInfo/${schemeId}`, method: 'GET', signal
+      {url: `/facility-management/BasicInfo/${schemeId}`, method: 'GET', signal
     },
       options);
     }
@@ -564,7 +564,7 @@ export const basicInfoGet = (
 
 export const getBasicInfoGetQueryKey = (schemeId: number,) => {
     return [
-    `/gateway/facility-management/BasicInfo/${schemeId}`
+    `/facility-management/BasicInfo/${schemeId}`
     ] as const;
     }
 
@@ -648,7 +648,7 @@ export const basicInfoUpdate = (
 
 
       return apiClient<ReadModelsBasicInfoDto>(
-      {url: `/gateway/facility-management/BasicInfo/${schemeId}`, method: 'PUT',
+      {url: `/facility-management/BasicInfo/${schemeId}`, method: 'PUT',
       headers: {'Content-Type': 'application/json', },
       data: updateBasicInfoCommand, signal
     },
@@ -716,7 +716,7 @@ export const basicInfoPlans = (
 
 
       return apiClient<ReadModelsPlanListDto>(
-      {url: `/gateway/facility-management/BasicInfo/${schemeId}/Plans`, method: 'GET', signal
+      {url: `/facility-management/BasicInfo/${schemeId}/Plans`, method: 'GET', signal
     },
       options);
     }
@@ -726,7 +726,7 @@ export const basicInfoPlans = (
 
 export const getBasicInfoPlansQueryKey = (schemeId: number,) => {
     return [
-    `/gateway/facility-management/BasicInfo/${schemeId}/Plans`
+    `/facility-management/BasicInfo/${schemeId}/Plans`
     ] as const;
     }
 
@@ -810,7 +810,7 @@ export const basicInfoSchemeReasons = (
 
 
       return apiClient<ReadModelsReasonDto[] | null>(
-      {url: `/gateway/facility-management/BasicInfo/Schemes/${schemeId}/Reasons`, method: 'GET',
+      {url: `/facility-management/BasicInfo/Schemes/${schemeId}/Reasons`, method: 'GET',
         params, signal
     },
       options);
@@ -822,7 +822,7 @@ export const basicInfoSchemeReasons = (
 export const getBasicInfoSchemeReasonsQueryKey = (schemeId: number,
     params?: BasicInfoSchemeReasonsParams,) => {
     return [
-    `/gateway/facility-management/BasicInfo/Schemes/${schemeId}/Reasons`, ...(params ? [params] : [])
+    `/facility-management/BasicInfo/Schemes/${schemeId}/Reasons`, ...(params ? [params] : [])
     ] as const;
     }
 
@@ -910,7 +910,7 @@ export const basicInfoReasonCreate = (
 
 
       return apiClient<ReadModelsReasonDto>(
-      {url: `/gateway/facility-management/BasicInfo/Schemes/${schemeId}/Reasons`, method: 'POST',
+      {url: `/facility-management/BasicInfo/Schemes/${schemeId}/Reasons`, method: 'POST',
       headers: {'Content-Type': 'application/json', },
       data: createReasonCommand, signal
     },
@@ -978,7 +978,7 @@ export const basicInfoReasons = (
 
 
       return apiClient<ReadModelsReasonDto[] | null>(
-      {url: `/gateway/facility-management/BasicInfo/Reasons`, method: 'GET',
+      {url: `/facility-management/BasicInfo/Reasons`, method: 'GET',
         params, signal
     },
       options);
@@ -989,7 +989,7 @@ export const basicInfoReasons = (
 
 export const getBasicInfoReasonsQueryKey = (params?: BasicInfoReasonsParams,) => {
     return [
-    `/gateway/facility-management/BasicInfo/Reasons`, ...(params ? [params] : [])
+    `/facility-management/BasicInfo/Reasons`, ...(params ? [params] : [])
     ] as const;
     }
 
@@ -1073,7 +1073,7 @@ export const basicInfoReasonUpdate = (
 
 
       return apiClient<ReadModelsReasonDto>(
-      {url: `/gateway/facility-management/BasicInfo/Schemes/${schemeId}/Reasons/${id}`, method: 'PUT',
+      {url: `/facility-management/BasicInfo/Schemes/${schemeId}/Reasons/${id}`, method: 'PUT',
       headers: {'Content-Type': 'application/json', },
       data: updateReasonCommand, signal
     },
@@ -1141,7 +1141,7 @@ export const basicInfoReasonDelete = (
 
 
       return apiClient<boolean>(
-      {url: `/gateway/facility-management/BasicInfo/Schemes/${schemeId}/Reasons/${id}`, method: 'DELETE', signal
+      {url: `/facility-management/BasicInfo/Schemes/${schemeId}/Reasons/${id}`, method: 'DELETE', signal
     },
       options);
     }

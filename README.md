@@ -34,12 +34,12 @@ npm run build:stage  # بیلد staging
 
 فایل‌های `.env.development`، `.env.staging` و `.env.production`:
 
-| متغیر               | توضیح                 |
-| ------------------- | --------------------- |
-| `VITE_API_BASE_URL` | آدرس API              |
-| `VITE_API_TIMEOUT`  | تایم‌اوت درخواست (ms) |
-| `VITE_ENABLE_MOCK`  | فعال بودن ماک MSW     |
-| `VITE_APP_TITLE`    | عنوان سامانه          |
+| متغیر               | توضیح                          |
+| ------------------- | ------------------------------ |
+| `VITE_API_BASE_URL` | آدرس API (همراه با `/gateway`) |
+| `VITE_API_TIMEOUT`  | تایم‌اوت درخواست (ms)          |
+| `VITE_ENABLE_MOCK`  | فعال بودن ماک MSW              |
+| `VITE_APP_TITLE`    | عنوان سامانه                   |
 
 ## ساختار پوشه‌ها
 

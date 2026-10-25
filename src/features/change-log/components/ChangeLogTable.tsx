@@ -10,9 +10,7 @@ import { PanelCard } from '@/component/card';
 import { SelectInput } from '@/component/input';
 import { StatusChip } from '@/component/status-chip';
 import { Table } from '@/component/table';
-import { ROLES } from '@/constant/roles';
 import { useEnums } from '@/services/enums';
-import { useProfileStore } from '@/store/useProfileStore';
 import { dayjs, toPersianDigits } from '@/utils/date';
 
 import { exportChangeLogs } from '../api';
@@ -34,7 +32,6 @@ export const ChangeLogTable = () => {
   const [panelUserId, setPanelUserId] = useState<number>(ALL);
   const [page, setPage] = useState(1);
   const [restoring, setRestoring] = useState<ChangeLogItem | null>(null);
-  const isAdmin = useProfileStore((state) => state.hasRole(ROLES.ADMIN));
 
   const enums = useEnums();
   const usersQuery = useChangeLogsUsers();
@@ -56,7 +53,7 @@ export const ChangeLogTable = () => {
 
   const renderRestore = (log: ChangeLogItem) => {
     if (log.restoredAt) return <StatusChip tone="warning">بازگردانی‌شده</StatusChip>;
-    if (isAdmin && log.canRestore) {
+    if (log.canRestore) {
       return (
         <Button
           variant="secondary"
