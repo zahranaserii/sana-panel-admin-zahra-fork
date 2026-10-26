@@ -5,7 +5,7 @@ import { Button } from '@/component/button';
 import { FACILITY } from '@/constant/endpoints';
 import { http } from '@/services/http';
 
-/** دانلود فایل تفاهم‌نامه فعلی شرکت (سرویس تولیدشده نوع فایل را نمی‌شناسد؛ با http.download) */
+/** دانلود فایل تفاهم‌نامه فعلی شرکت (از لینک موقت بک‌اند، با http.download) */
 export const AgreementDownload = ({ companyId }: { companyId: number }) => {
   const { mutate, isPending } = useMutation({
     mutationFn: () => http.download(`${FACILITY}/Companies/${companyId}/AgreementFile`),

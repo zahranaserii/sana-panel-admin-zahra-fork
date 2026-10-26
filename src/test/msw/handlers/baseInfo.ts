@@ -87,7 +87,6 @@ const SETTING_DEFAULTS: Omit<Settings, 'schemeId' | 'rowVersion'> = {
   personnelIntroductionDelayMonths: 0,
   waitingPeriodDays: 0,
   usableTable: [],
-  digitalApprovalEnabled: false,
 };
 
 /** فیلد لیست متنی درخواست به ازای هر نوع دلیل */

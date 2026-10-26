@@ -165,7 +165,7 @@ export const basicInfoSchemeCreate = (
 
       return apiClient<ReadModelsSchemeFormDto>(
       {url: `/facility-management/BasicInfo/Schemes`, method: 'POST',
-      headers: {'Content-Type': 'application/json', },
+      headers: {'Content-Type': 'application/json; x-api-version=2', },
       data: saveSchemeCommand, signal
     },
       options);
@@ -421,7 +421,7 @@ export const basicInfoSchemeUpdate = (
 
       return apiClient<ReadModelsSchemeFormDto>(
       {url: `/facility-management/BasicInfo/Schemes/${schemeId}`, method: 'PUT',
-      headers: {'Content-Type': 'application/json', },
+      headers: {'Content-Type': 'application/json; x-api-version=2', },
       data: saveSchemeCommand, signal
     },
       options);
@@ -649,7 +649,7 @@ export const basicInfoUpdate = (
 
       return apiClient<ReadModelsBasicInfoDto>(
       {url: `/facility-management/BasicInfo/${schemeId}`, method: 'PUT',
-      headers: {'Content-Type': 'application/json', },
+      headers: {'Content-Type': 'application/json; x-api-version=2', },
       data: updateBasicInfoCommand, signal
     },
       options);
@@ -911,7 +911,7 @@ export const basicInfoReasonCreate = (
 
       return apiClient<ReadModelsReasonDto>(
       {url: `/facility-management/BasicInfo/Schemes/${schemeId}/Reasons`, method: 'POST',
-      headers: {'Content-Type': 'application/json', },
+      headers: {'Content-Type': 'application/json; x-api-version=2', },
       data: createReasonCommand, signal
     },
       options);
@@ -968,7 +968,7 @@ export const useBasicInfoReasonCreate = <TError = ErrorType<ProblemDetails>,
       return useMutation(getBasicInfoReasonCreateMutationOptions(options), queryClient);
     }
     /**
- * ⚠ فهرست‌ها دیگر سراسری نیستند. این مسیر تا وقتی فقط یک طرح فعال باشد کار می‌کند و با طرح دوم خطای روشن می‌دهد. مسیر درست: Schemes/{schemeId}/Reasons.
+ * ⚠  فهرست‌ها دیگر سراسری نیستند. این مسیر تا وقتی فقط یک طرح فعال باشد کار می‌کند و با طرح دوم خطای روشن می‌دهد. مسیر درست: Schemes/{schemeId}/Reasons.
  * @summary فهرست داینامیک طرح پیش‌فرض (برای سازگاری)
  */
 export const basicInfoReasons = (
@@ -1074,7 +1074,7 @@ export const basicInfoReasonUpdate = (
 
       return apiClient<ReadModelsReasonDto>(
       {url: `/facility-management/BasicInfo/Schemes/${schemeId}/Reasons/${id}`, method: 'PUT',
-      headers: {'Content-Type': 'application/json', },
+      headers: {'Content-Type': 'application/json; x-api-version=2', },
       data: updateReasonCommand, signal
     },
       options);

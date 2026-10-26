@@ -16,7 +16,7 @@ import { type CreditApprovalItem } from '../types';
 const toJalali = (value?: string | null) =>
   value ? formatJalali(value, undefined, { persianDigits: true }) : '—';
 
-/** سرویس تولیدشده نوع فایل را نمی‌شناسد؛ دانلود با http.download */
+/** دانلود از لینک موقت بک‌اند (http.download) */
 const download = (row: CreditApprovalItem, file: CommonStoredFileDto) =>
   http.download(`${FACILITY}/LoanRequests/${row.id}/Documents/${file.id}`, file.fileName);
 

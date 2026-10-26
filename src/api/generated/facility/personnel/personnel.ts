@@ -22,8 +22,8 @@ import type {
 
 import type {
   CommonFacilityPagedResponseOfPersonnelListItemDto,
+  CommonFileLinkDto,
   CreatePersonnelCommand,
-  DecidePersonnelCommand,
   PersonnelDeleteBody,
   PersonnelImportBody,
   PersonnelSearchParams,
@@ -58,7 +58,7 @@ const withQueryKey = <T extends object, K>(query: T, queryKey: K): T & { queryKe
 };
 
 /**
- * جستجو در نام، کد ملی، موبایل، کد پرسنلی + بازهٔ تاریخ استخدام. مرتب بر اساس اولویت. در انتظار/ردشده فقط برای ادمین، منابع انسانی و مدیر همان شرکت.
+ * جستجو در نام، کد ملی، موبایل، کد پرسنلی + بازهٔ تاریخ استخدام. مرتب بر اساس اولویت. همهٔ پرسنل فعال شرکت؛ چرخهٔ تأیید ندارد.
  * @summary پرسنل یک شرکت
  */
 export const personnelSearch = (
@@ -159,7 +159,7 @@ export function usePersonnelSearch<TData = Awaited<ReturnType<typeof personnelSe
 
 
 /**
- * با وضعیت «در انتظار تأیید مدیر شرکت» ثبت می‌شود.
+ * مستقیم با وضعیت «فعال» ثبت می‌شود؛ تأیید مدیر شرکت ندارد.
  * @summary افزودن پرسنل
  */
 export const personnelCreate = (
@@ -171,7 +171,7 @@ export const personnelCreate = (
 
       return apiClient<ReadModelsPersonnelDetailsDto>(
       {url: `/facility-management/Companies/${companyId}/Personnel`, method: 'POST',
-      headers: {'Content-Type': 'application/json', },
+      headers: {'Content-Type': 'application/json; x-api-version=2', },
       data: createPersonnelCommand, signal
     },
       options);
@@ -320,8 +320,8 @@ export function usePersonnelGet<TData = Awaited<ReturnType<typeof personnelGet>>
 
 
 /**
- * برای فرد ردشده وضعیت دوباره «در انتظار تأیید مدیر» می‌شود. فرد استفاده‌شده در وام قفل است.
- * @summary ویرایش یا اصلاح و ارسال دوباره
+ * فرد استفاده‌شده در درخواست وام قفل است. ویرایش با rowVersion و قابل بازگردانی از گزارش تغییرات.
+ * @summary ویرایش پرسنل
  */
 export const personnelUpdate = (
     id: number,
@@ -332,7 +332,7 @@ export const personnelUpdate = (
 
       return apiClient<ReadModelsPersonnelDetailsDto>(
       {url: `/facility-management/Personnel/${id}`, method: 'PUT',
-      headers: {'Content-Type': 'application/json', },
+      headers: {'Content-Type': 'application/json; x-api-version=2', },
       data: updatePersonnelCommand, signal
     },
       options);
@@ -376,7 +376,7 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
     export type PersonnelUpdateMutationVariables = {id: number;data?: BodyType<UpdatePersonnelCommand>}
 
     /**
- * @summary ویرایش یا اصلاح و ارسال دوباره
+ * @summary ویرایش پرسنل
  */
 export const usePersonnelUpdate = <TError = ErrorType<ProblemDetails>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof personnelUpdate>>, TError,PersonnelUpdateMutationVariables, TContext>, request?: SecondParameter<typeof apiClient>}
@@ -389,7 +389,7 @@ export const usePersonnelUpdate = <TError = ErrorType<ProblemDetails>,
       return useMutation(getPersonnelUpdateMutationOptions(options), queryClient);
     }
     /**
- * توضیح و فایل الزامی. POST چون فایل دارد.
+ * توضیح (۵ تا ۵۰۰ حرف) و فایل (file: pdf/jpg/jpeg/png تا ۵ مگابایت) هر دو الزامی. POST چون فایل دارد.
  * @summary حذف پرسنل
  */
 export const personnelDelete = (
@@ -458,7 +458,7 @@ export const usePersonnelDelete = <TError = ErrorType<ProblemDetails>,
       return useMutation(getPersonnelDeleteMutationOptions(options), queryClient);
     }
     /**
- * @summary دانلود نمونه فایل اکسل
+ * @summary لینک دانلود نمونه فایل اکسل (xlsx)
  */
 export const personnelImportTemplate = (
 
@@ -466,7 +466,7 @@ export const personnelImportTemplate = (
 ) => {
 
 
-      return apiClient<unknown>(
+      return apiClient<CommonFileLinkDto>(
       {url: `/facility-management/Personnel/Import/Template`, method: 'GET', signal
     },
       options);
@@ -529,7 +529,7 @@ export function usePersonnelImportTemplate<TData = Awaited<ReturnType<typeof per
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
- * @summary دانلود نمونه فایل اکسل
+ * @summary لینک دانلود نمونه فایل اکسل (xlsx)
  */
 
 export function usePersonnelImportTemplate<TData = Awaited<ReturnType<typeof personnelImportTemplate>>, TError = ErrorType<ProblemDetails>>(
@@ -550,7 +550,7 @@ export function usePersonnelImportTemplate<TData = Awaited<ReturnType<typeof per
 
 
 /**
- * xlsx, xls, csv تا ۱۰ مگابایت. خطای هر ردیف برمی‌گردد.
+ * xlsx, xls, csv تا ۱۰ مگابایت، حداکثر ۵۰۰۰ ردیف. همه یا هیچ: اگر حتی یک ردیف خطا داشته باشد کل فایل رد می‌شود، هیچ فردی ثبت نمی‌شود و پاسخ 422 با فهرست خطای همهٔ ردیف‌ها برمی‌گردد. فایل سالم: همهٔ افراد مستقیم «فعال» ثبت می‌شوند (چرخهٔ تأیید ندارد).
  * @summary بارگذاری گروهی (US-E2)
  */
 export const personnelImport = (
@@ -573,7 +573,7 @@ export const personnelImport = (
 
 export const getPersonnelImportMutationKey = () => ['personnelImport'] as const;
 
-export const getPersonnelImportMutationOptions = <TError = ErrorType<ProblemDetails>,
+export const getPersonnelImportMutationOptions = <TError = ErrorType<ProblemDetails | ReadModelsPersonnelImportResultDto>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof personnelImport>>, TError,PersonnelImportMutationVariables, TContext>, request?: SecondParameter<typeof apiClient>}
 ): UseMutationOptions<Awaited<ReturnType<typeof personnelImport>>, TError,PersonnelImportMutationVariables, TContext> => {
 
@@ -602,13 +602,13 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
     export type PersonnelImportMutationResult = NonNullable<Awaited<ReturnType<typeof personnelImport>>>
     export type PersonnelImportMutationBody = BodyType<PersonnelImportBody> | undefined
-    export type PersonnelImportMutationError = ErrorType<ProblemDetails>
+    export type PersonnelImportMutationError = ErrorType<ProblemDetails | ReadModelsPersonnelImportResultDto>
     export type PersonnelImportMutationVariables = {companyId: number;data?: BodyType<PersonnelImportBody>}
 
     /**
  * @summary بارگذاری گروهی (US-E2)
  */
-export const usePersonnelImport = <TError = ErrorType<ProblemDetails>,
+export const usePersonnelImport = <TError = ErrorType<ProblemDetails | ReadModelsPersonnelImportResultDto>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof personnelImport>>, TError,PersonnelImportMutationVariables, TContext>, request?: SecondParameter<typeof apiClient>}
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof personnelImport>>,
@@ -710,71 +710,3 @@ export function usePersonnelImportResult<TData = Awaited<ReturnType<typeof perso
 
 
 
-/**
- * تکی یا گروهی، در یک تراکنش.
- * @summary تأیید/رد افراد معرفی‌شده (US-D1)
- */
-export const personnelDecide = (
-    decidePersonnelCommand?: BodyType<DecidePersonnelCommand>,
- options?: SecondParameter<typeof apiClient>,signal?: AbortSignal
-) => {
-
-
-      return apiClient<number>(
-      {url: `/facility-management/Personnel/Decisions`, method: 'POST',
-      headers: {'Content-Type': 'application/json', },
-      data: decidePersonnelCommand, signal
-    },
-      options);
-    }
-
-
-
-
-export const getPersonnelDecideMutationKey = () => ['personnelDecide'] as const;
-
-export const getPersonnelDecideMutationOptions = <TError = ErrorType<ProblemDetails>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof personnelDecide>>, TError,PersonnelDecideMutationVariables, TContext>, request?: SecondParameter<typeof apiClient>}
-): UseMutationOptions<Awaited<ReturnType<typeof personnelDecide>>, TError,PersonnelDecideMutationVariables, TContext> => {
-
-const mutationKey = getPersonnelDecideMutationKey();
-const {mutation: mutationOptions, request: requestOptions} = options ?
-      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
-      options
-      : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }, request: undefined};
-
-
-
-
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof personnelDecide>>, PersonnelDecideMutationVariables> = (props) => {
-          const {data} = props ?? {};
-
-          return  personnelDecide(data,requestOptions)
-        }
-
-
-
-
-
-
-  return  { mutationFn, ...mutationOptions }}
-
-    export type PersonnelDecideMutationResult = NonNullable<Awaited<ReturnType<typeof personnelDecide>>>
-    export type PersonnelDecideMutationBody = BodyType<DecidePersonnelCommand> | undefined
-    export type PersonnelDecideMutationError = ErrorType<ProblemDetails>
-    export type PersonnelDecideMutationVariables = {data?: BodyType<DecidePersonnelCommand>}
-
-    /**
- * @summary تأیید/رد افراد معرفی‌شده (US-D1)
- */
-export const usePersonnelDecide = <TError = ErrorType<ProblemDetails>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof personnelDecide>>, TError,PersonnelDecideMutationVariables, TContext>, request?: SecondParameter<typeof apiClient>}
- , queryClient?: QueryClient): UseMutationResult<
-        Awaited<ReturnType<typeof personnelDecide>>,
-        TError,
-        PersonnelDecideMutationVariables,
-        TContext
-      > => {
-      return useMutation(getPersonnelDecideMutationOptions(options), queryClient);
-    }

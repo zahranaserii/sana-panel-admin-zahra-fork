@@ -96,7 +96,6 @@ const EMPTY_SCHEME: MockScheme = {
     waitingPeriodDays: 0,
     usableTable: [],
     rowVersion: '',
-    digitalApprovalEnabled: false,
   },
   reasons: {
     contractCancel: [],

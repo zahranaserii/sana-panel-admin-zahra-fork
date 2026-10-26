@@ -36,7 +36,6 @@ export const TEXT_LISTS: SchemeTextList[] = [
 export const EMPTY_VALUES: SchemeFormValues = {
   title: '',
   isActive: true,
-  digitalApprovalEnabled: false,
   murabahaRates: [null as never],
   repaymentTermsMonths: [null as never],
   usable: [],
@@ -87,7 +86,6 @@ export const toFormValues = ({
     maxPlansPerCompany: settings.maxPlansPerCompany,
     personnelIntroductionDelayMonths: settings.personnelIntroductionDelayMonths,
     waitingPeriodDays: settings.waitingPeriodDays,
-    digitalApprovalEnabled: settings.digitalApprovalEnabled,
     rowVersion: settings.rowVersion,
     usable: terms.map((term) => [
       findUsable(table, term, QARD_HASAN),

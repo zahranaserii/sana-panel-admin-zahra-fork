@@ -1,10 +1,9 @@
 import ExcelJS from 'exceljs';
-import { delay, http, HttpResponse } from 'msw';
+import { delay, http } from 'msw';
 
 import {
   type CommonFacilityPagedResponseOfPersonnelListItemDto,
   type CreatePersonnelCommand,
-  type DecidePersonnelCommand,
   type ReadModelsPersonnelDetailsDto,
   type ReadModelsPersonnelImportErrorDto,
   type ReadModelsPersonnelImportResultDto,
@@ -16,8 +15,8 @@ import { LOAN_REQUEST_STATUS, PERSONNEL_STATUS, type MockStaff } from '@/constan
 import { ISO_DATE_FORMAT, parseJalali, toEnglishDigits } from '@/utils/date';
 
 import { logAction } from '../audit';
-import { activeLoans, db, nextId, reasonTitle, registrarOf } from '../db';
-import { api, formText, json } from '../utils';
+import { activeLoans, db, nextId, registrarOf } from '../db';
+import { api, fileLink, formText, json } from '../utils';
 
 const SAMPLE_HEADERS = [
   'نام و نام خانوادگی',
@@ -236,12 +235,7 @@ export const staffHandlers = [
       column.width = 22;
     });
     const buffer = await workbook.xlsx.writeBuffer();
-    return new HttpResponse(buffer, {
-      headers: {
-        'Content-Type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-        'Content-Disposition': `attachment; filename*=UTF-8''${encodeURIComponent('نمونه-فایل-پرسنل.xlsx')}`,
-      },
-    });
+    return fileLink(buffer, 'نمونه-فایل-پرسنل.xlsx');
   }),
 
   http.get(api(`${FACILITY}/Personnel/Import/:batchId`), async ({ params }) => {
@@ -354,24 +348,4 @@ export const staffHandlers = [
       return json(result);
     },
   ),
-
-  /** تأیید/رد پرسنل در انتظار (تعداد انجام‌شده برمی‌گردد) */
-  http.post(api(`${FACILITY}/Personnel/Decisions`), async ({ request }) => {
-    await delay(300);
-    const body = (await request.json()) as DecidePersonnelCommand;
-    const approve = body.decision === 1;
-    const rejectReason = approve ? null : (reasonTitle('personnelReject', body.reasonId) ?? null);
-    if (!approve && !rejectReason) {
-      return json({ message: 'انتخاب دلیل رد اجباری است.' }, { status: 400 });
-    }
-    const pending = db.staff.filter(
-      (item) => body.personnelIds.includes(item.id) && item.status === PERSONNEL_STATUS.PENDING,
-    );
-    pending.forEach((item) => {
-      item.status = approve ? PERSONNEL_STATUS.APPROVED : PERSONNEL_STATUS.REJECTED;
-      item.rejectReason = rejectReason;
-      item.decidedAt = new Date().toISOString();
-    });
-    return json(pending.length);
-  }),
 ];

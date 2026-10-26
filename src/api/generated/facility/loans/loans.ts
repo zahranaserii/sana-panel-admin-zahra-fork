@@ -26,6 +26,7 @@ import type {
   CommandResponsesLoanBatchDto,
   CommandResponsesLoanRequestListItemDto,
   CommonFacilityPagedResponseOfLoanRequestListItemDto,
+  CommonFileLinkDto,
   CreateLoanRequestsCommand,
   LoansCreditParams,
   LoansSearchParams,
@@ -173,7 +174,7 @@ export const loansPreview = (
 
       return apiClient<ReadModelsLoanRequestPreviewDto>(
       {url: `/facility-management/Companies/${companyId}/LoanRequests/Preview`, method: 'POST',
-      headers: {'Content-Type': 'application/json', },
+      headers: {'Content-Type': 'application/json; x-api-version=2', },
       data: previewLoanRequestQuery, signal
     },
       options);
@@ -275,7 +276,7 @@ export const loansCreate = (
 
       return apiClient<CommandResponsesLoanBatchDto>(
       {url: `/facility-management/Companies/${companyId}/LoanRequests`, method: 'POST',
-      headers: {'Content-Type': 'application/json', },
+      headers: {'Content-Type': 'application/json; x-api-version=2', },
       data: createLoanRequestsCommand, signal
     },
       options);
@@ -530,7 +531,7 @@ export const loansAddMember = (
 
       return apiClient<CommandResponsesLoanBatchDto>(
       {url: `/facility-management/LoanBatches/${batchId}/Members`, method: 'POST',
-      headers: {'Content-Type': 'application/json', },
+      headers: {'Content-Type': 'application/json; x-api-version=2', },
       data: addLoanBatchMemberCommand, signal
     },
       options);
@@ -655,7 +656,7 @@ export const useLoansRemoveMember = <TError = ErrorType<ProblemDetails>,
     }
     /**
  * fileId همان id عضوهای documents در ردیف فهرست است.
- * @summary دانلود مستند درخواست
+ * @summary لینک دانلود مستند درخواست
  */
 export const loansDocumentDownload = (
     id: number,
@@ -664,7 +665,7 @@ export const loansDocumentDownload = (
 ) => {
 
 
-      return apiClient<unknown>(
+      return apiClient<CommonFileLinkDto>(
       {url: `/facility-management/LoanRequests/${id}/Documents/${fileId}`, method: 'GET', signal
     },
       options);
@@ -732,7 +733,7 @@ export function useLoansDocumentDownload<TData = Awaited<ReturnType<typeof loans
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
- * @summary دانلود مستند درخواست
+ * @summary لینک دانلود مستند درخواست
  */
 
 export function useLoansDocumentDownload<TData = Awaited<ReturnType<typeof loansDocumentDownload>>, TError = ErrorType<ProblemDetails>>(
@@ -766,7 +767,7 @@ export const loansCancel = (
 
       return apiClient<CommandResponsesLoanRequestListItemDto>(
       {url: `/facility-management/LoanRequests/${id}/Cancel`, method: 'POST',
-      headers: {'Content-Type': 'application/json', },
+      headers: {'Content-Type': 'application/json; x-api-version=2', },
       data: cancelLoanRequestCommand, signal
     },
       options);

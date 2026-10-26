@@ -22,6 +22,7 @@ import type {
 
 import type {
   CommonFacilityLookupItemDto,
+  CommonFileLinkDto,
   CompaniesBalanceDocumentsParams,
   CompaniesBalanceDocumentsUploadBody,
   CompaniesBalancesSaveBody,
@@ -157,7 +158,7 @@ export function useCompaniesSearch<TData = Awaited<ReturnType<typeof companiesSe
 
 
 /**
- * فرم + فایل تفاهم‌نامه. شعبهٔ شرکت = شعبهٔ کاربر ثبت‌کننده.
+ * فرم + فایل تفاهم‌نامه (اختیاری). کد شعبه: کاربر شعبه همیشه شعبهٔ خودش (BranchCode نادیده گرفته می‌شود)؛ ادمین و شعبهٔ دیجیتال (دامنهٔ سراسری) BranchCode را می‌فرستند و اگر خالی باشد شعبهٔ خودشان ثبت می‌شود.
  * @summary ثبت شرکت جدید (US-B2)
  */
 export const companiesCreate = (
@@ -491,7 +492,7 @@ export const companiesDelete = (
 
       return apiClient<boolean>(
       {url: `/facility-management/Companies/${id}`, method: 'DELETE',
-      headers: {'Content-Type': 'application/json', },
+      headers: {'Content-Type': 'application/json; x-api-version=2', },
       data: deleteCompanyCommand, signal
     },
       options);
@@ -548,7 +549,7 @@ export const useCompaniesDelete = <TError = ErrorType<ProblemDetails>,
       return useMutation(getCompaniesDeleteMutationOptions(options), queryClient);
     }
     /**
- * تاریخ، دلیل از فهرست، توضیح و فایل نامه الزامی.
+ * تاریخ، دلیل از فهرست، توضیح (۵ تا ۱۰۰۰ حرف) و فایل نامه (letterFile: pdf/jpg/jpeg/png تا ۵ مگابایت) همه الزامی.
  * @summary لغو قرارداد (مدال تصمیم)
  */
 export const companiesCancelContract = (
@@ -617,7 +618,7 @@ export const useCompaniesCancelContract = <TError = ErrorType<ProblemDetails>,
       return useMutation(getCompaniesCancelContractMutationOptions(options), queryClient);
     }
     /**
- * @summary دانلود فایل تفاهم‌نامه
+ * @summary لینک دانلود فایل تفاهم‌نامه
  */
 export const companiesAgreementFile = (
     id: number,
@@ -625,7 +626,7 @@ export const companiesAgreementFile = (
 ) => {
 
 
-      return apiClient<unknown>(
+      return apiClient<CommonFileLinkDto>(
       {url: `/facility-management/Companies/${id}/AgreementFile`, method: 'GET', signal
     },
       options);
@@ -688,7 +689,7 @@ export function useCompaniesAgreementFile<TData = Awaited<ReturnType<typeof comp
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
- * @summary دانلود فایل تفاهم‌نامه
+ * @summary لینک دانلود فایل تفاهم‌نامه
  */
 
 export function useCompaniesAgreementFile<TData = Awaited<ReturnType<typeof companiesAgreementFile>>, TError = ErrorType<ProblemDetails>>(
@@ -801,7 +802,7 @@ export function useCompaniesBalances<TData = Awaited<ReturnType<typeof companies
 
 
 /**
- * فقط کاربر شعبه (شعبهٔ خود) و ادمین. ⚠ بدنه multipart شد: اگر مبلغی عوض شود، documentTypeId و حداقل یک فایل الزامی است و هر دو در یک تراکنش ثبت می‌شوند. یک مستند همهٔ ماه‌های تغییریافتهٔ همین ذخیره را پوشش می‌دهد. اگر هیچ مبلغی عوض نشود، مستند لازم نیست. مبلغ قبلی و جدید در گزارش تغییرات ثبت می‌شود.
+ * فقط کاربر شعبه (شعبهٔ خود) و ادمین. ⚠  بدنه multipart شد: اگر مبلغی عوض شود، documentTypeId و حداقل یک فایل الزامی است و هر دو در یک تراکنش ثبت می‌شوند. یک مستند همهٔ ماه‌های تغییریافتهٔ همین ذخیره را پوشش می‌دهد. اگر هیچ مبلغی عوض نشود، مستند لازم نیست. مبلغ قبلی و جدید در گزارش تغییرات ثبت می‌شود.
  * @summary ذخیرهٔ میانگین‌ها همراه مستندش (US-B4، US-B5)
  */
 export const companiesBalancesSave = (
@@ -1039,7 +1040,7 @@ export const useCompaniesBalanceDocumentsUpload = <TError = ErrorType<ProblemDet
       return useMutation(getCompaniesBalanceDocumentsUploadMutationOptions(options), queryClient);
     }
     /**
- * @summary دانلود مستند
+ * @summary لینک دانلود مستند
  */
 export const companiesBalanceDocumentDownload = (
     id: number,
@@ -1048,7 +1049,7 @@ export const companiesBalanceDocumentDownload = (
 ) => {
 
 
-      return apiClient<unknown>(
+      return apiClient<CommonFileLinkDto>(
       {url: `/facility-management/Companies/${id}/Balances/Documents/${documentId}`, method: 'GET', signal
     },
       options);
@@ -1116,7 +1117,7 @@ export function useCompaniesBalanceDocumentDownload<TData = Awaited<ReturnType<t
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
- * @summary دانلود مستند
+ * @summary لینک دانلود مستند
  */
 
 export function useCompaniesBalanceDocumentDownload<TData = Awaited<ReturnType<typeof companiesBalanceDocumentDownload>>, TError = ErrorType<ProblemDetails>>(

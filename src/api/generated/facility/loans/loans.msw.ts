@@ -6,7 +6,6 @@ import {
 } from '@faker-js/faker/locale/fa';
 
 import {
-  HttpResponse,
   delay,
   http
 } from 'msw';
@@ -19,6 +18,7 @@ import type {
   CommandResponsesLoanBatchDto,
   CommandResponsesLoanRequestListItemDto,
   CommonFacilityPagedResponseOfLoanRequestListItemDto,
+  CommonFileLinkDto,
   ReadModelsCompanyCreditDto,
   ReadModelsLoanRequestDetailsDto,
   ReadModelsLoanRequestPreviewDto
@@ -38,6 +38,8 @@ export const getLoansGetResponseMock = (overrideResponse: Partial<Extract<ReadMo
 export const getLoansAddMemberResponseMock = (overrideResponse: Partial<Extract<CommandResponsesLoanBatchDto, object>> = {}): CommandResponsesLoanBatchDto => ({batchId: faker.number.int(), companyId: faker.number.int(), planId: faker.number.int(), mode: faker.helpers.arrayElement([1,2] as const), total: faker.number.int(), requests: Array.from({ length: faker.number.int({min: 1, max: 10}) }, (_, i) => i + 1).map(() => ({id: faker.number.int(), batchId: faker.number.int(), companyId: faker.number.int(), companyName: faker.string.alpha({length: {min: 10, max: 20}}), branchCode: faker.string.alpha({length: {min: 10, max: 20}}), personnelId: faker.number.int(), personnelName: faker.string.alpha({length: {min: 10, max: 20}}), personnelCode: faker.string.alpha({length: {min: 10, max: 20}}), planTitle: faker.string.alpha({length: {min: 10, max: 20}}), amount: faker.number.int(), paymentOrder: faker.number.int(), createdAt: faker.date.past().toISOString().slice(0, 19) + 'Z', decidedAt: faker.helpers.arrayElement([faker.date.past().toISOString().slice(0, 19) + 'Z', null]), status: faker.helpers.arrayElement([1,2,3,4,5,6,7,8] as const), postStage: faker.helpers.arrayElement([1,2,3,4] as const), description: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), null]), documentCount: faker.number.int(), canCancel: faker.datatype.boolean(), documents: Array.from({ length: faker.number.int({min: 1, max: 10}) }, (_, i) => i + 1).map(() => ({id: faker.number.int(), fileName: faker.string.alpha({length: {min: 10, max: 20}}), size: faker.number.int(), uploadedAt: faker.date.past().toISOString().slice(0, 19) + 'Z', uploadedBy: faker.string.alpha({length: {min: 10, max: 20}})}))})), ...overrideResponse})
 
 export const getLoansRemoveMemberResponseMock = (overrideResponse: Partial<Extract<CommandResponsesLoanBatchDto, object>> = {}): CommandResponsesLoanBatchDto => ({batchId: faker.number.int(), companyId: faker.number.int(), planId: faker.number.int(), mode: faker.helpers.arrayElement([1,2] as const), total: faker.number.int(), requests: Array.from({ length: faker.number.int({min: 1, max: 10}) }, (_, i) => i + 1).map(() => ({id: faker.number.int(), batchId: faker.number.int(), companyId: faker.number.int(), companyName: faker.string.alpha({length: {min: 10, max: 20}}), branchCode: faker.string.alpha({length: {min: 10, max: 20}}), personnelId: faker.number.int(), personnelName: faker.string.alpha({length: {min: 10, max: 20}}), personnelCode: faker.string.alpha({length: {min: 10, max: 20}}), planTitle: faker.string.alpha({length: {min: 10, max: 20}}), amount: faker.number.int(), paymentOrder: faker.number.int(), createdAt: faker.date.past().toISOString().slice(0, 19) + 'Z', decidedAt: faker.helpers.arrayElement([faker.date.past().toISOString().slice(0, 19) + 'Z', null]), status: faker.helpers.arrayElement([1,2,3,4,5,6,7,8] as const), postStage: faker.helpers.arrayElement([1,2,3,4] as const), description: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), null]), documentCount: faker.number.int(), canCancel: faker.datatype.boolean(), documents: Array.from({ length: faker.number.int({min: 1, max: 10}) }, (_, i) => i + 1).map(() => ({id: faker.number.int(), fileName: faker.string.alpha({length: {min: 10, max: 20}}), size: faker.number.int(), uploadedAt: faker.date.past().toISOString().slice(0, 19) + 'Z', uploadedBy: faker.string.alpha({length: {min: 10, max: 20}})}))})), ...overrideResponse})
+
+export const getLoansDocumentDownloadResponseMock = (overrideResponse: Partial<Extract<CommonFileLinkDto, object>> = {}): CommonFileLinkDto => ({url: faker.string.alpha({length: {min: 10, max: 20}}), fileName: faker.string.alpha({length: {min: 10, max: 20}}), contentType: faker.string.alpha({length: {min: 10, max: 20}}), expiresAt: faker.date.past().toISOString().slice(0, 19) + 'Z', ...overrideResponse})
 
 export const getLoansCancelResponseMock = (overrideResponse: Partial<Extract<CommandResponsesLoanRequestListItemDto, object>> = {}): CommandResponsesLoanRequestListItemDto => ({id: faker.number.int(), batchId: faker.number.int(), companyId: faker.number.int(), companyName: faker.string.alpha({length: {min: 10, max: 20}}), branchCode: faker.string.alpha({length: {min: 10, max: 20}}), personnelId: faker.number.int(), personnelName: faker.string.alpha({length: {min: 10, max: 20}}), personnelCode: faker.string.alpha({length: {min: 10, max: 20}}), planTitle: faker.string.alpha({length: {min: 10, max: 20}}), amount: faker.number.int(), paymentOrder: faker.number.int(), createdAt: faker.date.past().toISOString().slice(0, 19) + 'Z', decidedAt: faker.helpers.arrayElement([faker.date.past().toISOString().slice(0, 19) + 'Z', null]), status: faker.helpers.arrayElement([1,2,3,4,5,6,7,8] as const), postStage: faker.helpers.arrayElement([1,2,3,4] as const), description: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), null]), documentCount: faker.number.int(), canCancel: faker.datatype.boolean(), documents: Array.from({ length: faker.number.int({min: 1, max: 10}) }, (_, i) => i + 1).map(() => ({id: faker.number.int(), fileName: faker.string.alpha({length: {min: 10, max: 20}}), size: faker.number.int(), uploadedAt: faker.date.past().toISOString().slice(0, 19) + 'Z', uploadedBy: faker.string.alpha({length: {min: 10, max: 20}})})), ...overrideResponse})
 
@@ -126,11 +128,13 @@ export const getLoansRemoveMemberMockHandler = (overrideResponse?: CommandRespon
   }, options)
 }
 
-export const getLoansDocumentDownloadMockHandler = (overrideResponse?: unknown | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<unknown> | unknown), options?: RequestHandlerOptions) => {
+export const getLoansDocumentDownloadMockHandler = (overrideResponse?: CommonFileLinkDto | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<CommonFileLinkDto> | CommonFileLinkDto), options?: RequestHandlerOptions) => {
   return http.get('*/facility-management/LoanRequests/:id/Documents/:fileId', async (info: Parameters<Parameters<typeof http.get>[1]>[0]) => {await delay(250);
-  if (typeof overrideResponse === 'function') {await overrideResponse(info); }
 
-    return new HttpResponse(null,
+
+    return json(overrideResponse !== undefined
+    ? (typeof overrideResponse === "function" ? await overrideResponse(info) : overrideResponse)
+    : getLoansDocumentDownloadResponseMock(),
       { status: 200
       })
   }, options)

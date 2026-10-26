@@ -25,6 +25,7 @@ import type {
   ChangeLogsSearchParams,
   CommandResponsesChangeLogItemDto,
   CommonFacilityPagedResponseOfChangeLogItemDto,
+  CommonFileLinkDto,
   CommonRegistrarDto,
   ProblemDetails,
   RestoreChangeCommand
@@ -54,7 +55,7 @@ const withQueryKey = <T extends object, K>(query: T, queryKey: K): T & { queryKe
 };
 
 /**
- * فیلتر نوع (شرکت/پرسنل/وام)، شرکت، کاربر، تاریخ؛ در دامنهٔ کاربر.
+ * فیلتر دسته (1 شرکت، 2 پرسنل، 3 وام، 4 کاربران، 5 اطلاعات پایه؛ عنوان‌ها در Lookups/Enums)، شرکت، کاربر، تاریخ، متن؛ در دامنهٔ کاربر. همهٔ فرایندها (ثبت/ویرایش/حذف/لغو/تصمیم/بارگذاری فایل) لاگ می‌شوند.
  * @summary لاگ عملیات
  */
 export const changeLogsSearch = (
@@ -241,8 +242,8 @@ export function useChangeLogsUsers<TData = Awaited<ReturnType<typeof changeLogsU
 
 
 /**
- * فیلترها دقیقاً همان فیلترهای لیست‌اند (شامل جستجوی متنی و فیلتر کاربر). ⚠ اگر xlsx لازم است باید تصمیم گرفته شود.
- * @summary خروجی گزارش (CSV با UTF-8 BOM، قابل باز شدن در Excel)
+ * فیلترها دقیقاً همان فیلترهای لیست‌اند (شامل جستجوی متنی و فیلتر کاربر). پاسخ لینک موقت فایل xlsx است.
+ * @summary خروجی اکسل گزارش (xlsx)
  */
 export const changeLogsExport = (
     params?: ChangeLogsExportParams,
@@ -250,7 +251,7 @@ export const changeLogsExport = (
 ) => {
 
 
-      return apiClient<void>(
+      return apiClient<CommonFileLinkDto>(
       {url: `/facility-management/ChangeLogs/Export`, method: 'GET',
         params, signal
     },
@@ -314,7 +315,7 @@ export function useChangeLogsExport<TData = Awaited<ReturnType<typeof changeLogs
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
- * @summary خروجی گزارش (CSV با UTF-8 BOM، قابل باز شدن در Excel)
+ * @summary خروجی اکسل گزارش (xlsx)
  */
 
 export function useChangeLogsExport<TData = Awaited<ReturnType<typeof changeLogsExport>>, TError = ErrorType<ProblemDetails>>(
@@ -335,7 +336,7 @@ export function useChangeLogsExport<TData = Awaited<ReturnType<typeof changeLogs
 
 
 /**
- * فقط ادمین. ⚠ Q16: عملیات قابل بازگردانی تعیین شود.
+ * فقط ادمین، فقط یک بار برای هر ردیف (canRestore در فهرست). قابل بازگردانی: ویرایش شرکت، حذف شرکت، میانگین موجودی، حذف مستند، ویرایش پرسنل، حذف پرسنل، اطلاعات پایه/طرح. تصمیم‌های تأیید/رد، عملیات وام و لغو قرارداد بازگردانی ندارند. اگر رکورد بعد از آن تغییر دوباره ویرایش شده باشد (یا بعد از تغییر میانگین وامی ثبت شده باشد) با 400 و پیام روشن رد می‌شود. توضیح الزامی.
  * @summary بازگردانی عملیات (US-A4)
  */
 export const changeLogsRestore = (
@@ -347,7 +348,7 @@ export const changeLogsRestore = (
 
       return apiClient<CommandResponsesChangeLogItemDto>(
       {url: `/facility-management/ChangeLogs/${id}/Restore`, method: 'POST',
-      headers: {'Content-Type': 'application/json', },
+      headers: {'Content-Type': 'application/json; x-api-version=2', },
       data: restoreChangeCommand, signal
     },
       options);
@@ -358,7 +359,7 @@ export const changeLogsRestore = (
 
 export const getChangeLogsRestoreMutationKey = () => ['changeLogsRestore'] as const;
 
-export const getChangeLogsRestoreMutationOptions = <TError = ErrorType<ProblemDetails>,
+export const getChangeLogsRestoreMutationOptions = <TError = ErrorType<unknown | ProblemDetails>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof changeLogsRestore>>, TError,ChangeLogsRestoreMutationVariables, TContext>, request?: SecondParameter<typeof apiClient>}
 ): UseMutationOptions<Awaited<ReturnType<typeof changeLogsRestore>>, TError,ChangeLogsRestoreMutationVariables, TContext> => {
 
@@ -387,13 +388,13 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
     export type ChangeLogsRestoreMutationResult = NonNullable<Awaited<ReturnType<typeof changeLogsRestore>>>
     export type ChangeLogsRestoreMutationBody = BodyType<RestoreChangeCommand> | undefined
-    export type ChangeLogsRestoreMutationError = ErrorType<ProblemDetails>
+    export type ChangeLogsRestoreMutationError = ErrorType<unknown | ProblemDetails>
     export type ChangeLogsRestoreMutationVariables = {id: number;data?: BodyType<RestoreChangeCommand>}
 
     /**
  * @summary بازگردانی عملیات (US-A4)
  */
-export const useChangeLogsRestore = <TError = ErrorType<ProblemDetails>,
+export const useChangeLogsRestore = <TError = ErrorType<unknown | ProblemDetails>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof changeLogsRestore>>, TError,ChangeLogsRestoreMutationVariables, TContext>, request?: SecondParameter<typeof apiClient>}
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof changeLogsRestore>>,

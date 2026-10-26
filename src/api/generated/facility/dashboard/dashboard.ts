@@ -17,6 +17,7 @@ import type {
 } from '@tanstack/react-query';
 
 import type {
+  CommonFileLinkDto,
   DashboardGetParams,
   DashboardRankingParams,
   ProblemDetails,
@@ -331,8 +332,8 @@ export function useDashboardMonths<TData = Awaited<ReturnType<typeof dashboardMo
 
 
 /**
- * Companies، Personnel، LoanRequests، MonthlyAverages، RemovedCompanies — فقط دادهٔ دامنهٔ کاربر.
- * @summary خروجی CSV (۵ دکمه)
+ * report: 1 Companies (شرکت‌ها)، 2 Personnel (پرسنل)، 3 LoanRequests (درخواست‌ها)، 4 MonthlyAverages (میانگین‌ها)، 5 RemovedCompanies (شرکت‌های حذف‌شده) — عنوان‌ها در Lookups/Enums هم هست. فقط دادهٔ دامنهٔ کاربر. پاسخ لینک موقت فایل xlsx است.
+ * @summary خروجی اکسل xlsx (۵ دکمه)
  */
 export const dashboardExport = (
     report: ReadModelsDashboardExport,
@@ -340,7 +341,7 @@ export const dashboardExport = (
 ) => {
 
 
-      return apiClient<unknown>(
+      return apiClient<CommonFileLinkDto>(
       {url: `/facility-management/Dashboard/Exports/${report}`, method: 'GET', signal
     },
       options);
@@ -403,7 +404,7 @@ export function useDashboardExport<TData = Awaited<ReturnType<typeof dashboardEx
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
- * @summary خروجی CSV (۵ دکمه)
+ * @summary خروجی اکسل xlsx (۵ دکمه)
  */
 
 export function useDashboardExport<TData = Awaited<ReturnType<typeof dashboardExport>>, TError = ErrorType<ProblemDetails>>(

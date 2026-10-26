@@ -10,8 +10,7 @@ import { type ChangeLogsSearchParams } from './types';
  */
 
 /**
- * خروجی اکسل: سرویس تولیدشده (changeLogsExport) نوع فایل پاسخ را نمی‌شناسد،
- * پس دانلود با http.download انجام می‌شود.
+ * خروجی اکسل: بک‌اند لینک موقت فایل (FileLinkDto) می‌دهد و http.download فایل را از آن ذخیره می‌کند.
  */
 export const exportChangeLogs = (params: Omit<ChangeLogsSearchParams, 'Page' | 'PageSize'>) =>
   http.download(ENDPOINTS.CHANGE_LOGS.EXPORT, 'گزارش-تغییرات.xlsx', { params });

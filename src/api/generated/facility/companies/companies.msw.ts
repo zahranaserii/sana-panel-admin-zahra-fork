@@ -6,7 +6,6 @@ import {
 } from '@faker-js/faker/locale/fa';
 
 import {
-  HttpResponse,
   delay,
   http
 } from 'msw';
@@ -17,6 +16,7 @@ import { json } from '@/test/msw/utils';
 
 import type {
   CommonFacilityLookupItemDto,
+  CommonFileLinkDto,
   ReadModelsBalanceDocumentDto,
   ReadModelsCompanyBalancesDto,
   ReadModelsCompanyDetailsDto,
@@ -38,6 +38,8 @@ export const getCompaniesDeleteResponseMock = (): boolean => (faker.datatype.boo
 
 export const getCompaniesCancelContractResponseMock = (overrideResponse: Partial<Extract<ReadModelsCompanyDetailsDto, object>> = {}): ReadModelsCompanyDetailsDto => ({id: faker.number.int(), schemeId: faker.number.int(), name: faker.string.alpha({length: {min: 10, max: 20}}), nationalId: faker.string.alpha({length: {min: 10, max: 20}}), agreementNumber: faker.string.alpha({length: {min: 10, max: 20}}), accountNumber: faker.string.alpha({length: {min: 10, max: 20}}), contractDate: faker.date.past().toISOString().slice(0, 10), accountOpeningDate: faker.date.past().toISOString().slice(0, 10), accountOpeningDayOfMonth: faker.number.int(), salaryFromSepah: faker.datatype.boolean(), plans: Array.from({ length: faker.number.int({min: 1, max: 10}) }, (_, i) => i + 1).map(() => ({planId: faker.number.int(), title: faker.string.alpha({length: {min: 10, max: 20}})})), agreementFile: {id: faker.number.int(), fileName: faker.string.alpha({length: {min: 10, max: 20}}), size: faker.number.int(), uploadedAt: faker.date.past().toISOString().slice(0, 19) + 'Z', uploadedBy: faker.string.alpha({length: {min: 10, max: 20}})}, registrar: {panelUserId: faker.number.int(), userName: faker.string.alpha({length: {min: 10, max: 20}}), userCode: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), null]), branchName: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), null]), branchCode: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), null])}, createdAt: faker.date.past().toISOString().slice(0, 19) + 'Z', status: faker.helpers.arrayElement([1,2,3,4] as const), cancellation: {cancelDate: faker.date.past().toISOString().slice(0, 10), reason: faker.string.alpha({length: {min: 10, max: 20}}), description: faker.string.alpha({length: {min: 10, max: 20}}), file: {id: faker.number.int(), fileName: faker.string.alpha({length: {min: 10, max: 20}}), size: faker.number.int(), uploadedAt: faker.date.past().toISOString().slice(0, 19) + 'Z', uploadedBy: faker.string.alpha({length: {min: 10, max: 20}})}, cancelledBy: {panelUserId: faker.number.int(), userName: faker.string.alpha({length: {min: 10, max: 20}}), userCode: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), null]), branchName: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), null]), branchCode: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), null])}, cancelledAt: faker.date.past().toISOString().slice(0, 19) + 'Z'}, branchCode: faker.string.alpha({length: {min: 10, max: 20}}), rowVersion: faker.string.alpha({length: {min: 10, max: 20}}), ...overrideResponse})
 
+export const getCompaniesAgreementFileResponseMock = (overrideResponse: Partial<Extract<CommonFileLinkDto, object>> = {}): CommonFileLinkDto => ({url: faker.string.alpha({length: {min: 10, max: 20}}), fileName: faker.string.alpha({length: {min: 10, max: 20}}), contentType: faker.string.alpha({length: {min: 10, max: 20}}), expiresAt: faker.date.past().toISOString().slice(0, 19) + 'Z', ...overrideResponse})
+
 export const getCompaniesBalancesResponseMock = (overrideResponse: Partial<Extract<ReadModelsCompanyBalancesDto, object>> = {}): ReadModelsCompanyBalancesDto => ({companyId: faker.number.int(), months: Array.from({ length: faker.number.int({min: 1, max: 10}) }, (_, i) => i + 1).map(() => ({month: faker.string.alpha({length: {min: 10, max: 20}}), averageBalance: faker.helpers.arrayElement([faker.number.int(), null]), remainingCredit: faker.helpers.arrayElement([faker.number.int(), null]), documentCount: faker.number.int(), hasDocuments: faker.datatype.boolean(), lastEditedBy: {panelUserId: faker.number.int(), userName: faker.string.alpha({length: {min: 10, max: 20}}), userCode: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), null]), branchName: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), null]), branchCode: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), null])}, lastEditedAt: faker.helpers.arrayElement([faker.date.past().toISOString().slice(0, 19) + 'Z', null]), usedCredit: faker.number.int()})), rowVersion: faker.string.alpha({length: {min: 10, max: 20}}), ...overrideResponse})
 
 export const getCompaniesBalancesSaveResponseMock = (overrideResponse: Partial<Extract<ReadModelsCompanyBalancesDto, object>> = {}): ReadModelsCompanyBalancesDto => ({companyId: faker.number.int(), months: Array.from({ length: faker.number.int({min: 1, max: 10}) }, (_, i) => i + 1).map(() => ({month: faker.string.alpha({length: {min: 10, max: 20}}), averageBalance: faker.helpers.arrayElement([faker.number.int(), null]), remainingCredit: faker.helpers.arrayElement([faker.number.int(), null]), documentCount: faker.number.int(), hasDocuments: faker.datatype.boolean(), lastEditedBy: {panelUserId: faker.number.int(), userName: faker.string.alpha({length: {min: 10, max: 20}}), userCode: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), null]), branchName: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), null]), branchCode: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), null])}, lastEditedAt: faker.helpers.arrayElement([faker.date.past().toISOString().slice(0, 19) + 'Z', null]), usedCredit: faker.number.int()})), rowVersion: faker.string.alpha({length: {min: 10, max: 20}}), ...overrideResponse})
@@ -45,6 +47,8 @@ export const getCompaniesBalancesSaveResponseMock = (overrideResponse: Partial<E
 export const getCompaniesBalanceDocumentsResponseMock = (): ReadModelsBalanceDocumentDto[] | null => (Array.from({ length: faker.number.int({min: 1, max: 10}) }, (_, i) => i + 1).map(() => ({id: faker.number.int(), month: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), null]), documentType: faker.string.alpha({length: {min: 10, max: 20}}), description: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), null]), file: {id: faker.number.int(), fileName: faker.string.alpha({length: {min: 10, max: 20}}), size: faker.number.int(), uploadedAt: faker.date.past().toISOString().slice(0, 19) + 'Z', uploadedBy: faker.string.alpha({length: {min: 10, max: 20}})}})))
 
 export const getCompaniesBalanceDocumentsUploadResponseMock = (): ReadModelsBalanceDocumentDto[] | null => (Array.from({ length: faker.number.int({min: 1, max: 10}) }, (_, i) => i + 1).map(() => ({id: faker.number.int(), month: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), null]), documentType: faker.string.alpha({length: {min: 10, max: 20}}), description: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), null]), file: {id: faker.number.int(), fileName: faker.string.alpha({length: {min: 10, max: 20}}), size: faker.number.int(), uploadedAt: faker.date.past().toISOString().slice(0, 19) + 'Z', uploadedBy: faker.string.alpha({length: {min: 10, max: 20}})}})))
+
+export const getCompaniesBalanceDocumentDownloadResponseMock = (overrideResponse: Partial<Extract<CommonFileLinkDto, object>> = {}): CommonFileLinkDto => ({url: faker.string.alpha({length: {min: 10, max: 20}}), fileName: faker.string.alpha({length: {min: 10, max: 20}}), contentType: faker.string.alpha({length: {min: 10, max: 20}}), expiresAt: faker.date.past().toISOString().slice(0, 19) + 'Z', ...overrideResponse})
 
 export const getCompaniesBalanceDocumentDeleteResponseMock = (): boolean => (faker.datatype.boolean())
 
@@ -133,11 +137,13 @@ export const getCompaniesCancelContractMockHandler = (overrideResponse?: ReadMod
   }, options)
 }
 
-export const getCompaniesAgreementFileMockHandler = (overrideResponse?: unknown | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<unknown> | unknown), options?: RequestHandlerOptions) => {
+export const getCompaniesAgreementFileMockHandler = (overrideResponse?: CommonFileLinkDto | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<CommonFileLinkDto> | CommonFileLinkDto), options?: RequestHandlerOptions) => {
   return http.get('*/facility-management/Companies/:id/AgreementFile', async (info: Parameters<Parameters<typeof http.get>[1]>[0]) => {await delay(250);
-  if (typeof overrideResponse === 'function') {await overrideResponse(info); }
 
-    return new HttpResponse(null,
+
+    return json(overrideResponse !== undefined
+    ? (typeof overrideResponse === "function" ? await overrideResponse(info) : overrideResponse)
+    : getCompaniesAgreementFileResponseMock(),
       { status: 200
       })
   }, options)
@@ -191,11 +197,13 @@ export const getCompaniesBalanceDocumentsUploadMockHandler = (overrideResponse?:
   }, options)
 }
 
-export const getCompaniesBalanceDocumentDownloadMockHandler = (overrideResponse?: unknown | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<unknown> | unknown), options?: RequestHandlerOptions) => {
+export const getCompaniesBalanceDocumentDownloadMockHandler = (overrideResponse?: CommonFileLinkDto | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<CommonFileLinkDto> | CommonFileLinkDto), options?: RequestHandlerOptions) => {
   return http.get('*/facility-management/Companies/:id/Balances/Documents/:documentId', async (info: Parameters<Parameters<typeof http.get>[1]>[0]) => {await delay(250);
-  if (typeof overrideResponse === 'function') {await overrideResponse(info); }
 
-    return new HttpResponse(null,
+
+    return json(overrideResponse !== undefined
+    ? (typeof overrideResponse === "function" ? await overrideResponse(info) : overrideResponse)
+    : getCompaniesBalanceDocumentDownloadResponseMock(),
       { status: 200
       })
   }, options)

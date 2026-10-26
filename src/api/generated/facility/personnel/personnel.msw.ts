@@ -6,7 +6,6 @@ import {
 } from '@faker-js/faker/locale/fa';
 
 import {
-  HttpResponse,
   delay,
   http
 } from 'msw';
@@ -17,6 +16,7 @@ import { json } from '@/test/msw/utils';
 
 import type {
   CommonFacilityPagedResponseOfPersonnelListItemDto,
+  CommonFileLinkDto,
   ReadModelsPersonnelDetailsDto,
   ReadModelsPersonnelImportResultDto
 } from '../facilityPanelAPI.schemas';
@@ -32,11 +32,11 @@ export const getPersonnelUpdateResponseMock = (overrideResponse: Partial<Extract
 
 export const getPersonnelDeleteResponseMock = (): boolean => (faker.datatype.boolean())
 
+export const getPersonnelImportTemplateResponseMock = (overrideResponse: Partial<Extract<CommonFileLinkDto, object>> = {}): CommonFileLinkDto => ({url: faker.string.alpha({length: {min: 10, max: 20}}), fileName: faker.string.alpha({length: {min: 10, max: 20}}), contentType: faker.string.alpha({length: {min: 10, max: 20}}), expiresAt: faker.date.past().toISOString().slice(0, 19) + 'Z', ...overrideResponse})
+
 export const getPersonnelImportResponseMock = (overrideResponse: Partial<Extract<ReadModelsPersonnelImportResultDto, object>> = {}): ReadModelsPersonnelImportResultDto => ({batchId: faker.number.int(), totalRows: faker.number.int(), accepted: faker.number.int(), rejected: faker.number.int(), errors: Array.from({ length: faker.number.int({min: 1, max: 10}) }, (_, i) => i + 1).map(() => ({row: faker.number.int(), column: faker.string.alpha({length: {min: 10, max: 20}}), message: faker.string.alpha({length: {min: 10, max: 20}})})), ...overrideResponse})
 
 export const getPersonnelImportResultResponseMock = (overrideResponse: Partial<Extract<ReadModelsPersonnelImportResultDto, object>> = {}): ReadModelsPersonnelImportResultDto => ({batchId: faker.number.int(), totalRows: faker.number.int(), accepted: faker.number.int(), rejected: faker.number.int(), errors: Array.from({ length: faker.number.int({min: 1, max: 10}) }, (_, i) => i + 1).map(() => ({row: faker.number.int(), column: faker.string.alpha({length: {min: 10, max: 20}}), message: faker.string.alpha({length: {min: 10, max: 20}})})), ...overrideResponse})
-
-export const getPersonnelDecideResponseMock = (): number => (faker.number.int())
 
 
 export const getPersonnelSearchMockHandler = (overrideResponse?: CommonFacilityPagedResponseOfPersonnelListItemDto | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<CommonFacilityPagedResponseOfPersonnelListItemDto> | CommonFacilityPagedResponseOfPersonnelListItemDto), options?: RequestHandlerOptions) => {
@@ -99,11 +99,13 @@ export const getPersonnelDeleteMockHandler = (overrideResponse?: boolean | ((inf
   }, options)
 }
 
-export const getPersonnelImportTemplateMockHandler = (overrideResponse?: unknown | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<unknown> | unknown), options?: RequestHandlerOptions) => {
+export const getPersonnelImportTemplateMockHandler = (overrideResponse?: CommonFileLinkDto | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<CommonFileLinkDto> | CommonFileLinkDto), options?: RequestHandlerOptions) => {
   return http.get('*/facility-management/Personnel/Import/Template', async (info: Parameters<Parameters<typeof http.get>[1]>[0]) => {await delay(250);
-  if (typeof overrideResponse === 'function') {await overrideResponse(info); }
 
-    return new HttpResponse(null,
+
+    return json(overrideResponse !== undefined
+    ? (typeof overrideResponse === "function" ? await overrideResponse(info) : overrideResponse)
+    : getPersonnelImportTemplateResponseMock(),
       { status: 200
       })
   }, options)
@@ -132,18 +134,6 @@ export const getPersonnelImportResultMockHandler = (overrideResponse?: ReadModel
       })
   }, options)
 }
-
-export const getPersonnelDecideMockHandler = (overrideResponse?: number | ((info: Parameters<Parameters<typeof http.post>[1]>[0]) => Promise<number> | number), options?: RequestHandlerOptions) => {
-  return http.post('*/facility-management/Personnel/Decisions', async (info: Parameters<Parameters<typeof http.post>[1]>[0]) => {await delay(250);
-
-
-    return json(overrideResponse !== undefined
-    ? (typeof overrideResponse === "function" ? await overrideResponse(info) : overrideResponse)
-    : getPersonnelDecideResponseMock(),
-      { status: 200
-      })
-  }, options)
-}
 export const getPersonnelMock = () => [
   getPersonnelSearchMockHandler(),
   getPersonnelCreateMockHandler(),
@@ -152,6 +142,5 @@ export const getPersonnelMock = () => [
   getPersonnelDeleteMockHandler(),
   getPersonnelImportTemplateMockHandler(),
   getPersonnelImportMockHandler(),
-  getPersonnelImportResultMockHandler(),
-  getPersonnelDecideMockHandler()
+  getPersonnelImportResultMockHandler()
 ]

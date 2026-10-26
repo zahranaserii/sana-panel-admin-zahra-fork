@@ -58,7 +58,7 @@ export const StaffTable = ({ companyId, filters, onEdit, loadingEditId }: StaffT
   const remove = ({ description, file }: DeleteReasonValues) =>
     deleteStaff({
       id: deleting?.id ?? 0,
-      data: { Description: description.trim(), file: file ?? undefined },
+      data: { Description: description.trim(), file: file as File },
     });
 
   const columns: ColumnsType<Staff> = [

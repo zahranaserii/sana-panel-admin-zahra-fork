@@ -54,7 +54,8 @@ export const CancelContractModal = ({ company, onClose }: CancelContractModalPro
         CancelDate: cancelDate,
         ReasonId: reasonId,
         Description: description.trim(),
-        letterFile: file ?? undefined,
+        /** فرم فایل را الزامی کرده است */
+        letterFile: file as File,
       },
     });
 

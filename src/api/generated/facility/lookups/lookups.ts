@@ -47,7 +47,7 @@ const withQueryKey = <T extends object, K>(query: T, queryKey: K): T & { queryKe
 /**
  * فرانت یک بار می‌خواند و کش می‌کند؛ عنوان وضعیت‌ها را در کد خودش تکرار نمی‌کند.
  * @summary عنوان همهٔ enumها. کلیدی لازم ندارد چون چیزی از دادهٔ شرکت‌ها نمی‌گوید — ولی
-[RequireFacilityPermission] بدون کلید هست، پس نشست معتبر لازم است و مسیر
+[RequirePermission] بدون کلید هست، پس نشست معتبر لازم است و مسیر
 از قاعدهٔ «هر مسیر باید تعیین تکلیف شده باشد» بیرون نمی‌افتد.
  */
 export const lookupsEnums = (
@@ -120,7 +120,7 @@ export function useLookupsEnums<TData = Awaited<ReturnType<typeof lookupsEnums>>
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
  * @summary عنوان همهٔ enumها. کلیدی لازم ندارد چون چیزی از دادهٔ شرکت‌ها نمی‌گوید — ولی
-[RequireFacilityPermission] بدون کلید هست، پس نشست معتبر لازم است و مسیر
+[RequirePermission] بدون کلید هست، پس نشست معتبر لازم است و مسیر
 از قاعدهٔ «هر مسیر باید تعیین تکلیف شده باشد» بیرون نمی‌افتد.
  */
 

@@ -1,5 +1,5 @@
 import ExcelJS from 'exceljs';
-import { delay, http, HttpResponse } from 'msw';
+import { delay, http } from 'msw';
 
 import {
   type ChangeLogCategory,
@@ -12,7 +12,7 @@ import { dayjs } from '@/utils/date';
 
 import { logAction, restoreSnapshot } from '../audit';
 import { db } from '../db';
-import { api, json } from '../utils';
+import { api, fileLink, json } from '../utils';
 
 const typeTitle = (type: MockAuditLog['type']) =>
   AUDIT_LOG_TYPES.find((item) => item.id === type)?.title.replace('مربوط به ', '') ?? type;
@@ -110,11 +110,6 @@ export const auditLogHandlers = [
     sheet.columns.forEach((column, index) => {
       column.width = index === 3 ? 80 : 24;
     });
-    return new HttpResponse(await workbook.xlsx.writeBuffer(), {
-      headers: {
-        'Content-Type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-        'Content-Disposition': `attachment; filename*=UTF-8''${encodeURIComponent('گزارش-تغییرات.xlsx')}`,
-      },
-    });
+    return fileLink(await workbook.xlsx.writeBuffer(), 'گزارش-تغییرات.xlsx');
   }),
 ];

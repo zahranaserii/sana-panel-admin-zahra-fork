@@ -12,7 +12,6 @@ import { SectionTitle } from './SectionTitle';
 /** isEdit: کد طرح بعد از ثبت قابل تغییر نیست */
 export const GeneralFields = ({ isEdit }: { isEdit: boolean }) => {
   const isActive = Form.useWatch<boolean | undefined>('isActive');
-  const digitalApproval = Form.useWatch<boolean | undefined>('digitalApprovalEnabled');
 
   return (
     <>
@@ -89,9 +88,6 @@ export const GeneralFields = ({ isEdit }: { isEdit: boolean }) => {
         </FormItem>
         <FormItem<SchemeFormValues> name="waitingPeriodDays" label="دوره انتظار (روز)">
           <NumberInput min={0} max={180} />
-        </FormItem>
-        <FormItem<SchemeFormValues> name="digitalApprovalEnabled" label="تأیید شعبه دیجیتال">
-          <Switch label={digitalApproval ? 'فعال' : 'غیرفعال'} />
         </FormItem>
       </div>
     </>

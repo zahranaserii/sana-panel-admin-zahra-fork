@@ -23,13 +23,11 @@ import type {
 import type {
   ApprovalsCreditDecideBody,
   ApprovalsCreditQueueParams,
-  ApprovalsDigitalDecideBody,
-  ApprovalsDigitalQueueParams,
+  ApprovalsManagerDecideBody,
   ApprovalsManagerQueueParams,
   CommandResponsesDecisionResultDto,
   CommandResponsesLoanRequestListItemDto,
   CommonFacilityPagedResponseOfLoanRequestListItemDto,
-  DecideLoanRequestsCommand,
   ProblemDetails,
   ReadModelsPendingCountsDto,
   SetPostApprovalStageCommand
@@ -154,19 +152,19 @@ export function useApprovalsManagerQueue<TData = Awaited<ReturnType<typeof appro
 
 
 /**
- * تأیید به manager-approval.approve و رد به manager-approval.reject نیاز دارد. رد: دلیل و توضیح الزامی (از «دلایل رد درخواست وام»، همان فهرست اعتبارات). اجرای ناقص مجاز است: ردیف‌های انجام‌نشده در skipped با دلیل برمی‌گردند.
+ * multipart/form-data، مثل تأیید اعتبارات. تأیید به manager-approval.approve و رد به manager-approval.reject نیاز دارد. رد: دلیل و توضیح الزامی (از «دلایل رد درخواست وام»، همان فهرست اعتبارات). پیوست (attachment) اختیاری: pdf/jpg/jpeg/png تا ۵ مگابایت. اجرای ناقص مجاز است: ردیف‌های انجام‌نشده در skipped با دلیل برمی‌گردند.
  * @summary تأیید/رد گروهی یا تکی مدیر شرکت
  */
 export const approvalsManagerDecide = (
-    decideLoanRequestsCommand?: BodyType<DecideLoanRequestsCommand>,
+    approvalsManagerDecideBody?: BodyType<ApprovalsManagerDecideBody>,
  options?: SecondParameter<typeof apiClient>,signal?: AbortSignal
 ) => {
 
-
+      const formData = toAspNetFormData(approvalsManagerDecideBody)
       return apiClient<CommandResponsesDecisionResultDto>(
       {url: `/facility-management/ManagerApprovals/Decisions`, method: 'POST',
-      headers: {'Content-Type': 'application/json', },
-      data: decideLoanRequestsCommand, signal
+      headers: {'Content-Type': 'multipart/form-data', },
+       data: formData, signal
     },
       options);
     }
@@ -204,9 +202,9 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
   return  { mutationFn, ...mutationOptions }}
 
     export type ApprovalsManagerDecideMutationResult = NonNullable<Awaited<ReturnType<typeof approvalsManagerDecide>>>
-    export type ApprovalsManagerDecideMutationBody = BodyType<DecideLoanRequestsCommand> | undefined
+    export type ApprovalsManagerDecideMutationBody = BodyType<ApprovalsManagerDecideBody> | undefined
     export type ApprovalsManagerDecideMutationError = ErrorType<ProblemDetails>
-    export type ApprovalsManagerDecideMutationVariables = {data?: BodyType<DecideLoanRequestsCommand>}
+    export type ApprovalsManagerDecideMutationVariables = {data?: BodyType<ApprovalsManagerDecideBody>}
 
     /**
  * @summary تأیید/رد گروهی یا تکی مدیر شرکت
@@ -396,7 +394,7 @@ export const approvalsPostStage = (
 
       return apiClient<CommandResponsesLoanRequestListItemDto>(
       {url: `/facility-management/CreditApprovals/${requestId}/PostApprovalStage`, method: 'PUT',
-      headers: {'Content-Type': 'application/json', },
+      headers: {'Content-Type': 'application/json; x-api-version=2', },
       data: setPostApprovalStageCommand, signal
     },
       options);
@@ -451,166 +449,6 @@ export const useApprovalsPostStage = <TError = ErrorType<ProblemDetails>,
         TContext
       > => {
       return useMutation(getApprovalsPostStageMutationOptions(options), queryClient);
-    }
-    /**
- * @summary صف تأیید شعبهٔ دیجیتال
- */
-export const approvalsDigitalQueue = (
-    params?: ApprovalsDigitalQueueParams,
- options?: SecondParameter<typeof apiClient>,signal?: AbortSignal
-) => {
-
-
-      return apiClient<CommonFacilityPagedResponseOfLoanRequestListItemDto>(
-      {url: `/facility-management/DigitalApprovals`, method: 'GET',
-        params, signal
-    },
-      options);
-    }
-
-
-
-
-export const getApprovalsDigitalQueueQueryKey = (params?: ApprovalsDigitalQueueParams,) => {
-    return [
-    `/facility-management/DigitalApprovals`, ...(params ? [params] : [])
-    ] as const;
-    }
-
-
-export const getApprovalsDigitalQueueQueryOptions = <TData = Awaited<ReturnType<typeof approvalsDigitalQueue>>, TError = ErrorType<ProblemDetails>>(params?: ApprovalsDigitalQueueParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof approvalsDigitalQueue>>, TError, TData>>, request?: SecondParameter<typeof apiClient>}
-) => {
-
-const {query: queryOptions, request: requestOptions} = options ?? {};
-
-  const queryKey =  queryOptions?.queryKey ?? getApprovalsDigitalQueueQueryKey(params);
-
-
-
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof approvalsDigitalQueue>>> = ({ signal }) => approvalsDigitalQueue(params, requestOptions, signal);
-
-
-
-
-
-   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof approvalsDigitalQueue>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
-}
-
-export type ApprovalsDigitalQueueQueryResult = NonNullable<Awaited<ReturnType<typeof approvalsDigitalQueue>>>
-export type ApprovalsDigitalQueueQueryError = ErrorType<ProblemDetails>
-
-
-export function useApprovalsDigitalQueue<TData = Awaited<ReturnType<typeof approvalsDigitalQueue>>, TError = ErrorType<ProblemDetails>>(
- params: undefined |  ApprovalsDigitalQueueParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof approvalsDigitalQueue>>, TError, TData>> & Pick<
-        DefinedInitialDataOptions<
-          Awaited<ReturnType<typeof approvalsDigitalQueue>>,
-          TError,
-          Awaited<ReturnType<typeof approvalsDigitalQueue>>
-        > , 'initialData'
-      >, request?: SecondParameter<typeof apiClient>}
- , queryClient?: QueryClient
-  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useApprovalsDigitalQueue<TData = Awaited<ReturnType<typeof approvalsDigitalQueue>>, TError = ErrorType<ProblemDetails>>(
- params?: ApprovalsDigitalQueueParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof approvalsDigitalQueue>>, TError, TData>> & Pick<
-        UndefinedInitialDataOptions<
-          Awaited<ReturnType<typeof approvalsDigitalQueue>>,
-          TError,
-          Awaited<ReturnType<typeof approvalsDigitalQueue>>
-        > , 'initialData'
-      >, request?: SecondParameter<typeof apiClient>}
- , queryClient?: QueryClient
-  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useApprovalsDigitalQueue<TData = Awaited<ReturnType<typeof approvalsDigitalQueue>>, TError = ErrorType<ProblemDetails>>(
- params?: ApprovalsDigitalQueueParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof approvalsDigitalQueue>>, TError, TData>>, request?: SecondParameter<typeof apiClient>}
- , queryClient?: QueryClient
-  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-/**
- * @summary صف تأیید شعبهٔ دیجیتال
- */
-
-export function useApprovalsDigitalQueue<TData = Awaited<ReturnType<typeof approvalsDigitalQueue>>, TError = ErrorType<ProblemDetails>>(
- params?: ApprovalsDigitalQueueParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof approvalsDigitalQueue>>, TError, TData>>, request?: SecondParameter<typeof apiClient>}
- , queryClient?: QueryClient
- ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
-
-  const queryOptions = getApprovalsDigitalQueueQueryOptions(params,options)
-
-  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
-
-  return withQueryKey(query, queryOptions.queryKey);
-}
-
-
-
-
-
-
-/**
- * @summary تأیید/رد شعبهٔ دیجیتال
- */
-export const approvalsDigitalDecide = (
-    approvalsDigitalDecideBody?: BodyType<ApprovalsDigitalDecideBody>,
- options?: SecondParameter<typeof apiClient>,signal?: AbortSignal
-) => {
-
-      const formData = toAspNetFormData(approvalsDigitalDecideBody)
-      return apiClient<CommandResponsesDecisionResultDto>(
-      {url: `/facility-management/DigitalApprovals/Decisions`, method: 'POST',
-      headers: {'Content-Type': 'multipart/form-data', },
-       data: formData, signal
-    },
-      options);
-    }
-
-
-
-
-export const getApprovalsDigitalDecideMutationKey = () => ['approvalsDigitalDecide'] as const;
-
-export const getApprovalsDigitalDecideMutationOptions = <TError = ErrorType<ProblemDetails>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof approvalsDigitalDecide>>, TError,ApprovalsDigitalDecideMutationVariables, TContext>, request?: SecondParameter<typeof apiClient>}
-): UseMutationOptions<Awaited<ReturnType<typeof approvalsDigitalDecide>>, TError,ApprovalsDigitalDecideMutationVariables, TContext> => {
-
-const mutationKey = getApprovalsDigitalDecideMutationKey();
-const {mutation: mutationOptions, request: requestOptions} = options ?
-      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
-      options
-      : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }, request: undefined};
-
-
-
-
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof approvalsDigitalDecide>>, ApprovalsDigitalDecideMutationVariables> = (props) => {
-          const {data} = props ?? {};
-
-          return  approvalsDigitalDecide(data,requestOptions)
-        }
-
-
-
-
-
-
-  return  { mutationFn, ...mutationOptions }}
-
-    export type ApprovalsDigitalDecideMutationResult = NonNullable<Awaited<ReturnType<typeof approvalsDigitalDecide>>>
-    export type ApprovalsDigitalDecideMutationBody = BodyType<ApprovalsDigitalDecideBody> | undefined
-    export type ApprovalsDigitalDecideMutationError = ErrorType<ProblemDetails>
-    export type ApprovalsDigitalDecideMutationVariables = {data?: BodyType<ApprovalsDigitalDecideBody>}
-
-    /**
- * @summary تأیید/رد شعبهٔ دیجیتال
- */
-export const useApprovalsDigitalDecide = <TError = ErrorType<ProblemDetails>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof approvalsDigitalDecide>>, TError,ApprovalsDigitalDecideMutationVariables, TContext>, request?: SecondParameter<typeof apiClient>}
- , queryClient?: QueryClient): UseMutationResult<
-        Awaited<ReturnType<typeof approvalsDigitalDecide>>,
-        TError,
-        ApprovalsDigitalDecideMutationVariables,
-        TContext
-      > => {
-      return useMutation(getApprovalsDigitalDecideMutationOptions(options), queryClient);
     }
     /**
  * برای مراحلی که کاربر مجوز دیدنشان را ندارد null برمی‌گردد.

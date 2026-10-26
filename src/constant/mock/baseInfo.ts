@@ -89,7 +89,6 @@ export const MOCK_SCHEMES: MockScheme[] = [
         [3, 3, 5, 6, 8, 10],
       ]),
       rowVersion: 'AAAAAAAAB9E=',
-      digitalApprovalEnabled: false,
     },
     reasons: {
       contractCancel: toReasons('contractCancel', [

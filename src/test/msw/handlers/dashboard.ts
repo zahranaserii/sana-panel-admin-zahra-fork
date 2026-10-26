@@ -1,5 +1,5 @@
 import ExcelJS from 'exceljs';
-import { delay, http, HttpResponse } from 'msw';
+import { delay, http } from 'msw';
 
 import {
   type ReadModelsCompanyRankingDto,
@@ -16,7 +16,7 @@ import { MOCK_ENUMS } from '@/constant/mock/enums';
 import { formatJalali, toPersianDigits } from '@/utils/date';
 
 import { activeLoans, contractMonths, db, monthKey, today } from '../db';
-import { api, json } from '../utils';
+import { api, fileLink, json } from '../utils';
 
 import { buildPlanCredits } from './credit';
 
@@ -184,12 +184,7 @@ const xlsx = async (fileName: string, headers: string[], rows: Cell[][]) => {
   sheet.columns.forEach((column) => {
     column.width = 22;
   });
-  return new HttpResponse(await workbook.xlsx.writeBuffer(), {
-    headers: {
-      'Content-Type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-      'Content-Disposition': `attachment; filename*=UTF-8''${encodeURIComponent(fileName)}`,
-    },
-  });
+  return fileLink(await workbook.xlsx.writeBuffer(), fileName);
 };
 
 const toman = (rial: number) => Math.round(rial / 10);

@@ -87,13 +87,15 @@ export const PendingRequestsTable = ({ companyId, onCompanyChange }: PendingRequ
   // رد: دلیل (از «دلایل رد درخواست وام»، همان فهرست اعتبارات) و توضیح الزامی
   const rejectReasons = useReasonOptions(REASON_TYPE.LOAN_REJECT);
 
-  const decide = ({ description, reasonId }: DecisionFormValues) =>
+  /** multipart با پیوست اختیاری */
+  const decide = ({ description, reasonId, file }: DecisionFormValues) =>
     mutateAsync({
       data: {
-        reasonId: target?.type === 'reject' ? reasonId : null,
-        requestIds: target?.requests.map((item) => item.id ?? 0) ?? [],
-        decision: DECISION[target?.type ?? 'approve'],
-        description: description?.trim() ? description.trim() : null,
+        RequestIds: target?.requests.map((item) => item.id ?? 0) ?? [],
+        Decision: DECISION[target?.type ?? 'approve'],
+        ReasonId: target?.type === 'reject' ? (reasonId ?? undefined) : undefined,
+        Description: description?.trim() || undefined,
+        attachment: file ?? undefined,
       },
     });
 
@@ -184,7 +186,6 @@ export const PendingRequestsTable = ({ companyId, onCompanyChange }: PendingRequ
       />
       <DecisionModal
         target={target}
-        allowFile={false}
         rejectReasons={rejectReasons.options}
         rejectReasonsProps={rejectReasons.selectProps}
         requireRejectNote

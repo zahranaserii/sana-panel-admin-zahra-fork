@@ -8,15 +8,8 @@ import { api } from '../utils';
 
 import { handlers } from './index';
 
-const post = (path: string, body: unknown) =>
-  getResponse(
-    handlers,
-    new Request(new URL(api(path), location.origin), {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(body),
-    }),
-  );
+const post = (path: string, body: FormData) =>
+  getResponse(handlers, new Request(new URL(api(path), location.origin), { method: 'POST', body }));
 
 describe('manager decisions', () => {
   it('processes pending requests and returns the rest in skipped with a reason', async () => {
@@ -30,10 +23,12 @@ describe('manager decisions', () => {
     );
     expect(pending && decided).toBeTruthy();
 
-    const response = await post(`${FACILITY}/ManagerApprovals/Decisions`, {
-      requestIds: [pending?.id, decided?.id],
-      decision: 1,
-    });
+    // multipart مثل بک‌اند: RequestIds تکراری
+    const form = new FormData();
+    form.append('RequestIds', String(pending?.id));
+    form.append('RequestIds', String(decided?.id));
+    form.append('Decision', '1');
+    const response = await post(`${FACILITY}/ManagerApprovals/Decisions`, form);
     const body = (await response?.json()) as {
       data: { processed: number; skipped: { requestId: number; reason: string }[] };
     };

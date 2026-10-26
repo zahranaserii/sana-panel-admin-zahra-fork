@@ -12,7 +12,7 @@ interface ExportOption {
   label: string;
 }
 
-/** سرویس تولیدشده نوع فایل را نمی‌شناسد؛ دانلود با http.download (نام فایل از سرور) */
+/** دانلود از لینک موقتی که بک‌اند می‌دهد (http.download، نام فایل از سرور) */
 const ExportButton = ({ report }: { report: ExportOption }) => {
   const { mutate, isPending } = useMutation({
     mutationFn: () => http.download(`${FACILITY}/Dashboard/Exports/${report.value}`),

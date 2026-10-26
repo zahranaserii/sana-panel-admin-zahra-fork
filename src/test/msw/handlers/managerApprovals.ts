@@ -2,14 +2,13 @@ import { delay, http } from 'msw';
 
 import {
   type CommandResponsesDecisionResultDto,
-  type DecideLoanRequestsCommand,
   type LoanRequestStatus,
   type PostApprovalStage,
   type ReadModelsPendingCountsDto,
   type SetPostApprovalStageCommand,
 } from '@/api/generated/facility/facilityPanelAPI.schemas';
 import { FACILITY } from '@/constant/endpoints';
-import { LOAN_REQUEST_STATUS, type MockLoanRequest, PERSONNEL_STATUS } from '@/constant/mock';
+import { LOAN_REQUEST_STATUS, type MockLoanRequest } from '@/constant/mock';
 import { MOCK_ENUMS } from '@/constant/mock/enums';
 import { formatRial } from '@/utils/number';
 
@@ -93,22 +92,24 @@ export const managerApprovalHandlers = [
   /** تأیید مدیر → مرحله «تأیید اعتبارات»؛ رد مدیر → پایان */
   http.post(api(`${FACILITY}/ManagerApprovals/Decisions`), async ({ request }) => {
     await delay(350);
-    const body = (await request.json()) as DecideLoanRequestsCommand;
-    const approve = body.decision === APPROVE;
-    const description = body.description?.trim() ?? '';
-    if (!approve && (!reasonTitle('loanReject', body.reasonId) || description.length < 5)) {
+    // multipart: RequestIds تکراری، attachment اختیاری
+    const form = await request.formData();
+    const approve = Number(form.get('Decision')) === APPROVE;
+    const reasonId = Number(form.get('ReasonId')) || null;
+    const description = formText(form, 'Description');
+    if (!approve && (!reasonTitle('loanReject', reasonId) || description.length < 5)) {
       return json({ message: 'دلیل رد و توضیحات (حداقل ۵ نویسه) الزامی است.' }, { status: 400 });
     }
     return json(
       decide(request, {
-        requestIds: body.requestIds,
+        requestIds: formNumbers(form, 'RequestIds'),
         approve,
         from: LOAN_REQUEST_STATUS.PENDING_MANAGER,
         to: approve ? LOAN_REQUEST_STATUS.PENDING_CREDIT : LOAN_REQUEST_STATUS.REJECTED_MANAGER,
         description,
         stage: 'مدیر شرکت',
         apply: (item) => {
-          if (!approve) item.rejectReason = reasonTitle('loanReject', body.reasonId);
+          if (!approve) item.rejectReason = reasonTitle('loanReject', reasonId);
         },
       }),
     );
@@ -197,10 +198,8 @@ export const managerApprovalHandlers = [
   http.get(api(`${FACILITY}/Approvals/PendingCounts`), async () => {
     await delay(150);
     const counts: ReadModelsPendingCountsDto = {
-      personnelApproval: db.staff.filter((item) => item.status === PERSONNEL_STATUS.PENDING).length,
       managerApproval: pendingCount(LOAN_REQUEST_STATUS.PENDING_MANAGER),
       creditApproval: pendingCount(LOAN_REQUEST_STATUS.PENDING_CREDIT),
-      digitalApproval: pendingCount(LOAN_REQUEST_STATUS.PENDING_DIGITAL),
     };
     return json(counts);
   }),

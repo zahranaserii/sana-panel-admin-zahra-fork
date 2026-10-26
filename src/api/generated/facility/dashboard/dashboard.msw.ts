@@ -6,7 +6,6 @@ import {
 } from '@faker-js/faker/locale/fa';
 
 import {
-  HttpResponse,
   delay,
   http
 } from 'msw';
@@ -16,6 +15,7 @@ import type {
 import { json } from '@/test/msw/utils';
 
 import type {
+  CommonFileLinkDto,
   ReadModelsCompanyRankingDto,
   ReadModelsDashboardDto,
   ReadModelsMonthOptionDto
@@ -29,6 +29,8 @@ export const getDashboardGetResponseMock = (overrideResponse: Partial<Extract<Re
 export const getDashboardRankingResponseMock = (): ReadModelsCompanyRankingDto[] | null => (Array.from({ length: faker.number.int({min: 1, max: 10}) }, (_, i) => i + 1).map(() => ({rank: faker.number.int(), companyId: faker.number.int(), companyName: faker.string.alpha({length: {min: 10, max: 20}}), averageBalance: faker.helpers.arrayElement([faker.number.int(), null]), allocatedAmount: faker.number.int(), requestCount: faker.number.int(), personnelCount: faker.number.int(), status: faker.string.alpha({length: {min: 10, max: 20}})})))
 
 export const getDashboardMonthsResponseMock = (): ReadModelsMonthOptionDto[] | null => (Array.from({ length: faker.number.int({min: 1, max: 10}) }, (_, i) => i + 1).map(() => ({key: faker.string.alpha({length: {min: 10, max: 20}}), title: faker.string.alpha({length: {min: 10, max: 20}})})))
+
+export const getDashboardExportResponseMock = (overrideResponse: Partial<Extract<CommonFileLinkDto, object>> = {}): CommonFileLinkDto => ({url: faker.string.alpha({length: {min: 10, max: 20}}), fileName: faker.string.alpha({length: {min: 10, max: 20}}), contentType: faker.string.alpha({length: {min: 10, max: 20}}), expiresAt: faker.date.past().toISOString().slice(0, 19) + 'Z', ...overrideResponse})
 
 
 export const getDashboardGetMockHandler = (overrideResponse?: ReadModelsDashboardDto | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<ReadModelsDashboardDto> | ReadModelsDashboardDto), options?: RequestHandlerOptions) => {
@@ -67,11 +69,13 @@ export const getDashboardMonthsMockHandler = (overrideResponse?: ReadModelsMonth
   }, options)
 }
 
-export const getDashboardExportMockHandler = (overrideResponse?: unknown | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<unknown> | unknown), options?: RequestHandlerOptions) => {
+export const getDashboardExportMockHandler = (overrideResponse?: CommonFileLinkDto | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<CommonFileLinkDto> | CommonFileLinkDto), options?: RequestHandlerOptions) => {
   return http.get('*/facility-management/Dashboard/Exports/:report', async (info: Parameters<Parameters<typeof http.get>[1]>[0]) => {await delay(250);
-  if (typeof overrideResponse === 'function') {await overrideResponse(info); }
 
-    return new HttpResponse(null,
+
+    return json(overrideResponse !== undefined
+    ? (typeof overrideResponse === "function" ? await overrideResponse(info) : overrideResponse)
+    : getDashboardExportResponseMock(),
       { status: 200
       })
   }, options)

@@ -1,6 +1,7 @@
 import { type AxiosProgressEvent, type AxiosRequestConfig } from 'axios';
 import { saveAs } from 'file-saver';
 
+import { type CommonFileLinkDto } from '@/api/generated/facility/facilityPanelAPI.schemas';
 import { type ApiResponse } from '@/types/common';
 
 import { httpClient } from './client';
@@ -16,11 +17,6 @@ const toFormData = (payload: FormData | Record<string, unknown>) => {
     else formData.append(key, value instanceof Blob ? value : String(value as string | number));
   });
   return formData;
-};
-
-const fileNameFromHeader = (header?: string) => {
-  const match = header ? /filename\*?=(?:UTF-8'')?"?([^";]+)"?/i.exec(header) : null;
-  return match?.[1] ? decodeURIComponent(match[1]) : undefined;
 };
 
 /** پاسخ بک‌اند همیشه `{ data, statusCode, message, isSuccess }` است؛ خروجی توابع فقط `data` است */
@@ -62,11 +58,10 @@ export const http = {
       .then(unwrap<T>);
   },
 
-  /** دریافت فایل و ذخیره آن */
+  /** دریافت لینک موقت فایل (FileLinkDto) از بک‌اند و ذخیره فایل از روی آن */
   download: async (url: string, fileName?: string, config?: RequestConfig) => {
-    const res = await httpClient.get<Blob>(url, { ...config, responseType: 'blob' });
-    const name =
-      fileName ?? fileNameFromHeader(res.headers['content-disposition'] as string) ?? 'file';
-    saveAs(res.data, name);
+    const link = await http.get<CommonFileLinkDto>(url, config);
+    if (!link?.url) throw new Error('لینک فایل دریافت نشد.');
+    saveAs(link.url, fileName ?? link.fileName ?? 'file');
   },
 };
