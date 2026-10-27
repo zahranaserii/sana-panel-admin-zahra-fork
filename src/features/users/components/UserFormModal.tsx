@@ -1,7 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { isAxiosError } from 'axios';
 import { useMemo } from 'react';
-import { toast } from 'sonner';
 
 import { Form, FormItem } from '@/component/form';
 import { PasswordInput, SelectInput, TextInput } from '@/component/input';
@@ -19,13 +18,21 @@ interface UserFormModalProps {
   onClose: () => void;
 }
 
-const toFormValues = ({ id: _id, isActive: _isActive, ...user }: User): UserPayload => user;
+/** نقش فعلی کاربر = اولین مورد roles */
+const toFormValues = (user: User): UserPayload => ({
+  userName: user.userName,
+  fullName: user.fullName,
+  userCode: user.userCode,
+  branchName: user.branchName,
+  branchCode: user.branchCode,
+  roleId: user.roles[0]?.roleId ?? null,
+});
 
 /** همه نقش‌ها برای سلکت (تعداد نقش‌ها کم است) */
 const ROLE_PARAMS = { page: 1, pageSize: 100 };
 
-/** ۴۰۹ (نام کاربری تکراری) به‌جای توست، کنار همان فیلد نمایش داده می‌شود */
-const DUPLICATE_HANDLED = { onError: { 409: () => undefined } };
+/** پیام موفقیت همان پیام بک‌اند است؛ ۴۰۹ (نام کاربری تکراری) به‌جای توست، کنار همان فیلد نمایش داده می‌شود */
+const SAVE_CONFIG = { successToast: true, onError: { 409: () => undefined } };
 
 export const UserFormModal = ({ open, userId, onClose }: UserFormModalProps) => {
   const [form] = Form.useForm<UserPayload>();
@@ -50,19 +57,14 @@ export const UserFormModal = ({ open, userId, onClose }: UserFormModalProps) => 
 
   const { mutateAsync } = useMutation({
     mutationFn: (values: UserPayload) =>
-      userId
-        ? updateUser(userId, values, DUPLICATE_HANDLED)
-        : createUser(values, DUPLICATE_HANDLED),
-    onSuccess: (saved) => {
+      userId ? updateUser(userId, values, SAVE_CONFIG) : createUser(values, SAVE_CONFIG),
+    onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: QUERY_KEYS.USERS.ALL });
-      toast.success(
-        isEdit ? `کاربر «${saved.fullName}» ویرایش شد.` : `کاربر «${saved.fullName}» ثبت شد.`,
-      );
     },
     onError: (error) => {
       if (isAxiosError<ApiErrorBody>(error) && error.response?.status === 409) {
         form.setFields([
-          { name: 'username', errors: error.response.data.errors?.username ?? ['تکراری است.'] },
+          { name: 'userName', errors: error.response.data.errors?.userName ?? ['تکراری است.'] },
         ]);
       }
     },
@@ -86,7 +88,7 @@ export const UserFormModal = ({ open, userId, onClose }: UserFormModalProps) => 
       onCancel={onClose}
       onSubmit={mutateAsync}
     >
-      <FormItem name="username" label="نام کاربری" required>
+      <FormItem name="userName" label="نام کاربری" required>
         <TextInput autoComplete="off" dir="ltr" />
       </FormItem>
       <FormItem

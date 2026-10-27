@@ -1,37 +1,40 @@
-export interface MockManagedUser {
-  id: number;
-  username: string;
+import { type User } from '@/features/users/types';
+
+/** کاربر پنل در قالب پاسخ بک‌اند به‌همراه رمز (رمز در پاسخ برنمی‌گردد) */
+export interface MockManagedUser extends User {
   password: string;
-  fullName: string;
-  userCode: string;
-  branchName: string;
-  branchCode: string;
-  roleId: number | null;
-  isActive: boolean;
 }
 
 /** کاربران قابل مدیریت در صفحه «مدیریت کاربران» */
 export const MOCK_MANAGED_USERS: MockManagedUser[] = [
   {
     id: 1,
-    username: 'admin',
+    userName: 'admin',
     password: 'admin',
+    email: null,
+    personId: null,
+    isActive: true,
+    creationTime: '2026-01-01T10:00:00',
     fullName: 'مدیر سامانه',
     userCode: '001',
-    branchName: 'ستاد مرکزی',
     branchCode: '150000',
-    roleId: 1,
-    isActive: true,
+    branchName: 'ستاد مرکزی',
+    companyId: null,
+    roles: [{ roleId: 1, persianTitle: 'مدیر سامانه', allowedScopeType: 0 }],
   },
   {
     id: 2,
-    username: 'branch',
+    userName: 'branch',
     password: 'branch',
+    email: null,
+    personId: null,
+    isActive: true,
+    creationTime: '2026-01-01T10:00:00',
     fullName: 'کاربر شعبه',
     userCode: '399',
-    branchName: 'شعبه ونک',
     branchCode: '150002',
-    roleId: 2,
-    isActive: true,
+    branchName: 'شعبه ونک',
+    companyId: null,
+    roles: [{ roleId: 2, persianTitle: 'کاربر شعبه', allowedScopeType: 1 }],
   },
 ];

@@ -61,7 +61,7 @@ export const UsersTable = () => {
   const confirmDelete = (user: User) =>
     modal.confirm({
       title: `حذف کاربر «${user.fullName}»`,
-      content: `کاربر با نام کاربری «${user.username}» حذف می‌شود و دیگر امکان ورود به سامانه را ندارد.`,
+      content: `کاربر با نام کاربری «${user.userName}» حذف می‌شود و دیگر امکان ورود به سامانه را ندارد.`,
       okText: 'حذف',
       okButtonProps: { danger: true },
       cancelText: 'انصراف',
@@ -69,7 +69,7 @@ export const UsersTable = () => {
     });
 
   const columns: ColumnsType<User> = [
-    { title: 'نام کاربری', dataIndex: 'username' },
+    { title: 'نام کاربری', dataIndex: 'userName' },
     { title: 'نام و نام خانوادگی', dataIndex: 'fullName' },
     { title: 'کد کاربر', dataIndex: 'userCode', render: (v: string) => toPersianDigits(v) },
     { title: 'شعبه', dataIndex: 'branchName' },

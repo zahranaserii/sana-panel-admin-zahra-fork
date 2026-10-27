@@ -25,5 +25,7 @@ declare module 'axios' {
     onError?: ErrorHandlerMap;
     /** پیام خطا (توست) نمایش داده نشود؛ ۴۰۱ همچنان مودال پایان نشست را باز می‌کند */
     silent?: boolean;
+    /** در پاسخ موفق، پیام بک‌اند (`message`) به‌صورت توست موفقیت نمایش داده شود */
+    successToast?: boolean;
   }
 }

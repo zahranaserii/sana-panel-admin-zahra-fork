@@ -51,7 +51,7 @@ export const findUserByToken = (authorization: string | null) => {
 /** کاربر ثبت‌کننده درخواست (از روی توکن) */
 export const registrarOf = (request: Request): CommonRegistrarDto => {
   const username = findUserByToken(request.headers.get('Authorization'))?.username;
-  const panelUser = db.users.find((item) => item.username === username);
+  const panelUser = db.users.find((item) => item.userName === username);
   return {
     panelUserId: panelUser?.id,
     userName: username ?? 'نامشخص',

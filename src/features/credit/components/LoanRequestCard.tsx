@@ -6,6 +6,7 @@ import { toast } from 'sonner';
 
 import {
   getLoansCreditQueryKey,
+  getLoansPreviewQueryOptions,
   getLoansSearchQueryKey,
   useLoansCreate,
   useLoansPreview,
@@ -21,7 +22,12 @@ import { type StaffFilters } from '@/features/staff/types';
 import { useDebouncedValue } from '@/hooks';
 import { toPersianDigits } from '@/utils/date';
 
-import { type CompanyCredit, type LoanRequestFormValues, type PlanCredit } from '../types';
+import {
+  type CompanyCredit,
+  type LoanPreview,
+  type LoanRequestFormValues,
+  type PlanCredit,
+} from '../types';
 import { ALLOCATION_MODE, buildLoanBody, repeatList } from '../utils';
 
 import { FixedAmountField } from './FixedAmountField';
@@ -51,6 +57,9 @@ const planOption = (plan: PlanCredit) => ({
 export const LoanRequestCard = ({ companyId, date, credit, filters }: LoanRequestCardProps) => {
   const [form] = Form.useForm<LoanRequestFormValues>();
   const [selectedIds, setSelectedIds] = useState<number[]>([]);
+  // مبلغ متفاوت: پیش‌نمایش فقط با دکمه ثبت گرفته می‌شود (نه با هر تغییر ورودی‌ها)
+  const [submitPreview, setSubmitPreview] = useState<LoanPreview>();
+  const [checking, setChecking] = useState(false);
   const queryClient = useQueryClient();
   const { modal } = App.useApp();
 
@@ -58,6 +67,7 @@ export const LoanRequestCard = ({ companyId, date, credit, filters }: LoanReques
   const canAllocate = Boolean(credit?.banner?.canRegisterLoan);
   const values = Form.useWatch([], form) ?? INITIAL_VALUES;
   const plan = plans.find((item) => item.planId === values.planId);
+  const isVariable = values.mode === ALLOCATION_MODE.VARIABLE;
 
   // اگر طرحی انتخاب نشده یا طرح انتخاب‌شده دیگر وجود ندارد، اولین طرح انتخاب می‌شود
   useEffect(() => {
@@ -67,11 +77,15 @@ export const LoanRequestCard = ({ companyId, date, credit, filters }: LoanReques
     }
   }, [plans, form]);
 
-  // پیش‌نمایش (مجموع، مجاز بودن، پیام‌ها و تخصیص تکراری) بعد از توقف تایپ از سرور گرفته می‌شود
+  // مبلغ یکسان: پیش‌نمایش (مجموع، مجاز بودن، پیام‌ها و تخصیص تکراری) بعد از توقف تایپ از سرور گرفته می‌شود
   const body = useDebouncedValue(buildLoanBody(values, selectedIds, date));
-  const { data: preview, isError: previewFailed } = useLoansPreview(companyId, body, {
-    query: { enabled: Boolean(plan) && canAllocate },
+  // فقط وقتی طرح (از سرویس اعتبار) در همان بدنه‌ی debounce‌شده انتخاب شده باشد؛ نه planId خالی (۰)
+  const hasPlan = plans.some((item) => item.planId === body.planId);
+  const autoPreview = useLoansPreview(companyId, body, {
+    query: { enabled: hasPlan && canAllocate && body.mode !== ALLOCATION_MODE.VARIABLE },
   });
+  const preview = isVariable ? submitPreview : autoPreview.data;
+  const previewFailed = !isVariable && autoPreview.isError;
 
   const { mutate, isPending } = useLoansCreate({
     mutation: {
@@ -96,14 +110,33 @@ export const LoanRequestCard = ({ companyId, date, credit, filters }: LoanReques
     },
   });
 
-  const handleFinish = (formValues: LoanRequestFormValues) => {
+  /** مبلغ متفاوت: پیش‌نمایش همان لحظه ثبت؛ مبلغ یکسان: نتیجه پیش‌نمایش خودکار */
+  const checkPreview = async (data: ReturnType<typeof buildLoanBody>) => {
+    if (!isVariable) return preview;
+    setChecking(true);
+    try {
+      const result = await queryClient.fetchQuery(
+        // هر بار از سرور (مانده و تخصیص تکراری ممکن است عوض شده باشد)
+        getLoansPreviewQueryOptions(companyId, data, { query: { staleTime: 0 } }),
+      );
+      setSubmitPreview(result);
+      return result;
+    } finally {
+      setChecking(false);
+    }
+  };
+
+  const handleFinish = async (formValues: LoanRequestFormValues) => {
     if (!plan) return;
     if (!selectedIds.length) {
       toast.error('حداقل یک پرسنل را از جدول انتخاب کنید.');
       return;
     }
-    const submit = () => mutate({ companyId, data: buildLoanBody(formValues, selectedIds, date) });
-    const repeats = preview?.repeatAllocations ?? [];
+    const data = buildLoanBody(formValues, selectedIds, date);
+    const checked = await checkPreview(data);
+    if (checked?.isAllowed === false) return;
+    const submit = () => mutate({ companyId, data });
+    const repeats = checked?.repeatAllocations ?? [];
     if (!repeats.length) {
       submit();
       return;
@@ -118,8 +151,6 @@ export const LoanRequestCard = ({ companyId, date, credit, filters }: LoanReques
     });
   };
 
-  const isVariable = values.mode === ALLOCATION_MODE.VARIABLE;
-
   return (
     <PanelCard
       title="ثبت درخواست تخصیص وام به پرسنل"
@@ -131,7 +162,9 @@ export const LoanRequestCard = ({ companyId, date, credit, filters }: LoanReques
         component={false}
         initialValues={INITIAL_VALUES}
         disabled={!canAllocate}
-        onFinish={handleFinish}
+        onFinish={(formValues) => void handleFinish(formValues)}
+        // نتیجه پیش‌نمایش قبلی (مبلغ متفاوت) با تغییر فرم دیگر معتبر نیست
+        onValuesChange={() => setSubmitPreview(undefined)}
       >
         <div className="max-w-[480px]">
           <FormItem name="planId" label="طرح این ماه (طبق تفاهم‌نامه)" required>
@@ -165,7 +198,10 @@ export const LoanRequestCard = ({ companyId, date, credit, filters }: LoanReques
           variableAmount={isVariable}
           disabled={!canAllocate}
           selectedIds={selectedIds}
-          onSelect={setSelectedIds}
+          onSelect={(ids) => {
+            setSelectedIds(ids);
+            setSubmitPreview(undefined);
+          }}
         />
         {!isVariable && <FixedAmountField amount={Number(values.fixedAmount ?? 0)} />}
       </Form>
@@ -181,7 +217,7 @@ export const LoanRequestCard = ({ companyId, date, credit, filters }: LoanReques
         icon={<SendOutlined />}
         // بدون نتیجه پیش‌نمایش (خطا) ثبت غیرفعال است
         disabled={!canAllocate || !plan || previewFailed || preview?.isAllowed === false}
-        loading={isPending}
+        loading={isPending || checking}
         onClick={() => form.submit()}
         className="mt-2"
       >

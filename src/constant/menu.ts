@@ -1,4 +1,5 @@
 import {
+  AuditOutlined,
   BarChartOutlined,
   CheckCircleOutlined,
   ControlOutlined,
@@ -27,15 +28,15 @@ interface PageConfig {
  */
 const PAGES: Record<string, PageConfig> = {
   '/home': { path: ROUTES.HOME, icon: HomeOutlined },
-  '/base-info': { path: ROUTES.BASE_INFO, icon: ControlOutlined },
+  '/facility/basic-info': { path: ROUTES.BASE_INFO, icon: ControlOutlined },
   '/facility/management-companies': { path: ROUTES.COMPANIES, icon: ShopOutlined },
-  '/facility/base-info': { path: ROUTES.MANAGER_APPROVE, icon: ShopOutlined },
   '/facility/personnel': { path: ROUTES.STAFF, icon: TeamOutlined },
+  '/facility/manager-approval': { path: ROUTES.MANAGER_APPROVE, icon: AuditOutlined },
   '/facility/loan-allocation': { path: ROUTES.CREDIT, icon: CreditCardOutlined },
   '/facility/credit-approval': { path: ROUTES.CREDIT_APPROVE, icon: CheckCircleOutlined },
-  '/facility/management-dashboard': { path: ROUTES.DASHBOARD, icon: BarChartOutlined },
-  '/facility/management-users': { path: ROUTES.USERS, icon: SafetyOutlined },
-  '/facility/audit-log': { path: ROUTES.CHANGE_LOG, icon: HistoryOutlined },
+  '/facility/dashboard': { path: ROUTES.DASHBOARD, icon: BarChartOutlined },
+  '/facility/user-management': { path: ROUTES.USERS, icon: SafetyOutlined },
+  '/facility/change-log': { path: ROUTES.CHANGE_LOG, icon: HistoryOutlined },
 };
 
 const isRoot = (item: MenuItemDto) => item.parentId === null || item.parentId === item.id;

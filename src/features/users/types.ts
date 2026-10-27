@@ -1,26 +1,42 @@
 import { type PageParams } from '@/types/common';
 
+/** نقش کاربر در پاسخ PanelUsers */
+export interface UserRole {
+  roleId: number;
+  persianTitle: string | null;
+  allowedScopeType: number;
+}
+
 /**
- * کاربر پنل.
- * ساختار پاسخ PanelUsers در سوئگر تعریف نشده؛ فیلدها از فرانت و Registrar بک‌اند برداشته شده‌اند.
+ * کاربر پنل (پاسخ PanelUsers/{id} بک‌اند؛ مدل آن در سوئگر تعریف نشده).
  * رمز عبور هیچ‌وقت از سرور برگردانده نمی‌شود.
  */
 export interface User {
   id: number;
-  username: string;
+  userName: string;
+  email: string | null;
+  personId: number | null;
+  /** در بک‌اند هست (فعال/غیرفعال کردن کاربر) — در UI استفاده نشده */
+  isActive: boolean;
+  creationTime: string;
+  fullName: string;
+  userCode: string;
+  branchCode: string;
+  branchName: string;
+  companyId: string | null;
+  roles: UserRole[];
+}
+
+/** بدنه ثبت/ویرایش؛ در ویرایش، رمز خالی یعنی رمز قبلی تغییر نکند */
+export interface UserPayload {
+  userName: string;
+  password?: string;
   fullName: string;
   userCode: string;
   branchName: string;
   branchCode: string;
   /** نقش کاربر (فعلاً هر کاربر فقط یک نقش دارد) */
   roleId: number | null;
-  /** در بک‌اند هست (فعال/غیرفعال کردن کاربر) — در UI استفاده نشده */
-  isActive: boolean;
-}
-
-/** بدنه ثبت/ویرایش؛ در ویرایش، رمز خالی یعنی رمز قبلی تغییر نکند */
-export interface UserPayload extends Omit<User, 'id' | 'isActive'> {
-  password?: string;
 }
 
 export interface UserListParams extends PageParams {

@@ -1,7 +1,7 @@
 import 'react-multi-date-picker/styles/backgrounds/bg-dark.css';
 
 import { FormItemInputContext } from 'antd/es/form/context';
-import { useContext, useMemo } from 'react';
+import { memo, useCallback, useContext, useLayoutEffect, useMemo, useRef } from 'react';
 import type DateObject from 'react-date-object';
 import persian from 'react-date-object/calendars/persian';
 import persian_fa from 'react-date-object/locales/persian_fa';
@@ -17,7 +17,11 @@ import { dayjs, ISO_DATE_FORMAT } from '@/utils/date';
  * اینجا export اصلی را جدا می‌کنیم.
  */
 const interopDefault = <T,>(module: T): T => (module as { default?: T }).default ?? module;
-const DatePicker = interopDefault(DatePickerModule);
+/**
+ * memo: تقویم کتابخانه با هر رندر دوباره، ماهِ در حال نمایش را به ماه مقدار (یا ماه جاری) برمی‌گرداند؛
+ * با props ثابت، رندر والد (مثلاً رسیدن پاسخ یک سرویس) ماهی را که کاربر به آن رفته عوض نمی‌کند.
+ */
+const DatePicker = memo(interopDefault(DatePickerModule));
 const DatePanel = interopDefault(DatePanelModule);
 const TimePicker = interopDefault(TimePickerModule);
 
@@ -91,12 +95,24 @@ export const DateInput = ({
     return list;
   }, [withTime, hideSeconds, mode]);
 
-  const handleChange = (selected: DateObject | DateObject[] | DateObject[][] | null) => {
-    if (!selected) return onChange?.(null);
-    if (!Array.isArray(selected)) return onChange?.(toIso(selected, withTime));
-    const flat = selected.flat();
-    onChange?.(flat.length ? flat.map((item) => toIso(item, withTime)) : null);
-  };
+  // onChange فرم با هر رندر عوض می‌شود؛ آخرین نسخه در ref نگه داشته می‌شود تا handleChange ثابت بماند
+  const onChangeRef = useRef(onChange);
+  useLayoutEffect(() => {
+    onChangeRef.current = onChange;
+  });
+
+  const handleChange = useCallback(
+    (selected: DateObject | DateObject[] | DateObject[][] | null) => {
+      const emit = onChangeRef.current;
+      if (!selected) return emit?.(null);
+      if (!Array.isArray(selected)) return emit?.(toIso(selected, withTime));
+      const flat = selected.flat();
+      emit?.(flat.length ? flat.map((item) => toIso(item, withTime)) : null);
+    },
+    [withTime],
+  );
+
+  const pickerValue = useMemo(() => toPickerValue(value, mode) as Value, [value, mode]);
 
   const displayFormat = format ?? `${DISPLAY_FORMAT[picker]}${withTime ? ' HH:mm' : ''}`;
   const inputClass = ['sana-date-input', status === 'error' ? 'sana-date-input--error' : '']
@@ -108,7 +124,7 @@ export const DateInput = ({
       id={id}
       calendar={persian}
       locale={persian_fa}
-      value={toPickerValue(value, mode) as Value}
+      value={pickerValue}
       onChange={handleChange}
       range={mode === 'range'}
       multiple={mode === 'multiple'}

@@ -20,8 +20,8 @@ describe('buildMenu', () => {
     expect(groups.map((group) => group.items.map((item) => item.path))).toEqual([
       [ROUTES.HOME],
       [ROUTES.BASE_INFO],
-      [ROUTES.COMPANIES, ROUTES.STAFF],
-      [ROUTES.MANAGER_APPROVE, ROUTES.CREDIT, ROUTES.CREDIT_APPROVE],
+      [ROUTES.COMPANIES, ROUTES.STAFF, ROUTES.MANAGER_APPROVE],
+      [ROUTES.CREDIT, ROUTES.CREDIT_APPROVE],
       [ROUTES.DASHBOARD, ROUTES.USERS, ROUTES.CHANGE_LOG],
     ]);
   });
@@ -34,14 +34,22 @@ describe('buildMenu', () => {
       'عملیات اعتباری',
       '',
       'گزارش و کنترل',
+      '',
     ]);
     expect(menu[3]?.items.map((item) => item.path)).toEqual([ROUTES.COMPANIES, ROUTES.STAFF]);
+    expect(menu[5]?.items.map((item) => item.path)).toEqual([ROUTES.MANAGER_APPROVE]);
+  });
+
+  it('ignores permission items (children of pages or of a missing parent)', () => {
+    const labels = groups.flatMap((group) => group.items.map((item) => item.label));
+    expect(labels).not.toContain('ثبت شرکت جدید');
+    expect(labels).not.toContain('رد اعتبارات');
+    expect(labels).not.toContain('پرسنل شرکت');
   });
 
   it('hides inactive items, unknown urls and empty groups', () => {
     const changed: Record<string, Partial<MenuItemDto>> = {
-      '/base-info': { isActive: false },
-      '/facility/base-info': { isActive: false },
+      '/facility/basic-info': { isActive: false },
       '/facility/loan-allocation': { url: '/unknown' },
       '/facility/credit-approval': { isActive: false },
     };
@@ -58,7 +66,7 @@ describe('buildMenu', () => {
 
 describe('findMenuItemByPath', () => {
   it('finds the exact page without confusing similar paths', () => {
-    expect(findMenuItemByPath(groups, ROUTES.CREDIT)?.label).toBe('نخصیص وام');
+    expect(findMenuItemByPath(groups, ROUTES.CREDIT)?.label).toBe('تخصیص وام');
     expect(findMenuItemByPath(groups, ROUTES.CREDIT_APPROVE)?.label).toBe('تأیید اعتبارات');
   });
 

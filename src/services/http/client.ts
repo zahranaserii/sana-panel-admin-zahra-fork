@@ -1,7 +1,9 @@
 import axios from 'axios';
+import { toast } from 'sonner';
 
 import { env } from '@/config/env';
 import { useAuthStore } from '@/store/useAuthStore';
+import { type ApiResponse } from '@/types/common';
 
 import { handleHttpError } from './errorHandler';
 import { getClientHeaders } from './headers';
@@ -25,7 +27,11 @@ httpClient.interceptors.request.use((config) => {
 });
 
 httpClient.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    const message = (response.data as Partial<ApiResponse<unknown>> | null)?.message;
+    if (response.config.successToast && message) toast.success(message);
+    return response;
+  },
   (error: HttpError) => {
     handleHttpError(error);
     return Promise.reject(error);
