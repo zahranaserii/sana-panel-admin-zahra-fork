@@ -30,6 +30,8 @@ export interface DecisionRequestInfo {
   personnelName?: string;
   planTitle?: string;
   amount?: number;
+  /** طرح کلان درخواست؛ دلایل رد از همان طرح خوانده می‌شود */
+  schemeId?: number;
 }
 
 export interface DecisionTarget {

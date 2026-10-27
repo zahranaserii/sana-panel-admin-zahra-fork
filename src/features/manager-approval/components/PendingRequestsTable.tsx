@@ -20,7 +20,12 @@ import { DecisionModal, showDecisionResult, type DecisionTarget } from '@/compon
 import { Table } from '@/component/table';
 import { LOAN_STATUS } from '@/constant/loanStatus';
 import { useDebouncedValue } from '@/hooks';
-import { REASON_TYPE, useReasonOptions } from '@/services/reasons';
+import {
+  MIXED_SCHEMES_MESSAGE,
+  REASON_TYPE,
+  schemeOfRequests,
+  useReasonOptions,
+} from '@/services/reasons';
 import { toPersianDigits } from '@/utils/date';
 
 import {
@@ -85,7 +90,12 @@ export const PendingRequestsTable = ({ companyId, onCompanyChange }: PendingRequ
   });
 
   // رد: دلیل (از «دلایل رد درخواست وام»، همان فهرست اعتبارات) و توضیح الزامی
-  const rejectReasons = useReasonOptions(REASON_TYPE.LOAN_REJECT);
+  const targetScheme = target ? schemeOfRequests(target.requests) : undefined;
+  const rejectReasons = useReasonOptions(
+    REASON_TYPE.LOAN_REJECT,
+    targetScheme === 'mixed' ? undefined : targetScheme,
+    target?.type === 'reject',
+  );
 
   /** multipart با پیوست اختیاری */
   const decide = ({ description, reasonId, file }: DecisionFormValues) =>
@@ -102,6 +112,10 @@ export const PendingRequestsTable = ({ companyId, onCompanyChange }: PendingRequ
   const openBulk = (type: DecisionType) => {
     if (!selected.length) {
       toast.error('حداقل یک درخواست را انتخاب کنید.');
+      return;
+    }
+    if (schemeOfRequests(selected) === 'mixed') {
+      toast.error(MIXED_SCHEMES_MESSAGE);
       return;
     }
     setTarget({ type, requests: selected });

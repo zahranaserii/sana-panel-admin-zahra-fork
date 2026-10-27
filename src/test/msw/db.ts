@@ -200,6 +200,7 @@ export const toLoanItem = (loan: MockLoanRequest): CommandResponsesLoanRequestLi
     documentCount: loan.documents.length,
     canCancel: CANCELABLE.includes(loan.status),
     documents: loan.documents,
+    schemeId: schemeOf(company?.schemeId).id,
   };
 };
 

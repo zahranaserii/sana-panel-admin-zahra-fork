@@ -5788,6 +5788,10 @@
             "items": {
               "$ref": "#/components/schemas/Common.StoredFileDto"
             }
+          },
+          "schemeId": {
+            "type": "integer",
+            "format": "int32"
           }
         },
         "additionalProperties": false

@@ -906,6 +906,7 @@ export interface CommandResponsesLoanRequestListItemDto {
   documentCount?: number;
   canCancel?: boolean;
   documents?: CommonStoredFileDto[];
+  schemeId?: number;
 }
 
 export interface CommonFacilityPagedResponseOfLoanRequestListItemDto {

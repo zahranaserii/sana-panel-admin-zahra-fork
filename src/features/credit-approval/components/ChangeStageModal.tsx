@@ -40,7 +40,7 @@ export const ChangeStageModal = ({ request, onClose }: ChangeStageModalProps) =>
         })
       }
     >
-      <PostStageFields />
+      <PostStageFields schemeId={request?.schemeId} />
     </FormModal>
   );
 };

@@ -26,7 +26,7 @@ interface CancelLoanModalProps {
 /** لغو درخواست وام در انتظار تأیید؛ دلیل و توضیحات الزامی */
 export const CancelLoanModal = ({ request, onClose }: CancelLoanModalProps) => {
   const queryClient = useQueryClient();
-  const reasons = useReasonOptions(REASON_TYPE.LOAN_CANCEL, undefined, Boolean(request));
+  const reasons = useReasonOptions(REASON_TYPE.LOAN_CANCEL, request?.schemeId, Boolean(request));
 
   const { mutateAsync } = useLoansCancel({
     mutation: {

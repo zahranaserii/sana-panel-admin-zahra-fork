@@ -86,7 +86,6 @@ export const toFormValues = ({
     maxPlansPerCompany: settings.maxPlansPerCompany,
     personnelIntroductionDelayMonths: settings.personnelIntroductionDelayMonths,
     waitingPeriodDays: settings.waitingPeriodDays,
-    rowVersion: settings.rowVersion,
     usable: terms.map((term) => [
       findUsable(table, term, QARD_HASAN),
       ...rates.map((rate) => findUsable(table, term, MURABAHA, rate)),
@@ -105,8 +104,13 @@ export const toFormValues = ({
  * مقادیر فرم → SaveSchemeCommand:
  * ماتریس به usableTable تبدیل می‌شود، نوع قراردادها از نرخ‌های واردشده ساخته می‌شود
  * و ردیف‌های خالی لیست‌های متنی حذف می‌شوند.
+ * `rowVersion` فیلد فرم نیست (antd مقدار فیلدهای ثبت‌نشده را در onFinish نمی‌دهد)؛
+ * در ویرایش الزامی است و از settings همان پاسخ BasicInfo/Schemes/{id} پاس داده می‌شود.
  */
-export const toPayload = ({ usable = [], ...values }: SchemeFormValues): SaveSchemeCommand => {
+export const toPayload = (
+  { usable = [], ...values }: SchemeFormValues,
+  rowVersion?: string | null,
+): SaveSchemeCommand => {
   const terms = values.repaymentTermsMonths ?? [];
   const rates = values.murabahaRates ?? [];
   const qardHasanRate = values.qardHasanRate ?? null;
@@ -136,6 +140,7 @@ export const toPayload = ({ usable = [], ...values }: SchemeFormValues): SaveSch
   return {
     ...removeEmpty(values),
     title: values.title.trim(),
+    ...(rowVersion ? { rowVersion } : {}),
     contractTypes,
     usableTable,
     ...Object.fromEntries(

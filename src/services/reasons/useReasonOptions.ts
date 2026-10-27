@@ -1,4 +1,4 @@
-import { useBasicInfoReasons, useBasicInfoSchemeReasons } from '@/api/generated/facility';
+import { useBasicInfoSchemeReasons } from '@/api/generated/facility';
 import { type ReasonType } from '@/api/generated/facility/facilityPanelAPI.schemas';
 
 /** نوع دلیل بک‌اند (Lookups/Enums → reasonType) */
@@ -13,23 +13,26 @@ export const REASON_TYPE = {
 
 /**
  * گزینه‌های کشویی دلایل (لغو، رد، انواع مستند و …) از اطلاعات پایه.
- * با schemeId دلایل همان طرح کلان، بدون آن دلایل عمومی خوانده می‌شود.
+ * دلایل به طرح کلان تعلق دارند و فقط از Schemes/{schemeId}/Reasons خوانده می‌شوند؛
+ * تا schemeId معلوم نباشد درخواستی فرستاده نمی‌شود.
  */
-export const useReasonOptions = (type: ReasonType, schemeId?: number, enabled = true) => {
-  const params = { type };
-  const bySchemeQuery = useBasicInfoSchemeReasons(schemeId ?? 0, params, {
-    query: { enabled: enabled && Boolean(schemeId) },
-  });
-  const generalQuery = useBasicInfoReasons(params, {
-    query: { enabled: enabled && !schemeId },
-  });
-  const { data, isPending, isFetching, refetch } = schemeId ? bySchemeQuery : generalQuery;
+export const useReasonOptions = (
+  type: ReasonType,
+  schemeId: number | undefined,
+  enabled = true,
+) => {
+  const isEnabled = enabled && Boolean(schemeId);
+  const { data, isPending, isFetching, refetch } = useBasicInfoSchemeReasons(
+    schemeId ?? 0,
+    { type },
+    { query: { enabled: isEnabled } },
+  );
   return {
     options: (data ?? []).map((reason) => ({ value: reason.id ?? 0, label: reason.title ?? '' })),
-    isPending: enabled && isPending,
+    isPending: isEnabled && isPending,
     /** پراپ‌های سلکت: لودینگ و فراخوانی دوباره با باز کردن سلکت خالی */
     selectProps: {
-      loading: enabled && isFetching,
+      loading: isEnabled && isFetching,
       onRetry: () => void refetch(),
     },
   };

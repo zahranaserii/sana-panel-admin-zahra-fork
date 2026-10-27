@@ -218,7 +218,9 @@ export const baseInfoHandlers = [
     const body = (await request.json()) as SaveSchemeCommand;
     const error = invalid(body);
     if (error) return json({ message: error }, { status: 400 });
-    if (body.rowVersion && body.rowVersion !== previous.settings.rowVersion) {
+    // مثل بک‌اند: rowVersion در ویرایش الزامی است (قفل خوش‌بینانه)
+    if (!body.rowVersion) return json({ message: 'rowVersion الزامی است.' }, { status: 400 });
+    if (body.rowVersion !== previous.settings.rowVersion) {
       return json(
         { message: 'این طرح هم‌زمان توسط کاربر دیگری ویرایش شده است؛ صفحه را دوباره باز کنید.' },
         { status: 409 },

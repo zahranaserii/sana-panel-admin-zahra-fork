@@ -23,7 +23,12 @@ import {
   type DecisionType,
 } from '@/features/manager-approval/types';
 import { useEnums } from '@/services/enums';
-import { REASON_TYPE, useReasonOptions } from '@/services/reasons';
+import {
+  MIXED_SCHEMES_MESSAGE,
+  REASON_TYPE,
+  schemeOfRequests,
+  useReasonOptions,
+} from '@/services/reasons';
 
 import { type CreditApprovalItem } from '../types';
 
@@ -58,7 +63,14 @@ export const CreditApprovalCard = ({ companyId, onCompanyChange }: CreditApprova
   // همه شرکت‌ها، شامل قراردادهای لغوشده
   const companiesQuery = useCompaniesLookup({ activeOnly: false });
   const companies = companiesQuery.data;
-  const rejectReasons = useReasonOptions(REASON_TYPE.LOAN_REJECT);
+  // دلایل از طرح درخواست‌های انتخاب‌شده (در انتخاب گروهی همه از یک طرح‌اند)
+  const targetScheme = target ? schemeOfRequests(target.requests) : undefined;
+  const schemeId = targetScheme === 'mixed' ? undefined : targetScheme;
+  const rejectReasons = useReasonOptions(
+    REASON_TYPE.LOAN_REJECT,
+    schemeId,
+    target?.type === 'reject',
+  );
 
   const { mutateAsync } = useApprovalsCreditDecide({
     mutation: {
@@ -93,6 +105,10 @@ export const CreditApprovalCard = ({ companyId, onCompanyChange }: CreditApprova
   const openBulk = (type: DecisionType) => {
     if (!selected.length) {
       toast.error('حداقل یک درخواست را انتخاب کنید.');
+      return;
+    }
+    if (schemeOfRequests(selected) === 'mixed') {
+      toast.error(MIXED_SCHEMES_MESSAGE);
       return;
     }
     setTarget({ type, requests: selected });
@@ -167,7 +183,7 @@ export const CreditApprovalCard = ({ companyId, onCompanyChange }: CreditApprova
         rejectReasons={rejectReasons.options}
         rejectReasonsProps={rejectReasons.selectProps}
         requireRejectNote
-        approveFields={<PostStageFields />}
+        approveFields={<PostStageFields schemeId={schemeId} />}
         onSubmit={decide}
         onClose={() => setTarget(null)}
       />

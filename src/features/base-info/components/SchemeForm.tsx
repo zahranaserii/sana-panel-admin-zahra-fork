@@ -54,9 +54,11 @@ export const SchemeForm = ({ schemeId, onBack }: SchemeFormProps) => {
   const update = useBasicInfoSchemeUpdate({ mutation: { onSuccess: onSaved } });
 
   const submit = (values: SchemeFormValues) => {
-    const data = toPayload(values);
-    if (isEdit) update.mutate({ schemeId, data });
-    else create.mutate({ data });
+    if (isEdit) {
+      update.mutate({ schemeId, data: toPayload(values, detail?.settings?.rowVersion) });
+    } else {
+      create.mutate({ data: toPayload(values) });
+    }
   };
 
   const initialValues = useMemo(
