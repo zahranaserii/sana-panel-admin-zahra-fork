@@ -1,3 +1,4 @@
+import { Checkbox } from 'antd';
 import { type ColumnsType } from 'antd/es/table';
 
 import { usePersonnelSearch } from '@/api/generated/facility';
@@ -11,6 +12,8 @@ interface StaffPickTableProps {
   companyId: number;
   filters: StaffFilters;
   variableAmount: boolean;
+  /** ردیف قابل انتخاب است؟ (مبلغ متفاوت: فقط ردیفی که مبلغش وارد شده) */
+  canSelect: (id: number) => boolean;
   disabled: boolean;
   selectedIds: number[];
   onSelect: (ids: number[]) => void;
@@ -23,6 +26,7 @@ export const StaffPickTable = ({
   companyId,
   filters,
   variableAmount,
+  canSelect,
   disabled,
   selectedIds,
   onSelect,
@@ -78,7 +82,9 @@ export const StaffPickTable = ({
       rowSelection={{
         selectedRowKeys: selectedIds,
         onChange: (keys) => onSelect(keys.map(Number)),
-        getCheckboxProps: () => ({ disabled }),
+        getCheckboxProps: (row) => ({ disabled: disabled || !canSelect(row.id ?? 0) }),
+        // مبلغ متفاوت: «انتخاب همه» همیشه غیرفعال است (هر ردیف با وارد شدن مبلغش انتخاب می‌شود)
+        columnTitle: variableAmount ? <Checkbox disabled /> : undefined,
       }}
     />
   );

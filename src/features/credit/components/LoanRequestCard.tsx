@@ -1,4 +1,4 @@
-import { SendOutlined } from '@ant-design/icons';
+import { SafetyCertificateOutlined, SendOutlined } from '@ant-design/icons';
 import { useQueryClient } from '@tanstack/react-query';
 import { App } from 'antd';
 import { useEffect, useMemo, useState } from 'react';
@@ -9,7 +9,6 @@ import {
   getLoansPreviewQueryOptions,
   getLoansSearchQueryKey,
   useLoansCreate,
-  useLoansPreview,
 } from '@/api/generated/facility';
 import { Button } from '@/component/button';
 import { PanelCard } from '@/component/card';
@@ -19,7 +18,6 @@ import { RadioGroup } from '@/component/radio';
 import { Typography } from '@/component/typography';
 import { StaffSearch } from '@/features/staff/components';
 import { type StaffFilters } from '@/features/staff/types';
-import { useDebouncedValue } from '@/hooks';
 import { toPersianDigits } from '@/utils/date';
 
 import {
@@ -48,17 +46,21 @@ const AMOUNT_MODES = [
   { value: ALLOCATION_MODE.VARIABLE, label: 'مبلغ متفاوت برای هرکس' },
 ];
 
+/** مبلغ ردیف در حالت مبلغ متفاوت وارد شده است؟ */
+const hasAmount = (rows: LoanRequestFormValues['rows'], id: number) =>
+  Number(rows?.[String(id)]?.amount ?? 0) > 0;
+
 const planOption = (plan: PlanCredit) => ({
   value: plan.planId,
   label: toPersianDigits(`${plan.contractType} - نرخ ${plan.rate}٪ - مدت ${plan.termMonths} ماه`),
 });
 
-/** ثبت درخواست تخصیص وام به پرسنل (بررسی اعتبار و تخصیص تکراری با سرویس پیش‌نمایش) */
+/** ثبت درخواست تخصیص وام به پرسنل؛ اول «بررسی اعتبار» (سرویس پیش‌نمایش)، بعد ثبت */
 export const LoanRequestCard = ({ companyId, date, credit, filters }: LoanRequestCardProps) => {
   const [form] = Form.useForm<LoanRequestFormValues>();
   const [selectedIds, setSelectedIds] = useState<number[]>([]);
-  // مبلغ متفاوت: پیش‌نمایش فقط با دکمه ثبت گرفته می‌شود (نه با هر تغییر ورودی‌ها)
-  const [submitPreview, setSubmitPreview] = useState<LoanPreview>();
+  // نتیجه «بررسی اعتبار» (Preview)؛ فقط با دکمه گرفته می‌شود و با هر تغییر فرم پاک می‌شود
+  const [checked, setChecked] = useState<LoanPreview>();
   const [checking, setChecking] = useState(false);
   const queryClient = useQueryClient();
   const { modal } = App.useApp();
@@ -77,16 +79,6 @@ export const LoanRequestCard = ({ companyId, date, credit, filters }: LoanReques
     }
   }, [plans, form]);
 
-  // مبلغ یکسان: پیش‌نمایش (مجموع، مجاز بودن، پیام‌ها و تخصیص تکراری) بعد از توقف تایپ از سرور گرفته می‌شود
-  const body = useDebouncedValue(buildLoanBody(values, selectedIds, date));
-  // فقط وقتی طرح (از سرویس اعتبار) در همان بدنه‌ی debounce‌شده انتخاب شده باشد؛ نه planId خالی (۰)
-  const hasPlan = plans.some((item) => item.planId === body.planId);
-  const autoPreview = useLoansPreview(companyId, body, {
-    query: { enabled: hasPlan && canAllocate && body.mode !== ALLOCATION_MODE.VARIABLE },
-  });
-  const preview = isVariable ? submitPreview : autoPreview.data;
-  const previewFailed = !isVariable && autoPreview.isError;
-
   const { mutate, isPending } = useLoansCreate({
     mutation: {
       onSuccess: (batch) => {
@@ -103,6 +95,7 @@ export const LoanRequestCard = ({ companyId, date, credit, filters }: LoanReques
           ),
         });
         setSelectedIds([]);
+        setChecked(undefined);
         toast.success(
           `درخواست وام برای ${toPersianDigits(batch.requests?.length ?? 0)} نفر با موفقیت ثبت شد.`,
         );
@@ -110,33 +103,27 @@ export const LoanRequestCard = ({ companyId, date, credit, filters }: LoanReques
     },
   });
 
-  /** مبلغ متفاوت: پیش‌نمایش همان لحظه ثبت؛ مبلغ یکسان: نتیجه پیش‌نمایش خودکار */
-  const checkPreview = async (data: ReturnType<typeof buildLoanBody>) => {
-    if (!isVariable) return preview;
+  /** بررسی اعتبار برای پرسنل انتخاب‌شده (Preview؛ هر بار از سرور) */
+  const handleCheck = async () => {
     setChecking(true);
     try {
-      const result = await queryClient.fetchQuery(
-        // هر بار از سرور (مانده و تخصیص تکراری ممکن است عوض شده باشد)
-        getLoansPreviewQueryOptions(companyId, data, { query: { staleTime: 0 } }),
+      const data = buildLoanBody(form.getFieldsValue(true), selectedIds, date);
+      setChecked(
+        await queryClient.fetchQuery(
+          getLoansPreviewQueryOptions(companyId, data, { query: { staleTime: 0 } }),
+        ),
       );
-      setSubmitPreview(result);
-      return result;
     } finally {
       setChecking(false);
     }
   };
 
-  const handleFinish = async (formValues: LoanRequestFormValues) => {
-    if (!plan) return;
-    if (!selectedIds.length) {
-      toast.error('حداقل یک پرسنل را از جدول انتخاب کنید.');
-      return;
-    }
+  /** ثبت با همان بدنه‌ای که بررسی شد (بعد از بررسی فرم تغییری نکرده است) */
+  const handleFinish = (formValues: LoanRequestFormValues) => {
+    if (!checked?.isAllowed) return;
     const data = buildLoanBody(formValues, selectedIds, date);
-    const checked = await checkPreview(data);
-    if (checked?.isAllowed === false) return;
     const submit = () => mutate({ companyId, data });
-    const repeats = checked?.repeatAllocations ?? [];
+    const repeats = checked.repeatAllocations ?? [];
     if (!repeats.length) {
       submit();
       return;
@@ -162,9 +149,15 @@ export const LoanRequestCard = ({ companyId, date, credit, filters }: LoanReques
         component={false}
         initialValues={INITIAL_VALUES}
         disabled={!canAllocate}
-        onFinish={(formValues) => void handleFinish(formValues)}
-        // نتیجه پیش‌نمایش قبلی (مبلغ متفاوت) با تغییر فرم دیگر معتبر نیست
-        onValuesChange={() => setSubmitPreview(undefined)}
+        onFinish={handleFinish}
+        onValuesChange={(_changed, all) => {
+          // نتیجه بررسی قبلی با تغییر فرم دیگر معتبر نیست
+          setChecked(undefined);
+          // مبلغ متفاوت: ردیفی که مبلغش خالی شد از انتخاب خارج می‌شود
+          if (all.mode === ALLOCATION_MODE.VARIABLE) {
+            setSelectedIds((ids) => ids.filter((id) => hasAmount(all.rows, id)));
+          }
+        }}
       >
         <div className="max-w-[480px]">
           <FormItem name="planId" label="طرح این ماه (طبق تفاهم‌نامه)" required>
@@ -196,33 +189,47 @@ export const LoanRequestCard = ({ companyId, date, credit, filters }: LoanReques
           companyId={companyId}
           filters={filters}
           variableAmount={isVariable}
+          canSelect={(id) => !isVariable || hasAmount(values.rows, id)}
           disabled={!canAllocate}
           selectedIds={selectedIds}
           onSelect={(ids) => {
             setSelectedIds(ids);
-            setSubmitPreview(undefined);
+            setChecked(undefined);
           }}
         />
         {!isVariable && <FixedAmountField amount={Number(values.fixedAmount ?? 0)} />}
       </Form>
 
-      <PreviewNotices preview={preview} />
+      <PreviewNotices preview={checked} />
       {!canAllocate && (
         <p className="mt-2 text-xs text-danger">
           تا رسیدن تاریخ و شرایط مجاز (طبق پیام بالا)، امکان انتخاب پرسنل و ثبت درخواست وجود ندارد.
         </p>
       )}
-      <Button
-        variant="primary"
-        icon={<SendOutlined />}
-        // بدون نتیجه پیش‌نمایش (خطا) ثبت غیرفعال است
-        disabled={!canAllocate || !plan || previewFailed || preview?.isAllowed === false}
-        loading={isPending || checking}
-        onClick={() => form.submit()}
-        className="mt-2"
-      >
-        ثبت درخواست برای پرسنل انتخاب‌شده
-      </Button>
+      {/* بررسی سمت راست و ثبت سمت چپ، هم‌عرض */}
+      <div className="mt-2 flex flex-wrap justify-between gap-2">
+        <Button
+          variant="secondary"
+          icon={<SafetyCertificateOutlined />}
+          disabled={!canAllocate || !plan || !selectedIds.length}
+          loading={checking}
+          onClick={() => void handleCheck()}
+          className="w-full sm:w-[300px]"
+        >
+          بررسی اعتبار برای پرسنل انتخاب‌شده
+        </Button>
+        <Button
+          variant="primary"
+          icon={<SendOutlined />}
+          // فقط بعد از بررسی موفق (مجاز) و بدون تغییر بعدی فرم
+          disabled={!canAllocate || !checked?.isAllowed}
+          loading={isPending}
+          onClick={() => form.submit()}
+          className="w-full sm:w-[300px]"
+        >
+          ثبت درخواست برای پرسنل انتخاب‌شده
+        </Button>
+      </div>
     </PanelCard>
   );
 };

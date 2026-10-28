@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test';
+import { expect, test, type Page } from '@playwright/test';
 
 /** بدنه درخواست‌های پیش‌نمایش (ماک داخل صفحه با Request ساخته می‌شود و به شبکه نمی‌رسد) */
 const recordPreviews = `(() => {
@@ -14,45 +14,68 @@ const recordPreviews = `(() => {
   };
 })()`;
 
-test('loan preview is called only after a plan is selected (never with planId 0)', async ({
-  page,
-}) => {
+const CHECK = /بررسی اعتبار برای پرسنل/;
+const SUBMIT = /ثبت درخواست برای پرسنل/;
+
+const openCredit = async (page: Page) => {
   await page.addInitScript(recordPreviews);
   await page.goto('/login');
   await page.getByLabel('نام کاربری').fill('admin');
   await page.getByLabel('رمز عبور').fill('admin');
   await page.getByRole('button', { name: /ورود/ }).click();
   await expect(page.getByRole('navigation')).toBeVisible();
-
   // ۱۴۰۵/۰۸/۱۲: روز مجاز انتقال اعتبار شرکت ۱ در ماک
   await page.goto('/credit?companyId=1&date=2026-11-03');
-  const planIds = () =>
-    page.evaluate<number[]>('window.__previews.map((body) => body.planId ?? 0)');
-  await expect.poll(async () => (await planIds()).length, { timeout: 20_000 }).toBeGreaterThan(0);
-  expect(await planIds()).not.toContain(0);
-});
+};
 
-test('variable amounts: preview is called only by the submit button', async ({ page }) => {
-  await page.addInitScript(recordPreviews);
-  await page.goto('/login');
-  await page.getByLabel('نام کاربری').fill('admin');
-  await page.getByLabel('رمز عبور').fill('admin');
-  await page.getByRole('button', { name: /ورود/ }).click();
-  await expect(page.getByRole('navigation')).toBeVisible();
-  await page.goto('/credit?companyId=1&date=2026-11-03');
+const previews = (page: Page) =>
+  page.evaluate<{ planId?: number; mode?: number }[]>('window.__previews');
 
-  const modes = () => page.evaluate<number[]>('window.__previews.map((body) => body.mode)');
-  await page.getByText('مبلغ متفاوت برای هرکس').click();
+test('fixed amount: preview only from the check button; submit enabled after an allowed check', async ({
+  page,
+}) => {
+  await openCredit(page);
   const row = page.getByRole('row', { name: /علی محمدی/ });
   await row.getByRole('checkbox').check();
-  await row.locator('input:not([type=checkbox])').last().fill('10000000');
-  // تا قبل از دکمه ثبت هیچ پیش‌نمایشی با مبلغ متفاوت فرستاده نمی‌شود
-  // بیش از زمان debounce (۴۰۰ میلی‌ثانیه) صبر می‌شود تا نبودن درخواست خودکار دیده شود
+  await page.getByLabel('مبلغ وام برای هر نفر').fill('10000000');
+  await expect(page.getByRole('button', { name: SUBMIT })).toBeDisabled();
+  // بیش از زمان debounce قبلی صبر می‌شود تا نبودن درخواست خودکار دیده شود
   // eslint-disable-next-line sonarjs/no-fixed-wait-in-tests
   await page.waitForTimeout(1500);
-  expect(await modes()).not.toContain(2);
+  expect(await previews(page)).toHaveLength(0);
 
-  await page.getByRole('button', { name: /ثبت درخواست برای پرسنل/ }).click();
-  await expect.poll(modes).toContain(2);
-  expect((await modes()).filter((mode) => mode === 2)).toHaveLength(1);
+  await page.getByRole('button', { name: CHECK }).click();
+  await expect.poll(async () => (await previews(page)).length).toBe(1);
+  expect((await previews(page))[0]?.planId).toBeGreaterThan(0);
+  await expect(page.getByRole('button', { name: SUBMIT })).toBeEnabled();
+
+  // با تغییر فرم، نتیجه بررسی باطل و ثبت دوباره غیرفعال می‌شود
+  await page.getByLabel('مبلغ وام برای هر نفر').fill('20000000');
+  await expect(page.getByRole('button', { name: SUBMIT })).toBeDisabled();
+});
+
+test('variable amounts: a row can be selected only after its amount; select-all stays disabled', async ({
+  page,
+}) => {
+  await openCredit(page);
+  await page.getByText('مبلغ متفاوت برای هرکس').click();
+  const table = page.locator('.ant-table').filter({ has: page.getByText('مبلغ وام این نفر') });
+  await expect(table.locator('thead').getByRole('checkbox')).toBeDisabled();
+
+  const row = page.getByRole('row', { name: /علی محمدی/ });
+  const amount = row.locator('input:not([type=checkbox])').last();
+  await expect(row.getByRole('checkbox')).toBeDisabled();
+  await amount.fill('10000000');
+  await expect(row.getByRole('checkbox')).toBeEnabled();
+  await row.getByRole('checkbox').check();
+
+  await page.getByRole('button', { name: CHECK }).click();
+  await expect.poll(async () => (await previews(page)).map((body) => body.mode)).toEqual([2]);
+  await expect(page.getByRole('button', { name: SUBMIT })).toBeEnabled();
+
+  // مبلغ پاک شود → ردیف از انتخاب خارج و چک‌باکسش غیرفعال می‌شود
+  await amount.fill('');
+  await expect(row.getByRole('checkbox')).not.toBeChecked();
+  await expect(row.getByRole('checkbox')).toBeDisabled();
+  await expect(page.getByRole('button', { name: CHECK })).toBeDisabled();
 });
