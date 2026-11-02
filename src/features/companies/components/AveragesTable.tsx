@@ -140,7 +140,6 @@ export const AveragesTable = ({ companyId }: { companyId: number }) => {
           columns={columns}
           dataSource={months}
           loading={isFetching}
-          maxHeight={440}
         />
         <Button
           variant="primary"

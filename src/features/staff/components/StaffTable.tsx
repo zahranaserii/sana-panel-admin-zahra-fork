@@ -12,7 +12,7 @@ import {
 import { Button } from '@/component/button';
 import { DeleteReasonModal, type DeleteReasonValues } from '@/component/delete-modal';
 import { StatusChip, type StatusTone } from '@/component/status-chip';
-import { Table } from '@/component/table';
+import { Table, usePaging } from '@/component/table';
 import { useEnums } from '@/services/enums';
 import { formatJalali, toPersianDigits } from '@/utils/date';
 
@@ -26,15 +26,13 @@ interface StaffTableProps {
   loadingEditId?: number | null;
 }
 
-const PAGE_SIZE = 10;
-
 /** رنگ وضعیت پرسنل (۱ در انتظار تأیید مدیر، ۲ تأییدشده، ۳ ردشده) */
 const STATUS_TONE: Record<number, StatusTone> = { 1: 'warning', 2: 'success', 3: 'error' };
 
 const LOCKED_TITLE = 'این پرسنل در وام استفاده شده و قابل ویرایش یا حذف نیست.';
 
 export const StaffTable = ({ companyId, filters, onEdit, loadingEditId }: StaffTableProps) => {
-  const [page, setPage] = useState(1);
+  const { page, pageSize, onPageChange } = usePaging();
   const [deleting, setDeleting] = useState<Staff | null>(null);
   const queryClient = useQueryClient();
   const enums = useEnums();
@@ -42,7 +40,7 @@ export const StaffTable = ({ companyId, filters, onEdit, loadingEditId }: StaffT
   const { data, isFetching, isError, refetch } = usePersonnelSearch(companyId, {
     ...toSearchParams(filters),
     Page: page,
-    PageSize: PAGE_SIZE,
+    PageSize: pageSize,
   });
 
   const { mutateAsync: deleteStaff } = usePersonnelDelete({
@@ -130,9 +128,9 @@ export const StaffTable = ({ companyId, filters, onEdit, loadingEditId }: StaffT
         locale={{ emptyText: 'پرسنلی با این شرایط یافت نشد.' }}
         pagination={{
           current: page,
-          pageSize: PAGE_SIZE,
+          pageSize: pageSize,
           total: data?.totalCount ?? 0,
-          onChange: setPage,
+          onChange: onPageChange,
         }}
       />
       <DeleteReasonModal

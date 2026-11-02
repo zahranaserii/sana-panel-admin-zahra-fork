@@ -14,7 +14,7 @@ import { Button } from '@/component/button';
 import { DeleteReasonModal, type DeleteReasonValues } from '@/component/delete-modal';
 import { PanelCard } from '@/component/card';
 import { StatusChip } from '@/component/status-chip';
-import { Table } from '@/component/table';
+import { Table, usePaging } from '@/component/table';
 import { useEnums } from '@/services/enums';
 import { formatJalali, toPersianDigits } from '@/utils/date';
 
@@ -27,8 +27,6 @@ interface CompanyTableProps {
   loadingEditId?: number | null;
   onCancelContract: (company: CompanyListItem) => void;
 }
-
-const PAGE_SIZE = 10;
 
 /** وضعیت شرکت بک‌اند: ۱ فعال، ۲ لغوشده */
 const ACTIVE = 1;
@@ -43,7 +41,7 @@ export const CompanyTable = ({
   onCancelContract,
   loadingEditId,
 }: CompanyTableProps) => {
-  const [page, setPage] = useState(1);
+  const { page, pageSize, onPageChange } = usePaging();
   const queryClient = useQueryClient();
   const [deleting, setDeleting] = useState<CompanyListItem | null>(null);
 
@@ -51,7 +49,7 @@ export const CompanyTable = ({
 
   const { data, isFetching, isError, refetch } = useCompaniesSearch({
     Page: page,
-    PageSize: PAGE_SIZE,
+    PageSize: pageSize,
   });
 
   const { mutateAsync: deleteCompany } = useCompaniesDelete({
@@ -157,12 +155,11 @@ export const CompanyTable = ({
         loading={isFetching}
         error={isError}
         onRetry={() => void refetch()}
-        showRowNumber
         pagination={{
           current: page,
-          pageSize: PAGE_SIZE,
+          pageSize: pageSize,
           total: data?.page?.totalCount ?? 0,
-          onChange: setPage,
+          onChange: onPageChange,
         }}
       />
       <DeleteReasonModal

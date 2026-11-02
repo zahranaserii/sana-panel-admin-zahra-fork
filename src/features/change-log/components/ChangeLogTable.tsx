@@ -9,7 +9,7 @@ import { Button } from '@/component/button';
 import { PanelCard } from '@/component/card';
 import { SelectInput } from '@/component/input';
 import { StatusChip } from '@/component/status-chip';
-import { Table } from '@/component/table';
+import { Table, usePaging } from '@/component/table';
 import { useEnums } from '@/services/enums';
 import { dayjs, toPersianDigits } from '@/utils/date';
 
@@ -18,7 +18,6 @@ import { type ChangeLogCategory, type ChangeLogItem } from '../types';
 
 import { RestoreModal } from './RestoreModal';
 
-const PAGE_SIZE = 20;
 const ALL = 0;
 
 const toJalaliDateTime = (iso?: string) =>
@@ -30,7 +29,7 @@ const userLabel = (user?: CommonRegistrarDto | null) =>
 export const ChangeLogTable = () => {
   const [category, setCategory] = useState<number>(ALL);
   const [panelUserId, setPanelUserId] = useState<number>(ALL);
-  const [page, setPage] = useState(1);
+  const { page, pageSize, setPage, onPageChange } = usePaging(20);
   const [restoring, setRestoring] = useState<ChangeLogItem | null>(null);
 
   const enums = useEnums();
@@ -44,7 +43,7 @@ export const ChangeLogTable = () => {
   const { data, isFetching, isError, refetch } = useChangeLogsSearch({
     ...filters,
     Page: page,
-    PageSize: PAGE_SIZE,
+    PageSize: pageSize,
   });
 
   const { mutate: download, isPending: isExporting } = useMutation({
@@ -147,15 +146,14 @@ export const ChangeLogTable = () => {
         loading={isFetching}
         error={isError}
         onRetry={() => void refetch()}
-        maxHeight={600}
         // عرض ثابت تا ستون جزئیات چندخطی شود و ستون بازگردانی دیده شود
         scroll={{ x: 1000 }}
         locale={{ emptyText: 'هنوز رویدادی ثبت نشده است.' }}
         pagination={{
           current: page,
-          pageSize: PAGE_SIZE,
+          pageSize: pageSize,
           total: data?.totalCount ?? 0,
-          onChange: setPage,
+          onChange: onPageChange,
         }}
       />
       <RestoreModal log={restoring} onClose={() => setRestoring(null)} />

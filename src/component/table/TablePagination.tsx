@@ -9,9 +9,9 @@ export interface TablePaginationProps {
   pageSize: number;
   total: number;
   onChange: (page: number, pageSize: number) => void;
-  /** نمایش تعداد کل رکوردها در انتهای سمت چپ */
+  /** نمایش تعداد کل رکوردها (سمت راست) */
   showTotal?: boolean;
-  /** انتخاب تعداد ردیف در هر صفحه (سمت راست) */
+  /** انتخاب تعداد ردیف در هر صفحه (سمت چپ؛ پیش‌فرض فعال) */
   showSizeChanger?: boolean;
   pageSizeOptions?: number[];
   disabled?: boolean;
@@ -19,7 +19,7 @@ export interface TablePaginationProps {
 
 /**
  * پجینیشن اختصاصی جدول — هم‌عرض جدول:
- * راست: تعداد در صفحه (اختیاری) · وسط: صفحات (از راست به چپ) · چپ: تعداد کل رکورد
+ * راست: تعداد کل رکورد · وسط: صفحات (از راست به چپ) · چپ: تعداد در صفحه
  */
 export const TablePagination = ({
   current,
@@ -27,12 +27,30 @@ export const TablePagination = ({
   total,
   onChange,
   showTotal = true,
-  showSizeChanger = false,
+  showSizeChanger = true,
   pageSizeOptions = [10, 20, 50, 100],
   disabled,
 }: TablePaginationProps) => (
   <div className="mt-3 grid w-full grid-cols-[1fr_auto_1fr] items-center gap-3">
-    <div className="justify-self-start">
+    <div className="justify-self-start text-xs whitespace-nowrap text-ink-soft">
+      {showTotal && (
+        <>
+          تعداد کل: <b className="text-heading">{toPersianDigits(total.toLocaleString('en-US'))}</b>{' '}
+          رکورد
+        </>
+      )}
+    </div>
+    <Pagination
+      className="justify-self-center"
+      current={current}
+      pageSize={pageSize}
+      total={total}
+      disabled={disabled}
+      showSizeChanger={false}
+      hideOnSinglePage={false}
+      onChange={onChange}
+    />
+    <div className="justify-self-end">
       {showSizeChanger && (
         <SelectInput<number>
           size="small"
@@ -47,24 +65,6 @@ export const TablePagination = ({
           }))}
           onChange={(size) => onChange(1, size)}
         />
-      )}
-    </div>
-    <Pagination
-      className="justify-self-center"
-      current={current}
-      pageSize={pageSize}
-      total={total}
-      disabled={disabled}
-      showSizeChanger={false}
-      hideOnSinglePage={false}
-      onChange={onChange}
-    />
-    <div className="justify-self-end text-xs whitespace-nowrap text-ink-soft">
-      {showTotal && (
-        <>
-          تعداد کل: <b className="text-heading">{toPersianDigits(total.toLocaleString('en-US'))}</b>{' '}
-          رکورد
-        </>
       )}
     </div>
   </div>

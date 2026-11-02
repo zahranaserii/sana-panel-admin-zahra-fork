@@ -12,9 +12,7 @@ import { type TablePaginationConfig, useTablePagination } from './useTablePagina
 export interface TableProps<T> extends Omit<AntTableProps<T>, 'pagination'> {
   /** پیش‌فرض غیرفعال؛ با `true` یا آبجکت تنظیمات فعال می‌شود */
   pagination?: boolean | TablePaginationConfig;
-  /** حداکثر ارتفاع؛ با عبور از آن اسکرول عمودی با هدر چسبان فعال می‌شود */
-  maxHeight?: number;
-  /** ستون «ردیف» در ابتدای جدول */
+  /** ستون «ردیف» در ابتدای جدول (پیش‌فرض فعال) */
   showRowNumber?: boolean;
   /** خطای سرویس دیتای جدول؛ به‌جای جدول خالی، تلاش مجدد نمایش داده می‌شود */
   error?: boolean;
@@ -25,13 +23,18 @@ export interface TableProps<T> extends Omit<AntTableProps<T>, 'pagination'> {
 const EMPTY: never[] = [];
 
 /**
+ * ارتفاع بدنه همه جدول‌ها: ۱۰ سطر جدول کاربران (هر سطر ~۵۷px)؛ بیشتر از آن اسکرول داخلی با هدر چسبان.
+ * ملاک پیکسل است، نه تعداد سطر؛ سطرهای بلندتر (مثلاً با ورودی) کمتر از ۱۰ سطر جا می‌گیرند.
+ */
+const BODY_HEIGHT = 570;
+
+/**
  * جدول پایه — پشتیبانی از اسکرول افقی/عمودی، expandable، rowSelection، هدر چندسطحی (children در columns)
  * و پجینیشن اختصاصی زیر جدول.
  */
 export const Table = <T extends object>({
   pagination = false,
-  maxHeight,
-  showRowNumber = false,
+  showRowNumber = true,
   dataSource = EMPTY,
   columns = EMPTY,
   scroll,
@@ -68,7 +71,7 @@ export const Table = <T extends object>({
         columns={mergedColumns}
         dataSource={page.pageData}
         pagination={false}
-        scroll={{ x: 'max-content', y: maxHeight, ...scroll }}
+        scroll={{ x: 'max-content', y: BODY_HEIGHT, ...scroll }}
         {...rest}
       />
       {page.config && (

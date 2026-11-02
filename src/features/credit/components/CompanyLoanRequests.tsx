@@ -6,7 +6,7 @@ import { useLoansSearch } from '@/api/generated/facility';
 import { Button } from '@/component/button';
 import { PanelCard } from '@/component/card';
 import { LoanStatusChip } from '@/component/loan-status';
-import { Table } from '@/component/table';
+import { Table, usePaging } from '@/component/table';
 import { formatJalali, toPersianDigits } from '@/utils/date';
 import { formatRial } from '@/utils/number';
 
@@ -14,18 +14,17 @@ import { type LoanRequest } from '../types';
 
 import { CancelLoanModal } from './CancelLoanModal';
 
-const PAGE_SIZE = 10;
 const toJalali = (value?: string | null) =>
   value ? formatJalali(value, undefined, { persianDigits: true }) : '—';
 
 /** همه درخواست‌های وام ثبت‌شده برای شرکت */
 export const CompanyLoanRequests = ({ companyId }: { companyId: number }) => {
-  const [page, setPage] = useState(1);
+  const { page, pageSize, onPageChange } = usePaging();
   const [cancelling, setCancelling] = useState<LoanRequest | null>(null);
   const { data, isFetching, isError, refetch } = useLoansSearch({
     CompanyId: companyId,
     Page: page,
-    PageSize: PAGE_SIZE,
+    PageSize: pageSize,
   });
 
   const columns: ColumnsType<LoanRequest> = [
@@ -84,9 +83,9 @@ export const CompanyLoanRequests = ({ companyId }: { companyId: number }) => {
         locale={{ emptyText: 'هنوز درخواستی برای این شرکت ثبت نشده است.' }}
         pagination={{
           current: page,
-          pageSize: PAGE_SIZE,
+          pageSize: pageSize,
           total: data?.totalCount ?? 0,
-          onChange: setPage,
+          onChange: onPageChange,
         }}
       />
       <CancelLoanModal request={cancelling} onClose={() => setCancelling(null)} />

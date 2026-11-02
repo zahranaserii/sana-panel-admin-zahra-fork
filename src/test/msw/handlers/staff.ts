@@ -126,6 +126,9 @@ const lastPriority = (companyId: number) =>
 const invalidStaff = (body: CreatePersonnelCommand, companyId: number, id?: number) => {
   if (!/^\d{10}$/.test(body.nationalCode)) return 'کد ملی باید ۱۰ رقم باشد.';
   if (!/^09\d{9}$/.test(body.mobile)) return 'شماره موبایل معتبر نیست.';
+  if (!body.personnelCode || body.personnelCode.length > 10) {
+    return 'کد پرسنلی باید ۱ تا ۱۰ کاراکتر باشد.';
+  }
   const duplicate = db.staff.some(
     (item) =>
       item.companyId === companyId &&

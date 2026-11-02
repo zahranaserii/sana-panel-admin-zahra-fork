@@ -7,7 +7,7 @@ import { toast } from 'sonner';
 
 import { Button } from '@/component/button';
 import { PanelCard } from '@/component/card';
-import { Table } from '@/component/table';
+import { Table, usePaging } from '@/component/table';
 import { QUERY_KEYS } from '@/constant/queryKeys';
 import { useFetchBeforeOpen } from '@/hooks';
 import { toPersianDigits } from '@/utils/date';
@@ -17,18 +17,16 @@ import { type User } from '../types';
 
 import { UserFormModal } from './UserFormModal';
 
-const PAGE_SIZE = 10;
-
 export const UsersTable = () => {
-  const [page, setPage] = useState(1);
+  const { page, pageSize, onPageChange } = usePaging();
   const [modalOpen, setModalOpen] = useState(false);
   const [editingId, setEditingId] = useState<number | null>(null);
   const queryClient = useQueryClient();
   const { modal } = App.useApp();
 
   const { data, isFetching, isError, refetch } = useQuery({
-    queryKey: QUERY_KEYS.USERS.LIST(page),
-    queryFn: () => getUsers({ page, pageSize: PAGE_SIZE }),
+    queryKey: QUERY_KEYS.USERS.LIST(page, pageSize),
+    queryFn: () => getUsers({ page, pageSize: pageSize }),
   });
 
   const { mutate: remove } = useMutation({
@@ -122,13 +120,12 @@ export const UsersTable = () => {
         loading={isFetching}
         error={isError}
         onRetry={() => void refetch()}
-        showRowNumber
         locale={{ emptyText: 'کاربری ثبت نشده است.' }}
         pagination={{
           current: page,
-          pageSize: PAGE_SIZE,
+          pageSize: pageSize,
           total: data?.totalCount ?? 0,
-          onChange: setPage,
+          onChange: onPageChange,
         }}
       />
       <UserFormModal open={modalOpen} userId={editingId} onClose={() => setModalOpen(false)} />

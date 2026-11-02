@@ -2,7 +2,6 @@ import { DeleteOutlined, EditOutlined, PlusOutlined } from '@ant-design/icons';
 import { useQueryClient } from '@tanstack/react-query';
 import { App } from 'antd';
 import { type ColumnsType } from 'antd/es/table';
-import { useState } from 'react';
 import { generatePath, useNavigate } from 'react-router';
 import { toast } from 'sonner';
 
@@ -10,14 +9,12 @@ import { useBasicInfoSchemeDelete, useBasicInfoSchemeSearch } from '@/api/genera
 import { Button } from '@/component/button';
 import { PanelCard } from '@/component/card';
 import { StatusChip } from '@/component/status-chip';
-import { Table } from '@/component/table';
+import { Table, usePaging } from '@/component/table';
 import { ROUTES } from '@/constant/routes';
 import { toPersianDigits } from '@/utils/date';
 
 import { type SchemeListItem } from '../types';
 import { invalidateBasicInfo } from '../utils';
-
-const PAGE_SIZE = 10;
 
 const joinNumbers = (list: number[] = [], suffix = '') =>
   list.map((value) => toPersianDigits(value) + suffix).join('، ') || '—';
@@ -67,7 +64,7 @@ const DATA_COLUMNS: ColumnsType<SchemeListItem> = [
 ];
 
 export const SchemesTable = () => {
-  const [page, setPage] = useState(1);
+  const { page, pageSize, onPageChange } = usePaging();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { modal } = App.useApp();
@@ -75,7 +72,7 @@ export const SchemesTable = () => {
   const { data, isFetching, isError, refetch } = useBasicInfoSchemeSearch({
     IncludeInactive: true,
     Page: page,
-    PageSize: PAGE_SIZE,
+    PageSize: pageSize,
   });
 
   const { mutateAsync: remove } = useBasicInfoSchemeDelete({
@@ -147,14 +144,13 @@ export const SchemesTable = () => {
         loading={isFetching}
         error={isError}
         onRetry={() => void refetch()}
-        showRowNumber
         scroll={{ x: 1100 }}
         locale={{ emptyText: 'طرحی ثبت نشده است.' }}
         pagination={{
           current: page,
-          pageSize: PAGE_SIZE,
+          pageSize: pageSize,
           total: data?.totalCount ?? 0,
-          onChange: setPage,
+          onChange: onPageChange,
         }}
       />
     </PanelCard>

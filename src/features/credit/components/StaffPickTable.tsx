@@ -77,7 +77,6 @@ export const StaffPickTable = ({
       loading={isFetching}
       error={isError}
       onRetry={() => void refetch()}
-      maxHeight={300}
       locale={{ emptyText: 'پرسنلی با این شرایط یافت نشد.' }}
       rowSelection={{
         selectedRowKeys: selectedIds,

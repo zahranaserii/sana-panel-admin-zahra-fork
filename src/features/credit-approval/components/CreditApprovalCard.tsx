@@ -15,7 +15,7 @@ import { Button } from '@/component/button';
 import { PanelCard } from '@/component/card';
 import { DecisionModal, showDecisionResult, type DecisionTarget } from '@/component/decision-modal';
 import { SelectInput } from '@/component/input';
-import { Table } from '@/component/table';
+import { Table, usePaging } from '@/component/table';
 import { LOAN_STATUS } from '@/constant/loanStatus';
 import {
   DECISION,
@@ -42,14 +42,13 @@ interface CreditApprovalCardProps {
   onCompanyChange: (companyId: string | undefined) => void;
 }
 
-const PAGE_SIZE = 10;
 const ALL = 'all';
 
 /** درخواست‌های ثبت‌شده در مرحله تأیید اعتبارات */
 export const CreditApprovalCard = ({ companyId, onCompanyChange }: CreditApprovalCardProps) => {
   const queryClient = useQueryClient();
   const { modal } = App.useApp();
-  const [page, setPage] = useState(1);
+  const { page, pageSize, setPage, onPageChange } = usePaging();
   const [selected, setSelected] = useState<CreditApprovalItem[]>([]);
   const [target, setTarget] = useState<DecisionTarget | null>(null);
   const [changingStage, setChangingStage] = useState<CreditApprovalItem | null>(null);
@@ -58,7 +57,7 @@ export const CreditApprovalCard = ({ companyId, onCompanyChange }: CreditApprova
   const { data, isFetching, isError, refetch } = useApprovalsCreditQueue({
     CompanyId: companyId ? Number(companyId) : undefined,
     Page: page,
-    PageSize: PAGE_SIZE,
+    PageSize: pageSize,
   });
   // همه شرکت‌ها، شامل قراردادهای لغوشده
   const companiesQuery = useCompaniesLookup({ activeOnly: false });
@@ -173,9 +172,9 @@ export const CreditApprovalCard = ({ companyId, onCompanyChange }: CreditApprova
         }}
         pagination={{
           current: page,
-          pageSize: PAGE_SIZE,
+          pageSize: pageSize,
           total: data?.totalCount ?? 0,
-          onChange: setPage,
+          onChange: onPageChange,
         }}
       />
       <DecisionModal

@@ -17,7 +17,7 @@ import { type LoanRequestStatus } from '@/api/generated/facility/facilityPanelAP
 import { Button } from '@/component/button';
 import { PanelCard } from '@/component/card';
 import { DecisionModal, showDecisionResult, type DecisionTarget } from '@/component/decision-modal';
-import { Table } from '@/component/table';
+import { Table, usePaging } from '@/component/table';
 import { LOAN_STATUS } from '@/constant/loanStatus';
 import { useDebouncedValue } from '@/hooks';
 import {
@@ -44,12 +44,11 @@ interface PendingRequestsTableProps {
   onCompanyChange: (companyId: string | undefined) => void;
 }
 
-const PAGE_SIZE = 10;
 /** انتهای کلید سرویس اعتبار شرکت (getLoansCreditQueryKey → Companies/{id}/Credit) */
 const CREDIT_KEY_SUFFIX = '/Credit';
 
 export const PendingRequestsTable = ({ companyId, onCompanyChange }: PendingRequestsTableProps) => {
-  const [page, setPage] = useState(1);
+  const { page, pageSize, setPage, onPageChange } = usePaging();
   const [status, setStatus] = useState<LoanRequestStatus>(LOAN_STATUS.PENDING_MANAGER);
   const [term, setTerm] = useState('');
   const [selected, setSelected] = useState<PendingRequest[]>([]);
@@ -65,7 +64,7 @@ export const PendingRequestsTable = ({ companyId, onCompanyChange }: PendingRequ
     Status: isPending ? undefined : status,
     Term: debouncedTerm || undefined,
     Page: page,
-    PageSize: PAGE_SIZE,
+    PageSize: pageSize,
   });
   // تعداد کل در انتظار (همه شرکت‌های دامنه کاربر)؛ خطا پیام نشان نمی‌دهد
   const { data: counts } = useApprovalsPendingCounts({ request: { silent: true } });
@@ -193,9 +192,9 @@ export const PendingRequestsTable = ({ companyId, onCompanyChange }: PendingRequ
         }
         pagination={{
           current: page,
-          pageSize: PAGE_SIZE,
+          pageSize: pageSize,
           total: data?.totalCount ?? 0,
-          onChange: setPage,
+          onChange: onPageChange,
         }}
       />
       <DecisionModal

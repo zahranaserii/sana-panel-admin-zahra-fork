@@ -14,6 +14,9 @@ import { FormModal } from '@/component/modal';
 
 import { type StaffDetail, type StaffFormValues } from '../types';
 
+/** کد پرسنلی: فقط طول محدود است (رشته؛ نوع کاراکتر چک نمی‌شود) */
+const PERSONNEL_CODE_MAX = 10;
+
 interface StaffFormModalProps {
   open: boolean;
   companyId: number;
@@ -93,8 +96,13 @@ export const StaffFormModal = ({ open, companyId, staffId, onClose }: StaffFormM
       >
         <TextInput inputMode="numeric" maxLength={11} />
       </FormItem>
-      <FormItem name="personnelCode" label="کد پرسنلی" required>
-        <TextInput />
+      <FormItem
+        name="personnelCode"
+        label="کد پرسنلی (حداکثر ۱۰ کاراکتر)"
+        required
+        rules={[{ max: PERSONNEL_CODE_MAX, message: 'کد پرسنلی حداکثر ۱۰ کاراکتر است.' }]}
+      >
+        <TextInput maxLength={PERSONNEL_CODE_MAX} />
       </FormItem>
       <FormItem name="hireDate" label="تاریخ استخدام" required>
         <DateInput />

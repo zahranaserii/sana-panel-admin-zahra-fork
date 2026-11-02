@@ -65,6 +65,15 @@ const toPickerValue = (value: DateInputValue | undefined, mode: DateInputMode) =
   return mode === 'single' ? (list[0] ?? null) : list;
 };
 
+/**
+ * محدوده تاریخ به Date تبدیل می‌شود؛ کتابخانه رشته را با تقویم شمسی می‌خواند
+ * (مثلاً «2026-10-03» سال ۲۰۲۶ شمسی می‌شود) و همه روزها غیرفعال می‌شدند.
+ */
+const useDateLimit = (limit?: string | Date) => {
+  const time = limit ? dayjs(limit).valueOf() : undefined;
+  return useMemo(() => (time === undefined ? undefined : new Date(time)), [time]);
+};
+
 const toIso = (date: DateObject, withTime: boolean) =>
   dayjs(date.toDate()).format(withTime ? ISO_DATE_TIME_FORMAT : ISO_DATE_FORMAT);
 
@@ -112,6 +121,8 @@ export const DateInput = ({
     [withTime],
   );
 
+  const min = useDateLimit(minDate);
+  const max = useDateLimit(maxDate);
   const pickerValue = useMemo(() => toPickerValue(value, mode) as Value, [value, mode]);
 
   const displayFormat = format ?? `${DISPLAY_FORMAT[picker]}${withTime ? ' HH:mm' : ''}`;
@@ -133,8 +144,8 @@ export const DateInput = ({
       format={displayFormat}
       placeholder={placeholder}
       disabled={disabled}
-      minDate={minDate}
-      maxDate={maxDate}
+      minDate={min}
+      maxDate={max}
       plugins={plugins}
       calendarPosition="bottom-right"
       containerClassName="w-full"
