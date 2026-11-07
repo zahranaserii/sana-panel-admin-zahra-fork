@@ -6,7 +6,7 @@ export const HomePage = () => (
   <section className="overflow-hidden rounded-[28px] border border-line shadow-panel">
     <img
       src={heroImage}
-      alt="خدمات تسهیلاتی سانا: بانک، سکه‌ها، قرارداد تأییدشده، کارت اعتباری و نمودار رشد اعتبار"
+      alt="خدمات تسهیلاتی سانا: بانک سپه، سکه‌های بهار آزادی، قرارداد تأییدشده، کارت‌های امید بانک و نمودار رشد اعتبار"
       className="block h-auto w-full"
     />
     <div className="bg-panel px-8 py-5 max-sm:px-4">
