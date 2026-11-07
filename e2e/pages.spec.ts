@@ -17,6 +17,19 @@ const login = async (page: Page, errors: string[]) => {
 
 const go = (page: Page, href: string) => page.locator(`nav a[href="${href}"]`).click();
 
+/** با بیشتر از یک شرکت فعال، شرکت خودکار انتخاب نمی‌شود */
+const pickCompany = async (page: Page, name: string) => {
+  const option = page.locator(
+    '.ant-select-dropdown:not(.ant-select-dropdown-hidden) .ant-select-item-option',
+    { hasText: name },
+  );
+  // تا رسیدن لیست شرکت‌ها، باز شدن کشویی ممکن است اثر نکند
+  await expect(async () => {
+    await page.getByRole('combobox', { name: 'انتخاب شرکت' }).click();
+    await option.click({ timeout: 2000 });
+  }).toPass({ timeout: 20_000 });
+};
+
 test('main pages work on the backend models (mock) without errors', async ({ page }) => {
   test.setTimeout(120_000);
   const errors: string[] = [];
@@ -33,11 +46,13 @@ test('main pages work on the backend models (mock) without errors', async ({ pag
   await expect(page.getByLabel('نام شرکت')).toHaveValue('شرکت فناوران پارس');
   await page.getByRole('button', { name: 'ذخیره تغییرات' }).click();
   await expect(page.getByText(/به‌روزرسانی شد/)).toBeVisible();
+  await pickCompany(page, 'شرکت فناوران پارس');
   await expect(page.getByText('مستندات ثبت‌شده میانگین موجودی')).toBeVisible();
   await expect(page.getByRole('cell', { name: 'نامه-میانگین.pdf' })).toBeVisible();
 
   // staff
   await go(page, '/staff');
+  await pickCompany(page, 'شرکت فناوران پارس');
   await expect(page.getByRole('cell', { name: 'علی محمدی' })).toBeVisible();
   // فردی که در وام استفاده شده قفل است
   await expect(
@@ -53,6 +68,7 @@ test('main pages work on the backend models (mock) without errors', async ({ pag
 
   // credit
   await go(page, '/credit');
+  await pickCompany(page, 'شرکت فناوران پارس');
   await expect(page.getByText('مانده اعتبار ماه').first()).toBeVisible({ timeout: 20_000 });
   await expect(page.getByText('درخواست‌های وام این شرکت')).toBeVisible();
 

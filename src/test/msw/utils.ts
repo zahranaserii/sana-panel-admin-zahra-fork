@@ -25,21 +25,18 @@ export const json = (body: unknown, init?: ResponseInit) => {
 
 const XLSX = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
 
-/**
- * پاسخ دانلود مثل بک‌اند: FileLinkDto (لینک موقت به‌جای خود فایل).
- * در ماک لینک یک blob URL محلی است.
- */
-export const fileLink = (content: BlobPart, fileName: string, contentType = XLSX) =>
-  json({
-    url: URL.createObjectURL(new Blob([content], { type: contentType })),
-    fileName,
-    contentType,
-    expiresAt: new Date(Date.now() + 15 * 60_000).toISOString(),
+/** پاسخ دانلود مثل بک‌اند: خود فایل با Content-Type و Content-Disposition (نام فایل) */
+export const fileContent = (content: BlobPart, fileName: string, contentType = XLSX) =>
+  new HttpResponse(new Blob([content], { type: contentType }), {
+    headers: {
+      'Content-Type': contentType,
+      'Content-Disposition': `attachment; filename*=UTF-8''${encodeURIComponent(fileName)}`,
+    },
   });
 
-/** لینک فایل نمونه با همان نام فایل ذخیره‌شده */
+/** فایل نمونه با همان نام فایل ذخیره‌شده */
 export const fileResponse = (fileName = 'file') =>
-  fileLink(`فایل نمونه: ${fileName}`, fileName, 'application/octet-stream');
+  fileContent(`فایل نمونه: ${fileName}`, fileName, 'application/octet-stream');
 
 /** مقادیر عددی یک فیلد تکراری multipart (مثل PlanIds) */
 export const formNumbers = (form: FormData, key: string) => form.getAll(key).map(Number);

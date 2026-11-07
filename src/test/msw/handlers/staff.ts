@@ -16,7 +16,7 @@ import { ISO_DATE_FORMAT, parseJalali, toEnglishDigits } from '@/utils/date';
 
 import { logAction } from '../audit';
 import { activeLoans, db, nextId, registrarOf } from '../db';
-import { api, fileLink, formText, json } from '../utils';
+import { api, fileContent, formText, json } from '../utils';
 
 const SAMPLE_HEADERS = [
   'نام و نام خانوادگی',
@@ -238,7 +238,7 @@ export const staffHandlers = [
       column.width = 22;
     });
     const buffer = await workbook.xlsx.writeBuffer();
-    return fileLink(buffer, 'نمونه-فایل-پرسنل.xlsx');
+    return fileContent(buffer, 'نمونه-فایل-پرسنل.xlsx');
   }),
 
   http.get(api(`${FACILITY}/Personnel/Import/:batchId`), async ({ params }) => {

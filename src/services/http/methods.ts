@@ -1,12 +1,25 @@
 import { type AxiosProgressEvent, type AxiosRequestConfig } from 'axios';
 import { saveAs } from 'file-saver';
 
-import { type CommonFileLinkDto } from '@/api/generated/facility/facilityPanelAPI.schemas';
 import { type ApiResponse } from '@/types/common';
 
 import { httpClient } from './client';
 
 export type RequestConfig = AxiosRequestConfig;
+
+/** نام فایل از هدر Content-Disposition (اول filename* با UTF-8، بعد filename) */
+export const fileNameFromDisposition = (header?: string | null) => {
+  if (!header) return undefined;
+  const encoded = /filename\*\s*=\s*(?:UTF-8'')?([^;]+)/i.exec(header)?.[1];
+  if (encoded) {
+    try {
+      return decodeURIComponent(encoded.trim().replace(/^"|"$/g, ''));
+    } catch {
+      // نام کدگذاری‌شده نامعتبر؛ سراغ filename ساده می‌رویم
+    }
+  }
+  return /filename\s*=\s*"?([^";]+)"?/i.exec(header)?.[1]?.trim();
+};
 
 const toFormData = (payload: FormData | Record<string, unknown>) => {
   if (payload instanceof FormData) return payload;
@@ -58,10 +71,14 @@ export const http = {
       .then(unwrap<T>);
   },
 
-  /** دریافت لینک موقت فایل (FileLinkDto) از بک‌اند و ذخیره فایل از روی آن */
+  /**
+   * دانلود: بک‌اند خود فایل را برمی‌گرداند (نه لینک و نه JSON).
+   * نام فایل از Content-Disposition؛ اگر نبود، نامی که فرانت می‌دهد.
+   * پاسخ خطای JSON در client به شیء تبدیل می‌شود تا پیامش مثل بقیه خطاها نمایش داده شود.
+   */
   download: async (url: string, fileName?: string, config?: RequestConfig) => {
-    const link = await http.get<CommonFileLinkDto>(url, config);
-    if (!link?.url) throw new Error('لینک فایل دریافت نشد.');
-    saveAs(link.url, fileName ?? link.fileName ?? 'file');
+    const res = await httpClient.get<Blob>(url, { ...config, responseType: 'blob' });
+    const header = res.headers['content-disposition'] as string | undefined;
+    saveAs(res.data, fileNameFromDisposition(header) ?? fileName ?? 'file');
   },
 };

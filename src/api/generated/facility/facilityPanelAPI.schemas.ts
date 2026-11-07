@@ -1001,20 +1001,30 @@ export interface BaseMessageResponseOfFacilityPagedResponseOfSchemeListItemDto {
   isSuccess?: boolean;
 }
 
-/**
- * پاسخ همهٔ سرویس‌های دانلود و خروجی: لینک موقت فایل (Minio presigned URL)، نه محتوای فایل.
- * فرانت همین Url را باز می‌کند؛ لینک بعد از ExpiresAt دیگر کار نمی‌کند و باید دوباره گرفته شود.
- * مجوز و دامنهٔ کاربر قبل از ساختن لینک در سرویس بررسی شده است.
- */
-export interface CommonFileLinkDto {
-  url?: string;
-  fileName?: string;
-  contentType?: string;
-  expiresAt?: string;
+export interface Stream {
+  readonly canRead?: boolean;
+  readonly canWrite?: boolean;
+  readonly canSeek?: boolean;
+  readonly canTimeout?: boolean;
+  readonly length?: number;
+  position?: number;
+  readTimeout?: number;
+  writeTimeout?: number;
 }
 
-export interface BaseMessageResponseOfFileLinkDto {
-  data?: CommonFileLinkDto;
+/**
+ * پاسخ همهٔ سرویس‌های دانلود و خروجی: خود محتوای فایل (از Minio خوانده می‌شود)، نه لینک.
+ * کنترلر آن را با FileOrError به‌صورت فایل برمی‌گرداند (Content-Type و Content-Disposition با نام فایل)، نه JSON.
+ * مجوز و دامنهٔ کاربر قبل از خواندن فایل در سرویس بررسی شده است.
+ */
+export interface CommonFileContentDto {
+  content?: Stream;
+  fileName?: string;
+  contentType?: string;
+}
+
+export interface BaseMessageResponseOfFileContentDto {
+  data?: CommonFileContentDto;
   statusCode?: EResponseStatusCode;
   /** @nullable */
   message?: string | null;

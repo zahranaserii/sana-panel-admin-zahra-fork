@@ -34,7 +34,7 @@ export const AverageDocsTable = ({ companyId }: { companyId: number }) => {
     },
   });
 
-  /** دانلود از لینک موقت بک‌اند (http.download) */
+  /** دانلود فایل از بک‌اند (http.download) */
   const download = (doc: BalanceDocument) =>
     http.download(
       `${FACILITY}/Companies/${companyId}/Balances/Documents/${doc.id}`,

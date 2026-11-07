@@ -25,7 +25,6 @@ import type {
   ChangeLogsSearchParams,
   CommandResponsesChangeLogItemDto,
   CommonFacilityPagedResponseOfChangeLogItemDto,
-  CommonFileLinkDto,
   CommonRegistrarDto,
   ProblemDetails,
   RestoreChangeCommand
@@ -242,7 +241,7 @@ export function useChangeLogsUsers<TData = Awaited<ReturnType<typeof changeLogsU
 
 
 /**
- * فیلترها دقیقاً همان فیلترهای لیست‌اند (شامل جستجوی متنی و فیلتر کاربر). پاسخ لینک موقت فایل xlsx است.
+ * فیلترها دقیقاً همان فیلترهای لیست‌اند (شامل جستجوی متنی و فیلتر کاربر). پاسخ خود فایل xlsx است.
  * @summary خروجی اکسل گزارش (xlsx)
  */
 export const changeLogsExport = (
@@ -251,9 +250,10 @@ export const changeLogsExport = (
 ) => {
 
 
-      return apiClient<CommonFileLinkDto>(
+      return apiClient<Blob>(
       {url: `/facility-management/ChangeLogs/Export`, method: 'GET',
-        params, signal
+        params,
+        responseType: 'blob', signal
     },
       options);
     }

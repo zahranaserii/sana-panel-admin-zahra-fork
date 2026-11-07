@@ -12,7 +12,7 @@ interface ExportOption {
   label: string;
 }
 
-/** دانلود از لینک موقتی که بک‌اند می‌دهد (http.download، نام فایل از سرور) */
+/** دانلود فایل از بک‌اند (http.download، نام فایل از Content-Disposition) */
 const ExportButton = ({ report }: { report: ExportOption }) => {
   const { mutate, isPending } = useMutation({
     mutationFn: () => http.download(`${FACILITY}/Dashboard/Exports/${report.value}`),

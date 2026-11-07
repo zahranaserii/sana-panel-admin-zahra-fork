@@ -149,6 +149,15 @@
 .sana-date-calendar {
   font-family: var(--font-sans) !important;
 }
+
+/* چک‌باکس انتخاب‌شده در جدول‌ها: پس‌زمینه سفید، حاشیه و تیک سرمه‌ای تم (غیرفعال و نیمه‌انتخاب مثل قبل) */
+.sana-table .ant-checkbox.ant-checkbox-checked:not(.ant-checkbox-disabled) {
+  background-color: #fff !important;
+  border-color: var(--sana-primary) !important;
+}
+.sana-table .ant-checkbox.ant-checkbox-checked:not(.ant-checkbox-disabled)::after {
+  border-color: var(--sana-primary) !important;
+}
 .sana-date-calendar .rmdp-day.rmdp-selected span:not(.highlight) {
   box-shadow: none;
   background-color: var(--sana-primary);

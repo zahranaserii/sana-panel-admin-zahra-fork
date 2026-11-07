@@ -22,7 +22,7 @@ import type {
 
 import type {
   CommonFacilityPagedResponseOfPersonnelListItemDto,
-  CommonFileLinkDto,
+  CommonFileContentDto,
   CreatePersonnelCommand,
   PersonnelDeleteBody,
   PersonnelImportBody,
@@ -466,7 +466,7 @@ export const personnelImportTemplate = (
 ) => {
 
 
-      return apiClient<CommonFileLinkDto>(
+      return apiClient<CommonFileContentDto>(
       {url: `/facility-management/Personnel/Import/Template`, method: 'GET', signal
     },
       options);

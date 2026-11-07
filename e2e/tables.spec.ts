@@ -30,3 +30,16 @@ test('tables: row numbers, total on the right, page size on the left, 10-row bod
   await expect(page.getByText('۱۰ در صفحه').filter({ visible: true })).toHaveCount(0);
   await expect(page.getByText('۲۰ در صفحه').filter({ visible: true })).toHaveCount(1);
 });
+
+test('company select: with more than one company nothing is preselected', async ({ page }) => {
+  await page.goto('/login');
+  await page.getByLabel('نام کاربری').fill('admin');
+  await page.getByLabel('رمز عبور').fill('admin');
+  await page.getByRole('button', { name: /ورود/ }).click();
+  await expect(page.getByRole('navigation')).toBeVisible();
+  await page.goto('/staff');
+  // ماک دو شرکت فعال دارد
+  await expect(page.getByText('انتخاب شرکت').filter({ visible: true }).last()).toBeVisible();
+  await expect(page).not.toHaveURL(/companyId=/);
+  await expect(page.getByText('پرسنل شرکت', { exact: true })).toHaveCount(0);
+});

@@ -10,15 +10,18 @@ interface CompanySelectProps {
 
 /**
  * انتخاب شرکت فعال (Companies/Lookup).
- * اگر مقداری انتخاب نشده یا شرکت انتخاب‌شده دیگر فعال نیست، اولین شرکت انتخاب می‌شود.
+ * اگر فقط یک شرکت باشد خودکار انتخاب می‌شود؛ با بیشتر از یک شرکت کاربر خودش انتخاب می‌کند.
+ * شرکت انتخاب‌شده‌ای که دیگر فعال نیست پاک می‌شود.
  */
 export const CompanySelect = ({ value, onChange }: CompanySelectProps) => {
   const { data: companies, isFetching, refetch } = useCompaniesLookup({ activeOnly: true });
 
   // شناسه عددی است؛ مقدار انتخاب در آدرس صفحه به‌صورت رشته نگه داشته می‌شود
   useEffect(() => {
-    const first = companies?.[0]?.id;
-    if (first && !companies.some((item) => String(item.id) === value)) onChange(String(first));
+    if (!companies || companies.some((item) => String(item.id) === value)) return;
+    const only = companies.length === 1 ? companies[0]?.id : undefined;
+    if (only) onChange(String(only));
+    else if (value) onChange('');
   }, [companies, value, onChange]);
 
   return (
@@ -35,9 +38,9 @@ export const CompanySelect = ({ value, onChange }: CompanySelectProps) => {
         allowClear={false}
         loading={isFetching}
         onRetry={() => void refetch()}
-        value={value}
+        value={value || undefined}
         onChange={onChange}
-        placeholder="ابتدا یک شرکت ثبت کنید"
+        placeholder={companies?.length ? 'انتخاب شرکت' : 'ابتدا یک شرکت ثبت کنید'}
         options={companies?.map((item) => ({ value: String(item.id), label: item.title }))}
       />
     </div>

@@ -12,7 +12,7 @@ import { dayjs } from '@/utils/date';
 
 import { logAction, restoreSnapshot } from '../audit';
 import { db } from '../db';
-import { api, fileLink, json } from '../utils';
+import { api, fileContent, json } from '../utils';
 
 const typeTitle = (type: MockAuditLog['type']) =>
   AUDIT_LOG_TYPES.find((item) => item.id === type)?.title.replace('مربوط به ', '') ?? type;
@@ -110,6 +110,6 @@ export const auditLogHandlers = [
     sheet.columns.forEach((column, index) => {
       column.width = index === 3 ? 80 : 24;
     });
-    return fileLink(await workbook.xlsx.writeBuffer(), 'گزارش-تغییرات.xlsx');
+    return fileContent(await workbook.xlsx.writeBuffer(), 'گزارش-تغییرات.xlsx');
   }),
 ];

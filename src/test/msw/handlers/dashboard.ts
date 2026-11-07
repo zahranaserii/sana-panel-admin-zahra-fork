@@ -16,7 +16,7 @@ import { MOCK_ENUMS } from '@/constant/mock/enums';
 import { formatJalali, toPersianDigits } from '@/utils/date';
 
 import { activeLoans, contractMonths, db, monthKey, today } from '../db';
-import { api, fileLink, json } from '../utils';
+import { api, fileContent, json } from '../utils';
 
 import { buildPlanCredits } from './credit';
 
@@ -184,7 +184,7 @@ const xlsx = async (fileName: string, headers: string[], rows: Cell[][]) => {
   sheet.columns.forEach((column) => {
     column.width = 22;
   });
-  return fileLink(await workbook.xlsx.writeBuffer(), fileName);
+  return fileContent(await workbook.xlsx.writeBuffer(), fileName);
 };
 
 const toman = (rial: number) => Math.round(rial / 10);

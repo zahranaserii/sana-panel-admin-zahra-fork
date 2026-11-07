@@ -22,7 +22,6 @@ import type {
 
 import type {
   CommonFacilityLookupItemDto,
-  CommonFileLinkDto,
   CompaniesBalanceDocumentsParams,
   CompaniesBalanceDocumentsUploadBody,
   CompaniesBalancesSaveBody,
@@ -618,7 +617,7 @@ export const useCompaniesCancelContract = <TError = ErrorType<ProblemDetails>,
       return useMutation(getCompaniesCancelContractMutationOptions(options), queryClient);
     }
     /**
- * @summary لینک دانلود فایل تفاهم‌نامه
+ * @summary دانلود فایل تفاهم‌نامه
  */
 export const companiesAgreementFile = (
     id: number,
@@ -626,8 +625,9 @@ export const companiesAgreementFile = (
 ) => {
 
 
-      return apiClient<CommonFileLinkDto>(
-      {url: `/facility-management/Companies/${id}/AgreementFile`, method: 'GET', signal
+      return apiClient<Blob>(
+      {url: `/facility-management/Companies/${id}/AgreementFile`, method: 'GET',
+        responseType: 'blob', signal
     },
       options);
     }
@@ -689,7 +689,7 @@ export function useCompaniesAgreementFile<TData = Awaited<ReturnType<typeof comp
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
- * @summary لینک دانلود فایل تفاهم‌نامه
+ * @summary دانلود فایل تفاهم‌نامه
  */
 
 export function useCompaniesAgreementFile<TData = Awaited<ReturnType<typeof companiesAgreementFile>>, TError = ErrorType<ProblemDetails>>(
@@ -802,7 +802,7 @@ export function useCompaniesBalances<TData = Awaited<ReturnType<typeof companies
 
 
 /**
- * فقط کاربر شعبه (شعبهٔ خود) و ادمین. ⚠  بدنه multipart شد: اگر مبلغی عوض شود، documentTypeId و حداقل یک فایل الزامی است و هر دو در یک تراکنش ثبت می‌شوند. یک مستند همهٔ ماه‌های تغییریافتهٔ همین ذخیره را پوشش می‌دهد. اگر هیچ مبلغی عوض نشود، مستند لازم نیست. مبلغ قبلی و جدید در گزارش تغییرات ثبت می‌شود.
+ * فقط کاربر شعبه (شعبهٔ خود) و ادمین. ⚠ بدنه multipart شد: اگر مبلغی عوض شود، documentTypeId و حداقل یک فایل الزامی است و هر دو در یک تراکنش ثبت می‌شوند. یک مستند همهٔ ماه‌های تغییریافتهٔ همین ذخیره را پوشش می‌دهد. اگر هیچ مبلغی عوض نشود، مستند لازم نیست. مبلغ قبلی و جدید در گزارش تغییرات ثبت می‌شود.
  * @summary ذخیرهٔ میانگین‌ها همراه مستندش (US-B4، US-B5)
  */
 export const companiesBalancesSave = (
@@ -1040,7 +1040,7 @@ export const useCompaniesBalanceDocumentsUpload = <TError = ErrorType<ProblemDet
       return useMutation(getCompaniesBalanceDocumentsUploadMutationOptions(options), queryClient);
     }
     /**
- * @summary لینک دانلود مستند
+ * @summary دانلود مستند
  */
 export const companiesBalanceDocumentDownload = (
     id: number,
@@ -1049,8 +1049,9 @@ export const companiesBalanceDocumentDownload = (
 ) => {
 
 
-      return apiClient<CommonFileLinkDto>(
-      {url: `/facility-management/Companies/${id}/Balances/Documents/${documentId}`, method: 'GET', signal
+      return apiClient<Blob>(
+      {url: `/facility-management/Companies/${id}/Balances/Documents/${documentId}`, method: 'GET',
+        responseType: 'blob', signal
     },
       options);
     }
@@ -1117,7 +1118,7 @@ export function useCompaniesBalanceDocumentDownload<TData = Awaited<ReturnType<t
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
- * @summary لینک دانلود مستند
+ * @summary دانلود مستند
  */
 
 export function useCompaniesBalanceDocumentDownload<TData = Awaited<ReturnType<typeof companiesBalanceDocumentDownload>>, TError = ErrorType<ProblemDetails>>(

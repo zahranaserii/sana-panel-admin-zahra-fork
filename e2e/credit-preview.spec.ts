@@ -54,7 +54,7 @@ test('fixed amount: preview only from the check button; submit enabled after an 
   await expect(page.getByRole('button', { name: SUBMIT })).toBeDisabled();
 });
 
-test('variable amounts: a row can be selected only after its amount; select-all stays disabled', async ({
+test('variable amounts: amount selects the row, unselect clears it; select-all stays disabled', async ({
   page,
 }) => {
   await openCredit(page);
@@ -66,8 +66,10 @@ test('variable amounts: a row can be selected only after its amount; select-all 
   const amount = row.locator('input:not([type=checkbox])').last();
   await expect(row.getByRole('checkbox')).toBeDisabled();
   await amount.fill('10000000');
-  await expect(row.getByRole('checkbox')).toBeEnabled();
-  await row.getByRole('checkbox').check();
+  // با وارد شدن مبلغ، ردیف خودکار انتخاب می‌شود
+  await expect(row.getByRole('checkbox')).toBeChecked();
+  // چک‌باکس انتخاب‌شده: پس‌زمینه سفید
+  await expect(row.locator('.ant-checkbox')).toHaveCSS('background-color', 'rgb(255, 255, 255)');
 
   await page.getByRole('button', { name: CHECK }).click();
   await expect.poll(async () => (await previews(page)).map((body) => body.mode)).toEqual([2]);
@@ -78,4 +80,11 @@ test('variable amounts: a row can be selected only after its amount; select-all 
   await expect(row.getByRole('checkbox')).not.toBeChecked();
   await expect(row.getByRole('checkbox')).toBeDisabled();
   await expect(page.getByRole('button', { name: CHECK })).toBeDisabled();
+
+  // برداشتن تیک → مبلغ همان ردیف خالی می‌شود
+  await amount.fill('5000000');
+  await expect(row.getByRole('checkbox')).toBeChecked();
+  await row.getByRole('checkbox').uncheck();
+  await expect(amount).toHaveValue('');
+  await expect(row.getByRole('checkbox')).toBeDisabled();
 });

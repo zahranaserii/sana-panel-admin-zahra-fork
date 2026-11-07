@@ -17,7 +17,7 @@ import type {
 } from '@tanstack/react-query';
 
 import type {
-  CommonFileLinkDto,
+  CommonFileContentDto,
   DashboardGetParams,
   DashboardRankingParams,
   ProblemDetails,
@@ -341,7 +341,7 @@ export const dashboardExport = (
 ) => {
 
 
-      return apiClient<CommonFileLinkDto>(
+      return apiClient<CommonFileContentDto>(
       {url: `/facility-management/Dashboard/Exports/${report}`, method: 'GET', signal
     },
       options);

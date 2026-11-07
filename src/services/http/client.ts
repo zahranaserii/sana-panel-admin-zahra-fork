@@ -9,6 +9,20 @@ import { handleHttpError } from './errorHandler';
 import { getClientHeaders } from './headers';
 import { type HttpError } from './types';
 
+/**
+ * در دانلود (responseType: 'blob') پاسخ خطا هم Blob است؛
+ * اگر JSON باشد (قالب پاسخ بک‌اند) به شیء تبدیل می‌شود تا پیام خطا خوانده شود.
+ */
+const parseBlobError = async (error: HttpError) => {
+  const data: unknown = error.response?.data;
+  if (!error.response || !(data instanceof Blob)) return;
+  try {
+    error.response.data = JSON.parse(await data.text()) as typeof error.response.data;
+  } catch {
+    error.response.data = {};
+  }
+};
+
 export const httpClient = axios.create({
   baseURL: env.apiBaseUrl,
   timeout: env.apiTimeout,
@@ -32,7 +46,8 @@ httpClient.interceptors.response.use(
     if (response.config.successToast && message) toast.success(message);
     return response;
   },
-  (error: HttpError) => {
+  async (error: HttpError) => {
+    await parseBlobError(error);
     handleHttpError(error);
     return Promise.reject(error);
   },

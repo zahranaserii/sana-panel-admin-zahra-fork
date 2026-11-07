@@ -18,7 +18,7 @@ interface StaffToolbarProps {
   onCreate: () => void;
 }
 
-/** دانلود فایل نمونه از لینک موقت بک‌اند (http.download) */
+/** دانلود فایل نمونه از بک‌اند (http.download) */
 const downloadTemplate = () =>
   http.download(`${FACILITY}/Personnel/Import/Template`, 'نمونه-فایل-پرسنل.xlsx');
 

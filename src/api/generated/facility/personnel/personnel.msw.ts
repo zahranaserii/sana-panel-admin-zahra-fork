@@ -16,7 +16,7 @@ import { json } from '@/test/msw/utils';
 
 import type {
   CommonFacilityPagedResponseOfPersonnelListItemDto,
-  CommonFileLinkDto,
+  CommonFileContentDto,
   ReadModelsPersonnelDetailsDto,
   ReadModelsPersonnelImportResultDto
 } from '../facilityPanelAPI.schemas';
@@ -32,7 +32,7 @@ export const getPersonnelUpdateResponseMock = (overrideResponse: Partial<Extract
 
 export const getPersonnelDeleteResponseMock = (): boolean => (faker.datatype.boolean())
 
-export const getPersonnelImportTemplateResponseMock = (overrideResponse: Partial<Extract<CommonFileLinkDto, object>> = {}): CommonFileLinkDto => ({url: faker.string.alpha({length: {min: 10, max: 20}}), fileName: faker.string.alpha({length: {min: 10, max: 20}}), contentType: faker.string.alpha({length: {min: 10, max: 20}}), expiresAt: faker.date.past().toISOString().slice(0, 19) + 'Z', ...overrideResponse})
+export const getPersonnelImportTemplateResponseMock = (overrideResponse: Partial<Extract<CommonFileContentDto, object>> = {}): CommonFileContentDto => ({content: {canRead: faker.datatype.boolean(), canWrite: faker.datatype.boolean(), canSeek: faker.datatype.boolean(), canTimeout: faker.datatype.boolean(), length: faker.number.int(), position: faker.number.int(), readTimeout: faker.number.int(), writeTimeout: faker.number.int()}, fileName: faker.string.alpha({length: {min: 10, max: 20}}), contentType: faker.string.alpha({length: {min: 10, max: 20}}), ...overrideResponse})
 
 export const getPersonnelImportResponseMock = (overrideResponse: Partial<Extract<ReadModelsPersonnelImportResultDto, object>> = {}): ReadModelsPersonnelImportResultDto => ({batchId: faker.number.int(), totalRows: faker.number.int(), accepted: faker.number.int(), rejected: faker.number.int(), errors: Array.from({ length: faker.number.int({min: 1, max: 10}) }, (_, i) => i + 1).map(() => ({row: faker.number.int(), column: faker.string.alpha({length: {min: 10, max: 20}}), message: faker.string.alpha({length: {min: 10, max: 20}})})), ...overrideResponse})
 
@@ -99,7 +99,7 @@ export const getPersonnelDeleteMockHandler = (overrideResponse?: boolean | ((inf
   }, options)
 }
 
-export const getPersonnelImportTemplateMockHandler = (overrideResponse?: CommonFileLinkDto | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<CommonFileLinkDto> | CommonFileLinkDto), options?: RequestHandlerOptions) => {
+export const getPersonnelImportTemplateMockHandler = (overrideResponse?: CommonFileContentDto | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<CommonFileContentDto> | CommonFileContentDto), options?: RequestHandlerOptions) => {
   return http.get('*/facility-management/Personnel/Import/Template', async (info: Parameters<Parameters<typeof http.get>[1]>[0]) => {await delay(250);
 
 

@@ -968,7 +968,7 @@ export const useBasicInfoReasonCreate = <TError = ErrorType<ProblemDetails>,
       return useMutation(getBasicInfoReasonCreateMutationOptions(options), queryClient);
     }
     /**
- * ⚠  فهرست‌ها دیگر سراسری نیستند. این مسیر تا وقتی فقط یک طرح فعال باشد کار می‌کند و با طرح دوم خطای روشن می‌دهد. مسیر درست: Schemes/{schemeId}/Reasons.
+ * ⚠ فهرست‌ها دیگر سراسری نیستند. این مسیر تا وقتی فقط یک طرح فعال باشد کار می‌کند و با طرح دوم خطای روشن می‌دهد. مسیر درست: Schemes/{schemeId}/Reasons.
  * @summary فهرست داینامیک طرح پیش‌فرض (برای سازگاری)
  */
 export const basicInfoReasons = (

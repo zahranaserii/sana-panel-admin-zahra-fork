@@ -26,7 +26,7 @@ import type {
   CommandResponsesLoanBatchDto,
   CommandResponsesLoanRequestListItemDto,
   CommonFacilityPagedResponseOfLoanRequestListItemDto,
-  CommonFileLinkDto,
+  CommonFileContentDto,
   CreateLoanRequestsCommand,
   LoansCreditParams,
   LoansSearchParams,
@@ -665,7 +665,7 @@ export const loansDocumentDownload = (
 ) => {
 
 
-      return apiClient<CommonFileLinkDto>(
+      return apiClient<CommonFileContentDto>(
       {url: `/facility-management/LoanRequests/${id}/Documents/${fileId}`, method: 'GET', signal
     },
       options);

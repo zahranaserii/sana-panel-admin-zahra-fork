@@ -15,7 +15,7 @@ import type {
 import { json } from '@/test/msw/utils';
 
 import type {
-  CommonFileLinkDto,
+  CommonFileContentDto,
   ReadModelsCompanyRankingDto,
   ReadModelsDashboardDto,
   ReadModelsMonthOptionDto
@@ -30,7 +30,7 @@ export const getDashboardRankingResponseMock = (): ReadModelsCompanyRankingDto[]
 
 export const getDashboardMonthsResponseMock = (): ReadModelsMonthOptionDto[] | null => (Array.from({ length: faker.number.int({min: 1, max: 10}) }, (_, i) => i + 1).map(() => ({key: faker.string.alpha({length: {min: 10, max: 20}}), title: faker.string.alpha({length: {min: 10, max: 20}})})))
 
-export const getDashboardExportResponseMock = (overrideResponse: Partial<Extract<CommonFileLinkDto, object>> = {}): CommonFileLinkDto => ({url: faker.string.alpha({length: {min: 10, max: 20}}), fileName: faker.string.alpha({length: {min: 10, max: 20}}), contentType: faker.string.alpha({length: {min: 10, max: 20}}), expiresAt: faker.date.past().toISOString().slice(0, 19) + 'Z', ...overrideResponse})
+export const getDashboardExportResponseMock = (overrideResponse: Partial<Extract<CommonFileContentDto, object>> = {}): CommonFileContentDto => ({content: {canRead: faker.datatype.boolean(), canWrite: faker.datatype.boolean(), canSeek: faker.datatype.boolean(), canTimeout: faker.datatype.boolean(), length: faker.number.int(), position: faker.number.int(), readTimeout: faker.number.int(), writeTimeout: faker.number.int()}, fileName: faker.string.alpha({length: {min: 10, max: 20}}), contentType: faker.string.alpha({length: {min: 10, max: 20}}), ...overrideResponse})
 
 
 export const getDashboardGetMockHandler = (overrideResponse?: ReadModelsDashboardDto | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<ReadModelsDashboardDto> | ReadModelsDashboardDto), options?: RequestHandlerOptions) => {
@@ -69,7 +69,7 @@ export const getDashboardMonthsMockHandler = (overrideResponse?: ReadModelsMonth
   }, options)
 }
 
-export const getDashboardExportMockHandler = (overrideResponse?: CommonFileLinkDto | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<CommonFileLinkDto> | CommonFileLinkDto), options?: RequestHandlerOptions) => {
+export const getDashboardExportMockHandler = (overrideResponse?: CommonFileContentDto | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<CommonFileContentDto> | CommonFileContentDto), options?: RequestHandlerOptions) => {
   return http.get('*/facility-management/Dashboard/Exports/:report', async (info: Parameters<Parameters<typeof http.get>[1]>[0]) => {await delay(250);
 
 

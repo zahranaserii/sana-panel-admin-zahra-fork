@@ -150,12 +150,17 @@ export const LoanRequestCard = ({ companyId, date, credit, filters }: LoanReques
         initialValues={INITIAL_VALUES}
         disabled={!canAllocate}
         onFinish={handleFinish}
-        onValuesChange={(_changed, all) => {
+        onValuesChange={(changed, all) => {
           // نتیجه بررسی قبلی با تغییر فرم دیگر معتبر نیست
           setChecked(undefined);
-          // مبلغ متفاوت: ردیفی که مبلغش خالی شد از انتخاب خارج می‌شود
+          // مبلغ متفاوت: ردیفی که مبلغش وارد شد خودکار انتخاب و ردیفی که مبلغش خالی شد از انتخاب خارج می‌شود
           if (all.mode === ALLOCATION_MODE.VARIABLE) {
-            setSelectedIds((ids) => ids.filter((id) => hasAmount(all.rows, id)));
+            const typed = Object.keys(changed.rows ?? {})
+              .map(Number)
+              .filter((id) => hasAmount(all.rows, id));
+            setSelectedIds((ids) => [
+              ...new Set([...ids.filter((id) => hasAmount(all.rows, id)), ...typed]),
+            ]);
           }
         }}
       >
@@ -193,6 +198,12 @@ export const LoanRequestCard = ({ companyId, date, credit, filters }: LoanReques
           disabled={!canAllocate}
           selectedIds={selectedIds}
           onSelect={(ids) => {
+            // مبلغ متفاوت: با برداشتن تیک یک ردیف، مبلغ همان ردیف هم خالی می‌شود
+            if (isVariable) {
+              selectedIds
+                .filter((id) => !ids.includes(id))
+                .forEach((id) => form.setFieldValue(['rows', String(id), 'amount'], undefined));
+            }
             setSelectedIds(ids);
             setChecked(undefined);
           }}
