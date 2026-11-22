@@ -11,6 +11,7 @@ const login = async (page: Page, errors: string[]) => {
   await page.goto('/login');
   await page.getByLabel('نام کاربری').fill('admin');
   await page.getByLabel('رمز عبور').fill('admin');
+  await page.getByLabel('کد امنیتی').fill('24125');
   await page.getByRole('button', { name: /ورود/ }).click();
   await expect(page.getByRole('navigation')).toBeVisible();
 };

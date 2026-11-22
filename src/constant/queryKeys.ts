@@ -5,5 +5,6 @@ export const QUERY_KEYS = {
     DETAIL: (id: number) => ['users', 'detail', id],
     ROLES: ['users', 'roles'],
   },
+  CAPTCHA: ['auth', 'captcha'],
   MAIN_MENU: ['main-menu'],
 } as const;

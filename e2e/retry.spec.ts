@@ -8,6 +8,7 @@ const login = async (page: Page) => {
   await page.goto('/login');
   await page.getByLabel('نام کاربری').fill('admin');
   await page.getByLabel('رمز عبور').fill('admin');
+  await page.getByLabel('کد امنیتی').fill('24125');
   await page.getByRole('button', { name: /ورود/ }).click();
   await expect(page.getByRole('navigation')).toBeVisible();
 };
@@ -19,6 +20,7 @@ test('menu error shows only a retry button, then the layout', async ({ page }) =
   await failOnce(page, 'Authentication/MainMenu');
   await page.getByLabel('نام کاربری').fill('admin');
   await page.getByLabel('رمز عبور').fill('admin');
+  await page.getByLabel('کد امنیتی').fill('24125');
   await page.getByRole('button', { name: /ورود/ }).click();
 
   await expect(retryButton(page)).toBeVisible();

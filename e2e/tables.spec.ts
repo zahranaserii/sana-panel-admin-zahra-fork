@@ -6,6 +6,7 @@ test('tables: row numbers, total on the right, page size on the left, 10-row bod
   await page.goto('/login');
   await page.getByLabel('نام کاربری').fill('admin');
   await page.getByLabel('رمز عبور').fill('admin');
+  await page.getByLabel('کد امنیتی').fill('24125');
   await page.getByRole('button', { name: /ورود/ }).click();
   await expect(page.getByRole('navigation')).toBeVisible();
   await page.goto('/companies');
@@ -35,6 +36,7 @@ test('company select: with more than one company nothing is preselected', async 
   await page.goto('/login');
   await page.getByLabel('نام کاربری').fill('admin');
   await page.getByLabel('رمز عبور').fill('admin');
+  await page.getByLabel('کد امنیتی').fill('24125');
   await page.getByRole('button', { name: /ورود/ }).click();
   await expect(page.getByRole('navigation')).toBeVisible();
   await page.goto('/staff');

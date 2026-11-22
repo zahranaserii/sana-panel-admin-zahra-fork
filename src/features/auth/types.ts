@@ -2,15 +2,16 @@
 export interface LoginRequest {
   username: string;
   password: string;
-  /**
-   * کپچا فعلاً به‌خاطر ایراد زیرساختی بک‌اند کار نمی‌کند و در بک‌اند اختیاری است؛
-   * تا فعال شدن همیشه null ارسال می‌شود.
-   */
-  captchaToken: string | null;
-  captchaValue: string | null;
+  captchaToken: string;
+  captchaValue: string;
 }
 
-export type LoginFormValues = Pick<LoginRequest, 'username' | 'password'>;
+export type LoginFormValues = Omit<LoginRequest, 'captchaToken'>;
+
+export interface CaptchaResponse {
+  captchaToken: string;
+  image: string;
+}
 
 /** ساختار پاسخ ورود در سوئگر تعریف نشده؛ فرض: توکن داخل data برمی‌گردد */
 export interface LoginResponse {

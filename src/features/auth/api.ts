@@ -2,18 +2,13 @@ import { ENDPOINTS } from '@/constant/endpoints';
 import { http } from '@/services/http';
 import { useAuthStore } from '@/store/useAuthStore';
 
-import { type LoginFormValues, type LoginRequest, type LoginResponse } from './types';
+import { type CaptchaResponse, type LoginRequest, type LoginResponse } from './types';
 
-export const login = (values: LoginFormValues) =>
-  http.post<LoginResponse, LoginRequest>(
-    ENDPOINTS.AUTH.LOGIN,
-    // کپچا فعلاً با مقدار ثابت ارسال می‌شود (سرویس کپچا هنوز استفاده نمی‌شود)
-    { ...values, captchaValue: '24125', captchaToken: '43d735fd-7fac-4e87-9148-3c6ca0eab8c6' },
-    {
-      // خطای ۴۰۱ در صفحه لاگین یعنی نام کاربری/رمز اشتباه — رفتار پیش‌فرض (خروج) اجرا نشود
-      onError: { 401: () => undefined },
-    },
-  );
+export const login = (values: LoginRequest) =>
+  http.post<LoginResponse, LoginRequest>(ENDPOINTS.AUTH.LOGIN, values, {
+    // خطای ۴۰۱ در صفحه لاگین یعنی نام کاربری/رمز اشتباه — رفتار پیش‌فرض (خروج) اجرا نشود
+    onError: { 401: () => undefined },
+  });
 
 /**
  * خروج؛ خطای آن نادیده گرفته می‌شود چون اطلاعات کاربر در هر حال پاک می‌شود
@@ -26,5 +21,13 @@ export const logout = () =>
     onError: { 401: () => undefined },
   });
 
-// کپچا: به‌خاطر ایراد زیرساختی بک‌اند فعلاً استفاده نمی‌شود
-// export const getCaptcha = () => http.get<unknown>(ENDPOINTS.AUTH.CAPTCHA);
+export const getCaptcha = async (signal?: AbortSignal) => {
+  const captcha = await http.get<CaptchaResponse>(ENDPOINTS.AUTH.CAPTCHA, {
+    signal,
+    onError: { 401: () => undefined },
+  });
+  if (!captcha?.captchaToken || !captcha.image) {
+    throw new Error('پاسخ سرویس کپچا نامعتبر است.');
+  }
+  return captcha;
+};
