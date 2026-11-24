@@ -14,6 +14,8 @@ export interface UserRole {
 export interface User {
   id: number;
   userName: string;
+  mobileNumber?: string | null;
+  nationalCode?: string | null;
   email: string | null;
   personId: number | null;
   /** در بک‌اند هست (فعال/غیرفعال کردن کاربر) — در UI استفاده نشده */
@@ -31,6 +33,8 @@ export interface User {
 export interface UserPayload {
   userName: string;
   password?: string;
+  mobileNumber: string;
+  nationalCode: string;
   fullName: string;
   userCode: string;
   branchName: string;

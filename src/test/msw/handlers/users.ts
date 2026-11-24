@@ -3,6 +3,7 @@ import { delay, http } from 'msw';
 import { ENDPOINTS } from '@/constant/endpoints';
 import { MOCK_ROLES, type MockManagedUser } from '@/constant/mock';
 import { type UserPayload } from '@/features/users/types';
+import { getNationalCodeError, mobileNumberRule } from '@/features/users/validation';
 import { toEnglishDigits } from '@/utils/date';
 
 import { db } from '../db';
@@ -39,8 +40,20 @@ const normalize = ({ roleId, ...body }: UserPayload) => ({
   userName: body.userName.trim(),
   userCode: toEnglishDigits(body.userCode),
   branchCode: toEnglishDigits(body.branchCode),
+  mobileNumber: toEnglishDigits(body.mobileNumber ?? ''),
+  nationalCode: toEnglishDigits(body.nationalCode ?? ''),
   roles: toRoles(roleId),
 });
+
+const validateUserNumbers = (body: Pick<UserPayload, 'mobileNumber' | 'nationalCode'>) => {
+  if (!mobileNumberRule.pattern.test(body.mobileNumber)) {
+    return json({ message: mobileNumberRule.message }, { status: 422 });
+  }
+  const nationalCodeError = getNationalCodeError(body.nationalCode);
+  if (nationalCodeError) {
+    return json({ message: nationalCodeError }, { status: 422 });
+  }
+};
 
 const paginate = <T>(list: T[], request: Request) => {
   const url = new URL(request.url);
@@ -81,6 +94,8 @@ export const userHandlers = [
     if (!body.password) {
       return json({ message: 'رمز عبور الزامی است.' }, { status: 422 });
     }
+    const invalidNumbers = validateUserNumbers(body);
+    if (invalidNumbers) return invalidNumbers;
     if (isTaken(body.userName)) return duplicate();
     const user = {
       ...body,
@@ -102,6 +117,8 @@ export const userHandlers = [
     const user = db.users.find((item) => item.id === Number(params.id));
     if (!user) return notFound();
     const { password, ...body } = normalize((await request.json()) as UserPayload);
+    const invalidNumbers = validateUserNumbers(body);
+    if (invalidNumbers) return invalidNumbers;
     if (isTaken(body.userName, user.id)) return duplicate();
     const before = structuredClone(user);
     Object.assign(user, body, password ? { password } : {});

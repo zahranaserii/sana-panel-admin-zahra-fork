@@ -13,7 +13,35 @@ export interface CaptchaResponse {
   image: string;
 }
 
-/** ساختار پاسخ ورود در سوئگر تعریف نشده؛ فرض: توکن داخل data برمی‌گردد */
-export interface LoginResponse {
+export interface AuthSessionResponse {
   token: string;
+}
+
+export interface OtpChallenge {
+  challengeId: string;
+}
+
+export interface PasswordChangeRequired {
+  mustChangePassword: true;
+  otpTracker: string;
+}
+
+export type LoginResponse =
+  | PasswordChangeRequired
+  | ((AuthSessionResponse | OtpChallenge | { otpTracker: string }) & {
+      mustChangePassword?: false;
+      otpTracker?: string;
+    });
+
+export interface ChangePasswordFormValues {
+  newPassword: string;
+  confirmNewPassword: string;
+}
+
+export interface ChangePasswordRequest extends ChangePasswordFormValues {
+  otpTracker: string;
+}
+
+export interface VerifyOtpRequest extends OtpChallenge {
+  code: string;
 }

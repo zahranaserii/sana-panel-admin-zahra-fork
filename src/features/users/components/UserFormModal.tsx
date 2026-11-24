@@ -7,9 +7,11 @@ import { PasswordInput, SelectInput, TextInput } from '@/component/input';
 import { FormModal } from '@/component/modal';
 import { QUERY_KEYS } from '@/constant/queryKeys';
 import { type ApiErrorBody } from '@/types/common';
+import { toEnglishDigits } from '@/utils/date';
 
 import { createUser, getRoles, getUser, updateUser } from '../api';
 import { type User, type UserPayload } from '../types';
+import { getNationalCodeError, mobileNumberRule } from '../validation';
 
 interface UserFormModalProps {
   open: boolean;
@@ -23,6 +25,8 @@ const toFormValues = (user: User): UserPayload => ({
   userName: user.userName,
   fullName: user.fullName,
   userCode: user.userCode,
+  mobileNumber: toEnglishDigits(user.mobileNumber ?? ''),
+  nationalCode: toEnglishDigits(user.nationalCode ?? ''),
   branchName: user.branchName,
   branchCode: user.branchCode,
   roleId: user.roles[0]?.roleId ?? null,
@@ -107,6 +111,31 @@ export const UserFormModal = ({ open, userId, onClose }: UserFormModalProps) => 
       </FormItem>
       <FormItem name="userCode" label="کد کاربر" required>
         <TextInput inputMode="numeric" placeholder="مثلاً ۳۹۹" />
+      </FormItem>
+      <FormItem
+        name="mobileNumber"
+        label="شماره موبایل"
+        required
+        normalize={toEnglishDigits}
+        rules={[mobileNumberRule]}
+      >
+        <TextInput dir="ltr" inputMode="tel" maxLength={11} />
+      </FormItem>
+      <FormItem
+        name="nationalCode"
+        label="کد ملی"
+        required
+        normalize={toEnglishDigits}
+        rules={[
+          {
+            validator: async (_, value: string) => {
+              const error = getNationalCodeError(value);
+              if (error) throw new Error(error);
+            },
+          },
+        ]}
+      >
+        <TextInput dir="ltr" inputMode="numeric" maxLength={10} />
       </FormItem>
       <FormItem name="branchName" label="نام شعبه" required>
         <TextInput placeholder="مثلاً شعبه بازار تهران" />

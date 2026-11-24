@@ -24,6 +24,7 @@ import { dayjs, toPersianDigits } from '@/utils/date';
  * با رفرش صفحه به مقادیر اولیه constant/mock برمی‌گردد.
  */
 export const db = {
+  authUsers: structuredClone(MOCK_USERS),
   schemes: structuredClone(MOCK_SCHEMES),
   companies: structuredClone(MOCK_COMPANIES),
   staff: structuredClone(MOCK_STAFF),
@@ -45,7 +46,7 @@ export const today = () => new Date().toISOString().slice(0, 10);
 
 export const findUserByToken = (authorization: string | null) => {
   const token = authorization?.replace('Bearer ', '');
-  return MOCK_USERS.find((user) => user.token === token);
+  return db.authUsers.find((user) => user.token === token);
 };
 
 /** کاربر ثبت‌کننده درخواست (از روی توکن) */

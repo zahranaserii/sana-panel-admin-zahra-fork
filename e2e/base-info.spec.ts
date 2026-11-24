@@ -1,11 +1,14 @@
 import { expect, test } from '@playwright/test';
 
+import { completeMockOtp } from './helpers/auth';
+
 test('base info: list, edit keeps the usable table, open create form', async ({ page }) => {
   await page.goto('/login');
   await page.getByLabel('نام کاربری').fill('admin');
   await page.getByLabel('رمز عبور').fill('admin');
   await page.getByLabel('کد امنیتی').fill('24125');
   await page.getByRole('button', { name: /ورود/ }).click();
+  await completeMockOtp(page);
   await expect(page.getByRole('navigation')).toBeVisible();
   await page.locator('nav a[href="/base-info"]').click();
   await expect(page.getByRole('cell', { name: 'نگین میثاق' })).toBeVisible();

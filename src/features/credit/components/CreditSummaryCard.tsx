@@ -2,12 +2,13 @@ import { type ColumnsType } from 'antd/es/table';
 
 import { type UseQueryResult } from '@tanstack/react-query';
 
-import { KpiCard, PanelCard } from '@/component/card';
+// import { KpiCard } from '@/component/card';
+import { PanelCard } from '@/component/card';
 import { QueryState } from '@/component/retry';
 import { Table } from '@/component/table';
 import { toPersianDigits } from '@/utils/date';
 import { formatRial } from '@/utils/number';
-import { rialToTomanWords } from '@/utils/numberToWords';
+// import { rialToTomanWords } from '@/utils/numberToWords';
 
 import { type CompanyCredit, type PlanCredit } from '../types';
 
@@ -44,10 +45,10 @@ export const CreditSummaryCard = ({ query }: CreditSummaryCardProps) => {
   return (
     <PanelCard
       title="مانده اعتبار ماه"
-      subtitle="میانگین موجودی از صفحه «مدیریت شرکت‌ها» ثبت می‌شود."
+      // subtitle="میانگین موجودی از صفحه «مدیریت شرکت‌ها» ثبت می‌شود."
     >
       <QueryState query={query}>
-        <div className="mb-4 grid grid-cols-[repeat(auto-fit,minmax(230px,1fr))] gap-4">
+        {/* <div className="mb-4 grid grid-cols-[repeat(auto-fit,minmax(230px,1fr))] gap-4">
           <KpiCard
             label="مجموع میانگین مبنای محاسبه اعتبار"
             value={formatRial(credit?.totalAverageBase ?? 0)}
@@ -66,7 +67,7 @@ export const CreditSummaryCard = ({ query }: CreditSummaryCardProps) => {
             footer={credit ? rialToTomanWords(credit.monthRemainingCredit ?? 0) : undefined}
             loading={loading}
           />
-        </div>
+        </div> */}
         <Table<PlanCredit>
           rowKey="planId"
           columns={columns}

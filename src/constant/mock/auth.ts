@@ -8,12 +8,14 @@ export interface MockUser {
   profile: PanelProfileDto;
   /** فقط برای ماک: کاربر شعبه بخشی از منو را می‌بیند */
   isBranch?: boolean;
+  mustChangePassword?: boolean;
 }
 
 export const MOCK_USERS: MockUser[] = [
   {
     username: 'admin',
     password: 'admin',
+    mustChangePassword: import.meta.env.VITE_VERCEL_ENV === 'preview',
     token: 'mock-token-admin',
     profile: {
       panelUserId: 1,
@@ -32,6 +34,7 @@ export const MOCK_USERS: MockUser[] = [
     password: 'branch',
     token: 'mock-token-branch',
     isBranch: true,
+    mustChangePassword: true,
     profile: {
       panelUserId: 2,
       userName: 'branch',

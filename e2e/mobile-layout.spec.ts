@@ -1,5 +1,7 @@
 import { expect, test, type Page } from '@playwright/test';
 
+import { completeMockOtp } from './helpers/auth';
+
 test.use({ viewport: { width: 390, height: 844 } });
 
 const login = async (page: Page) => {
@@ -8,6 +10,7 @@ const login = async (page: Page) => {
   await page.getByLabel('رمز عبور').fill('admin');
   await page.getByLabel('کد امنیتی').fill('24125');
   await page.getByRole('button', { name: /ورود/ }).click();
+  await completeMockOtp(page);
   await expect(page.getByRole('button', { name: 'منو' })).toBeVisible();
 };
 

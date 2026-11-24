@@ -1,5 +1,7 @@
 import { expect, test, type Page } from '@playwright/test';
 
+import { completeMockOtp } from './helpers/auth';
+
 /** بدنه درخواست‌های پیش‌نمایش (ماک داخل صفحه با Request ساخته می‌شود و به شبکه نمی‌رسد) */
 const recordPreviews = `(() => {
   window.__previews = [];
@@ -24,6 +26,7 @@ const openCredit = async (page: Page) => {
   await page.getByLabel('رمز عبور').fill('admin');
   await page.getByLabel('کد امنیتی').fill('24125');
   await page.getByRole('button', { name: /ورود/ }).click();
+  await completeMockOtp(page);
   await expect(page.getByRole('navigation')).toBeVisible();
   // ۱۴۰۵/۰۸/۱۲: روز مجاز انتقال اعتبار شرکت ۱ در ماک
   await page.goto('/credit?companyId=1&date=2026-11-03');
@@ -59,7 +62,7 @@ test('variable amounts: amount selects the row, unselect clears it; select-all s
   page,
 }) => {
   await openCredit(page);
-  await page.getByText('مبلغ متفاوت برای هرکس').click();
+  await page.getByRole('radio', { name: 'مبلغ متفاوت برای هرشخص', exact: true }).click();
   const table = page.locator('.ant-table').filter({ has: page.getByText('مبلغ وام این نفر') });
   await expect(table.locator('thead').getByRole('checkbox')).toBeDisabled();
 

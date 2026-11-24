@@ -1,5 +1,7 @@
 import { expect, test } from '@playwright/test';
 
+import { completeMockOtp } from './helpers/auth';
+
 test('tables: row numbers, total on the right, page size on the left, 10-row body height', async ({
   page,
 }) => {
@@ -8,6 +10,7 @@ test('tables: row numbers, total on the right, page size on the left, 10-row bod
   await page.getByLabel('رمز عبور').fill('admin');
   await page.getByLabel('کد امنیتی').fill('24125');
   await page.getByRole('button', { name: /ورود/ }).click();
+  await completeMockOtp(page);
   await expect(page.getByRole('navigation')).toBeVisible();
   await page.goto('/companies');
 
@@ -38,6 +41,7 @@ test('company select: with more than one company nothing is preselected', async 
   await page.getByLabel('رمز عبور').fill('admin');
   await page.getByLabel('کد امنیتی').fill('24125');
   await page.getByRole('button', { name: /ورود/ }).click();
+  await completeMockOtp(page);
   await expect(page.getByRole('navigation')).toBeVisible();
   await page.goto('/staff');
   // ماک دو شرکت فعال دارد

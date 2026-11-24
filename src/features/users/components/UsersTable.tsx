@@ -17,6 +17,8 @@ import { type User } from '../types';
 
 import { UserFormModal } from './UserFormModal';
 
+const displayUserNumber = (value?: string | null) => (value ? toPersianDigits(value) : '—');
+
 export const UsersTable = () => {
   const { page, pageSize, onPageChange } = usePaging();
   const [modalOpen, setModalOpen] = useState(false);
@@ -70,6 +72,8 @@ export const UsersTable = () => {
     { title: 'نام کاربری', dataIndex: 'userName' },
     { title: 'نام و نام خانوادگی', dataIndex: 'fullName' },
     { title: 'کد کاربر', dataIndex: 'userCode', render: (v: string) => toPersianDigits(v) },
+    { title: 'شماره موبایل', dataIndex: 'mobileNumber', render: displayUserNumber },
+    { title: 'کد ملی', dataIndex: 'nationalCode', render: displayUserNumber },
     { title: 'شعبه', dataIndex: 'branchName' },
     { title: 'کد شعبه', dataIndex: 'branchCode', render: (v: string) => toPersianDigits(v) },
     {

@@ -43,7 +43,7 @@ const INITIAL_VALUES: LoanRequestFormValues = { mode: ALLOCATION_MODE.FIXED };
 
 const AMOUNT_MODES = [
   { value: ALLOCATION_MODE.FIXED, label: 'مبلغ یکسان برای همه' },
-  { value: ALLOCATION_MODE.VARIABLE, label: 'مبلغ متفاوت برای هرکس' },
+  { value: ALLOCATION_MODE.VARIABLE, label: 'مبلغ متفاوت برای هرشخص' },
 ];
 
 /** مبلغ ردیف در حالت مبلغ متفاوت وارد شده است؟ */

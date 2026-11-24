@@ -1,6 +1,8 @@
+import { Suspense } from 'react';
 import { createBrowserRouter } from 'react-router';
 
-import { AuthLayout, MainLayout } from '@/component/layout';
+import { MainLayout } from '@/component/layout';
+import { FullPageLoading } from '@/component/loading';
 import { ROUTES } from '@/constant/routes';
 
 import { GuestRoute } from './GuestRoute';
@@ -8,7 +10,7 @@ import { lazyPage } from './lazyPage';
 import { ProtectedRoute } from './ProtectedRoute';
 
 // همه صفحات به‌صورت lazy لود می‌شوند؛ Suspense در لی‌اوت‌ها اسکلتون نمایش می‌دهد
-const LoginPage = lazyPage(() => import('@/features/auth/pages/LoginPage'), 'LoginPage');
+const LoginFlow = lazyPage(() => import('@/features/auth/LoginFlow'), 'LoginFlow');
 const HomePage = lazyPage(() => import('@/features/home/pages/HomePage'), 'HomePage');
 const BaseInfoPage = lazyPage(
   () => import('@/features/base-info/pages/BaseInfoPage'),
@@ -44,12 +46,14 @@ const ChangeLogPage = lazyPage(
 
 export const router = createBrowserRouter([
   {
+    path: ROUTES.LOGIN,
     element: (
       <GuestRoute>
-        <AuthLayout />
+        <Suspense fallback={<FullPageLoading />}>
+          <LoginFlow />
+        </Suspense>
       </GuestRoute>
     ),
-    children: [{ path: ROUTES.LOGIN, element: <LoginPage /> }],
   },
   {
     element: (

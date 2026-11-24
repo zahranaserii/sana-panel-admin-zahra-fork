@@ -1,5 +1,7 @@
 import { expect, test, type Page } from '@playwright/test';
 
+import { completeMockOtp } from './helpers/auth';
+
 const login = async (page: Page, errors: string[]) => {
   page.on('pageerror', (e) => errors.push(`pageerror: ${e.message}`));
   page.on('console', (m) => {
@@ -13,6 +15,7 @@ const login = async (page: Page, errors: string[]) => {
   await page.getByLabel('رمز عبور').fill('admin');
   await page.getByLabel('کد امنیتی').fill('24125');
   await page.getByRole('button', { name: /ورود/ }).click();
+  await completeMockOtp(page);
   await expect(page.getByRole('navigation')).toBeVisible();
 };
 
