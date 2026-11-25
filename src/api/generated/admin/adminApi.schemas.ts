@@ -1,6 +1,13 @@
 /**
  * تولید خودکار با Orval از روی OpenAPI — دستی ویرایش نشود (npm run api:generate)
  */
+export interface ChangeOwnPasswordRequest {
+  /** @nullable */
+  currentPassword?: string | null;
+  /** @nullable */
+  newPassword?: string | null;
+}
+
 export interface CreateAccessCommand {
   /** @nullable */
   title?: string | null;
@@ -15,6 +22,31 @@ export interface CreateAccessCommand {
   /** @nullable */
   description?: string | null;
   isActive?: boolean;
+}
+
+export interface CreatePanelUserCommand {
+  /** @nullable */
+  userName?: string | null;
+  /** @nullable */
+  password?: string | null;
+  /** @nullable */
+  fullName?: string | null;
+  /** @nullable */
+  userCode?: string | null;
+  /** @nullable */
+  branchCode?: string | null;
+  /** @nullable */
+  branchName?: string | null;
+  /** @nullable */
+  companyId?: string | null;
+  /** @nullable */
+  mobileNumber?: string | null;
+  /** @nullable */
+  nationalCode?: string | null;
+  /** @nullable */
+  email?: string | null;
+  /** @nullable */
+  roleIds?: number[] | null;
 }
 
 export interface CreateRoleCommand {
@@ -34,6 +66,20 @@ export interface CreateRoleCommand {
   token?: string | null;
 }
 
+export interface LoginChangePasswordCommand {
+  /** @nullable */
+  otpTracker?: string | null;
+  /** @nullable */
+  newPassword?: string | null;
+}
+
+export interface LoginOtpQuery {
+  /** @nullable */
+  otpTracker?: string | null;
+  /** @nullable */
+  code?: string | null;
+}
+
 export interface LoginQuery {
   /** @nullable */
   username?: string | null;
@@ -44,31 +90,15 @@ export interface LoginQuery {
   captchaValue?: string | null;
 }
 
-export interface PanelProfileDto {
-  panelUserId?: number;
+export interface ResendLoginOtpCommand {
   /** @nullable */
-  userName?: string | null;
-  /** @nullable */
-  fullName?: string | null;
-  /** @nullable */
-  userCode?: string | null;
-  /** @nullable */
-  branchCode?: string | null;
-  /** @nullable */
-  branchName?: string | null;
-  scopeType?: number;
-  /** @nullable */
-  scopeId?: number | null;
-  /** @nullable */
-  keys?: string[] | null;
+  otpTracker?: string | null;
 }
 
-export interface PanelProfileDtoApiResponse {
-  isSuccess?: boolean;
-  statusCode?: number;
+export interface ResetPanelUserPasswordCommand {
+  id?: number;
   /** @nullable */
-  message?: string | null;
-  data?: PanelProfileDto;
+  newPassword?: string | null;
 }
 
 export interface ResolveRequest {
@@ -91,6 +121,36 @@ export interface UpdateAccessCommand {
   /** @nullable */
   description?: string | null;
   isActive?: boolean;
+}
+
+export interface UpdatePanelUserCommand {
+  id?: number;
+  /** @nullable */
+  fullName?: string | null;
+  /** @nullable */
+  userCode?: string | null;
+  /** @nullable */
+  branchCode?: string | null;
+  /** @nullable */
+  branchName?: string | null;
+  /** @nullable */
+  email?: string | null;
+  /** @nullable */
+  userName?: string | null;
+  /** @nullable */
+  nationalCode?: string | null;
+  /** @nullable */
+  mobileNumber?: string | null;
+}
+
+export interface UpdatePanelUserRolesCommand {
+  id?: number;
+  /** @nullable */
+  roleIds?: number[] | null;
+  /** @nullable */
+  companyId?: string | null;
+  /** @nullable */
+  roleId?: number | null;
 }
 
 export interface UpdateRoleCommand {

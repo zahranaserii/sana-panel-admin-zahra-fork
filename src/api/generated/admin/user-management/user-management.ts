@@ -22,8 +22,12 @@ import type {
 
 import type {
   CreateAccessCommand,
+  CreatePanelUserCommand,
   CreateRoleCommand,
+  ResetPanelUserPasswordCommand,
   UpdateAccessCommand,
+  UpdatePanelUserCommand,
+  UpdatePanelUserRolesCommand,
   UpdateRoleCommand,
   UserManagementAccessesGetParams,
   UserManagementGroupsGetParams,
@@ -1030,7 +1034,68 @@ export function useUserManagementPanelUsersGet<TData = Awaited<ReturnType<typeof
 
 
 
-export const userManagementPanelUsersByIdGet = (
+export const userManagementPanelUsersPost = (
+    createPanelUserCommand?: BodyType<CreatePanelUserCommand>,
+ options?: SecondParameter<typeof apiClient>,signal?: AbortSignal
+) => {
+
+
+      return apiClient<void>(
+      {url: `/identity/UserManagement/PanelUsers`, method: 'POST',
+      headers: {'Content-Type': 'application/json; x-api-version=2', },
+      data: createPanelUserCommand, signal
+    },
+      options);
+    }
+
+
+
+
+export const getUserManagementPanelUsersPostMutationKey = () => ['userManagementPanelUsersPost'] as const;
+
+export const getUserManagementPanelUsersPostMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof userManagementPanelUsersPost>>, TError,UserManagementPanelUsersPostMutationVariables, TContext>, request?: SecondParameter<typeof apiClient>}
+): UseMutationOptions<Awaited<ReturnType<typeof userManagementPanelUsersPost>>, TError,UserManagementPanelUsersPostMutationVariables, TContext> => {
+
+const mutationKey = getUserManagementPanelUsersPostMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof userManagementPanelUsersPost>>, UserManagementPanelUsersPostMutationVariables> = (props) => {
+          const {data} = props ?? {};
+
+          return  userManagementPanelUsersPost(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type UserManagementPanelUsersPostMutationResult = NonNullable<Awaited<ReturnType<typeof userManagementPanelUsersPost>>>
+    export type UserManagementPanelUsersPostMutationBody = BodyType<CreatePanelUserCommand> | undefined
+    export type UserManagementPanelUsersPostMutationError = ErrorType<unknown>
+    export type UserManagementPanelUsersPostMutationVariables = {data?: BodyType<CreatePanelUserCommand>}
+
+    export const useUserManagementPanelUsersPost = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof userManagementPanelUsersPost>>, TError,UserManagementPanelUsersPostMutationVariables, TContext>, request?: SecondParameter<typeof apiClient>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof userManagementPanelUsersPost>>,
+        TError,
+        UserManagementPanelUsersPostMutationVariables,
+        TContext
+      > => {
+      return useMutation(getUserManagementPanelUsersPostMutationOptions(options), queryClient);
+    }
+    export const userManagementPanelUsersByIdGet = (
     id: number,
  options?: SecondParameter<typeof apiClient>,signal?: AbortSignal
 ) => {
@@ -1116,7 +1181,128 @@ export function useUserManagementPanelUsersByIdGet<TData = Awaited<ReturnType<ty
 
 
 
-export const userManagementPanelUsersByIdActivePut = (
+export const userManagementPanelUsersByIdPut = (
+    id: number,
+    updatePanelUserCommand?: BodyType<UpdatePanelUserCommand>,
+ options?: SecondParameter<typeof apiClient>,signal?: AbortSignal
+) => {
+
+
+      return apiClient<void>(
+      {url: `/identity/UserManagement/PanelUsers/${id}`, method: 'PUT',
+      headers: {'Content-Type': 'application/json; x-api-version=2', },
+      data: updatePanelUserCommand, signal
+    },
+      options);
+    }
+
+
+
+
+export const getUserManagementPanelUsersByIdPutMutationKey = () => ['userManagementPanelUsersByIdPut'] as const;
+
+export const getUserManagementPanelUsersByIdPutMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof userManagementPanelUsersByIdPut>>, TError,UserManagementPanelUsersByIdPutMutationVariables, TContext>, request?: SecondParameter<typeof apiClient>}
+): UseMutationOptions<Awaited<ReturnType<typeof userManagementPanelUsersByIdPut>>, TError,UserManagementPanelUsersByIdPutMutationVariables, TContext> => {
+
+const mutationKey = getUserManagementPanelUsersByIdPutMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof userManagementPanelUsersByIdPut>>, UserManagementPanelUsersByIdPutMutationVariables> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  userManagementPanelUsersByIdPut(id,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type UserManagementPanelUsersByIdPutMutationResult = NonNullable<Awaited<ReturnType<typeof userManagementPanelUsersByIdPut>>>
+    export type UserManagementPanelUsersByIdPutMutationBody = BodyType<UpdatePanelUserCommand> | undefined
+    export type UserManagementPanelUsersByIdPutMutationError = ErrorType<unknown>
+    export type UserManagementPanelUsersByIdPutMutationVariables = {id: number;data?: BodyType<UpdatePanelUserCommand>}
+
+    export const useUserManagementPanelUsersByIdPut = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof userManagementPanelUsersByIdPut>>, TError,UserManagementPanelUsersByIdPutMutationVariables, TContext>, request?: SecondParameter<typeof apiClient>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof userManagementPanelUsersByIdPut>>,
+        TError,
+        UserManagementPanelUsersByIdPutMutationVariables,
+        TContext
+      > => {
+      return useMutation(getUserManagementPanelUsersByIdPutMutationOptions(options), queryClient);
+    }
+    export const userManagementPanelUsersByIdDelete = (
+    id: number,
+ options?: SecondParameter<typeof apiClient>,signal?: AbortSignal
+) => {
+
+
+      return apiClient<void>(
+      {url: `/identity/UserManagement/PanelUsers/${id}`, method: 'DELETE', signal
+    },
+      options);
+    }
+
+
+
+
+export const getUserManagementPanelUsersByIdDeleteMutationKey = () => ['userManagementPanelUsersByIdDelete'] as const;
+
+export const getUserManagementPanelUsersByIdDeleteMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof userManagementPanelUsersByIdDelete>>, TError,UserManagementPanelUsersByIdDeleteMutationVariables, TContext>, request?: SecondParameter<typeof apiClient>}
+): UseMutationOptions<Awaited<ReturnType<typeof userManagementPanelUsersByIdDelete>>, TError,UserManagementPanelUsersByIdDeleteMutationVariables, TContext> => {
+
+const mutationKey = getUserManagementPanelUsersByIdDeleteMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof userManagementPanelUsersByIdDelete>>, UserManagementPanelUsersByIdDeleteMutationVariables> = (props) => {
+          const {id} = props ?? {};
+
+          return  userManagementPanelUsersByIdDelete(id,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type UserManagementPanelUsersByIdDeleteMutationResult = NonNullable<Awaited<ReturnType<typeof userManagementPanelUsersByIdDelete>>>
+
+    export type UserManagementPanelUsersByIdDeleteMutationError = ErrorType<unknown>
+    export type UserManagementPanelUsersByIdDeleteMutationVariables = {id: number}
+
+    export const useUserManagementPanelUsersByIdDelete = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof userManagementPanelUsersByIdDelete>>, TError,UserManagementPanelUsersByIdDeleteMutationVariables, TContext>, request?: SecondParameter<typeof apiClient>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof userManagementPanelUsersByIdDelete>>,
+        TError,
+        UserManagementPanelUsersByIdDeleteMutationVariables,
+        TContext
+      > => {
+      return useMutation(getUserManagementPanelUsersByIdDeleteMutationOptions(options), queryClient);
+    }
+    export const userManagementPanelUsersByIdActivePut = (
     id: number,
     params?: UserManagementPanelUsersByIdActivePutParams,
  options?: SecondParameter<typeof apiClient>,signal?: AbortSignal
@@ -1263,3 +1449,127 @@ export function useUserManagementAccessMatrixGet<TData = Awaited<ReturnType<type
 
 
 
+export const userManagementPanelUsersByIdRolesPut = (
+    id: number,
+    updatePanelUserRolesCommand?: BodyType<UpdatePanelUserRolesCommand>,
+ options?: SecondParameter<typeof apiClient>,signal?: AbortSignal
+) => {
+
+
+      return apiClient<void>(
+      {url: `/identity/UserManagement/PanelUsers/${id}/Roles`, method: 'PUT',
+      headers: {'Content-Type': 'application/json; x-api-version=2', },
+      data: updatePanelUserRolesCommand, signal
+    },
+      options);
+    }
+
+
+
+
+export const getUserManagementPanelUsersByIdRolesPutMutationKey = () => ['userManagementPanelUsersByIdRolesPut'] as const;
+
+export const getUserManagementPanelUsersByIdRolesPutMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof userManagementPanelUsersByIdRolesPut>>, TError,UserManagementPanelUsersByIdRolesPutMutationVariables, TContext>, request?: SecondParameter<typeof apiClient>}
+): UseMutationOptions<Awaited<ReturnType<typeof userManagementPanelUsersByIdRolesPut>>, TError,UserManagementPanelUsersByIdRolesPutMutationVariables, TContext> => {
+
+const mutationKey = getUserManagementPanelUsersByIdRolesPutMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof userManagementPanelUsersByIdRolesPut>>, UserManagementPanelUsersByIdRolesPutMutationVariables> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  userManagementPanelUsersByIdRolesPut(id,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type UserManagementPanelUsersByIdRolesPutMutationResult = NonNullable<Awaited<ReturnType<typeof userManagementPanelUsersByIdRolesPut>>>
+    export type UserManagementPanelUsersByIdRolesPutMutationBody = BodyType<UpdatePanelUserRolesCommand> | undefined
+    export type UserManagementPanelUsersByIdRolesPutMutationError = ErrorType<unknown>
+    export type UserManagementPanelUsersByIdRolesPutMutationVariables = {id: number;data?: BodyType<UpdatePanelUserRolesCommand>}
+
+    export const useUserManagementPanelUsersByIdRolesPut = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof userManagementPanelUsersByIdRolesPut>>, TError,UserManagementPanelUsersByIdRolesPutMutationVariables, TContext>, request?: SecondParameter<typeof apiClient>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof userManagementPanelUsersByIdRolesPut>>,
+        TError,
+        UserManagementPanelUsersByIdRolesPutMutationVariables,
+        TContext
+      > => {
+      return useMutation(getUserManagementPanelUsersByIdRolesPutMutationOptions(options), queryClient);
+    }
+    export const userManagementPanelUsersByIdResetPasswordPost = (
+    id: number,
+    resetPanelUserPasswordCommand?: BodyType<ResetPanelUserPasswordCommand>,
+ options?: SecondParameter<typeof apiClient>,signal?: AbortSignal
+) => {
+
+
+      return apiClient<void>(
+      {url: `/identity/UserManagement/PanelUsers/${id}/ResetPassword`, method: 'POST',
+      headers: {'Content-Type': 'application/json; x-api-version=2', },
+      data: resetPanelUserPasswordCommand, signal
+    },
+      options);
+    }
+
+
+
+
+export const getUserManagementPanelUsersByIdResetPasswordPostMutationKey = () => ['userManagementPanelUsersByIdResetPasswordPost'] as const;
+
+export const getUserManagementPanelUsersByIdResetPasswordPostMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof userManagementPanelUsersByIdResetPasswordPost>>, TError,UserManagementPanelUsersByIdResetPasswordPostMutationVariables, TContext>, request?: SecondParameter<typeof apiClient>}
+): UseMutationOptions<Awaited<ReturnType<typeof userManagementPanelUsersByIdResetPasswordPost>>, TError,UserManagementPanelUsersByIdResetPasswordPostMutationVariables, TContext> => {
+
+const mutationKey = getUserManagementPanelUsersByIdResetPasswordPostMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof userManagementPanelUsersByIdResetPasswordPost>>, UserManagementPanelUsersByIdResetPasswordPostMutationVariables> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  userManagementPanelUsersByIdResetPasswordPost(id,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type UserManagementPanelUsersByIdResetPasswordPostMutationResult = NonNullable<Awaited<ReturnType<typeof userManagementPanelUsersByIdResetPasswordPost>>>
+    export type UserManagementPanelUsersByIdResetPasswordPostMutationBody = BodyType<ResetPanelUserPasswordCommand> | undefined
+    export type UserManagementPanelUsersByIdResetPasswordPostMutationError = ErrorType<unknown>
+    export type UserManagementPanelUsersByIdResetPasswordPostMutationVariables = {id: number;data?: BodyType<ResetPanelUserPasswordCommand>}
+
+    export const useUserManagementPanelUsersByIdResetPasswordPost = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof userManagementPanelUsersByIdResetPasswordPost>>, TError,UserManagementPanelUsersByIdResetPasswordPostMutationVariables, TContext>, request?: SecondParameter<typeof apiClient>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof userManagementPanelUsersByIdResetPasswordPost>>,
+        TError,
+        UserManagementPanelUsersByIdResetPasswordPostMutationVariables,
+        TContext
+      > => {
+      return useMutation(getUserManagementPanelUsersByIdResetPasswordPostMutationOptions(options), queryClient);
+    }

@@ -23,15 +23,32 @@ export const getUsers = (params: UserListParams) =>
 
 export const getUser = (id: number) => http.get<User>(USER_MANAGEMENT.USER(id));
 
-/** بکند ندارد — نام کاربری تکراری → ۴۰۹ */
-export const createUser = (body: UserPayload, config?: RequestConfig) =>
-  http.post<User, UserPayload>(USER_MANAGEMENT.USERS, body, config);
+export const createUser = ({ roleId, ...body }: UserPayload, config?: RequestConfig) =>
+  http.post(USER_MANAGEMENT.USERS, { ...body, roleIds: roleId === null ? [] : [roleId] }, config);
 
-/** بکند ندارد */
-export const updateUser = (id: number, body: UserPayload, config?: RequestConfig) =>
-  http.put<User, UserPayload>(USER_MANAGEMENT.USER(id), body, config);
+export const updateUser = async (
+  user: User,
+  { roleId, password, ...body }: UserPayload,
+  config?: RequestConfig,
+) => {
+  const id = user.id;
+  const url = USER_MANAGEMENT.USER(id);
+  const silentSuccess = { ...config, successToast: false };
+  const roleChanged = roleId !== (user.roles[0]?.roleId ?? null);
+  await http.put(
+    url,
+    { ...body, id, email: user.email },
+    roleChanged || password ? silentSuccess : config,
+  );
+  if (roleChanged)
+    await http.put(
+      url + '/Roles',
+      { id, roleId, roleIds: roleId === null ? [] : [roleId], companyId: user.companyId },
+      password ? silentSuccess : config,
+    );
+  if (password) await http.post(url + '/ResetPassword', { id, newPassword: password }, config);
+};
 
-/** بکند ندارد (بک‌اند به‌جای حذف، فعال/غیرفعال کردن دارد) — حذف آخرین کاربر مجاز نیست (۴۲۲) */
 export const deleteUser = (id: number) => http.delete<void>(USER_MANAGEMENT.USER(id));
 
 /** در فرانت استفاده نشده */

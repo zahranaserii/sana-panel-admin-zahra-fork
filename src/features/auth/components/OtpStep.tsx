@@ -1,7 +1,7 @@
-import { ArrowRightOutlined, SafetyCertificateOutlined } from '@ant-design/icons';
+import { ArrowRightOutlined, ReloadOutlined, SafetyCertificateOutlined } from '@ant-design/icons';
 import { useMutation } from '@tanstack/react-query';
 import { isAxiosError } from 'axios';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 
 import { Button } from '@/component/button';
@@ -11,12 +11,15 @@ import { Typography } from '@/component/typography';
 
 interface OtpStepProps {
   onSubmit: (code: string) => Promise<void>;
+  maskedMobile: string | null;
+  expiresAt: number;
+  onResend: () => Promise<void>;
   onBack: () => void;
 }
 
 const OTP_LENGTH = 6;
 
-export const OtpStep = ({ onSubmit, onBack }: OtpStepProps) => {
+export const OtpStep = ({ onSubmit, onBack, onResend, maskedMobile, expiresAt }: OtpStepProps) => {
   const [code, setCode] = useState('');
   const { mutate, isPending } = useMutation({
     mutationFn: onSubmit,
@@ -24,7 +27,16 @@ export const OtpStep = ({ onSubmit, onBack }: OtpStepProps) => {
       if (!isAxiosError(error)) toast.error(error.message);
     },
   });
-  const canVerify = code.length === OTP_LENGTH && /^\d+$/.test(code) && !isPending;
+  const [now, setNow] = useState(Date.now);
+  const remaining = Math.max(0, Math.ceil((expiresAt - now) / 1000)) || 0;
+  useEffect(() => {
+    if (now >= expiresAt) return;
+    const timer = window.setTimeout(() => setNow(Date.now()), 1000);
+    return () => window.clearTimeout(timer);
+  }, [now, expiresAt]);
+  const resend = useMutation({ mutationFn: onResend });
+  const busy = isPending || resend.isPending;
+  const canVerify = code.length === OTP_LENGTH && /^\d+$/.test(code) && !busy && remaining > 0;
 
   return (
     <section aria-label="تأیید ورود" className="text-center">
@@ -35,7 +47,15 @@ export const OtpStep = ({ onSubmit, onBack }: OtpStepProps) => {
         تأیید ورود
       </Typography>
       <Typography as="paragraph" size="md" weight={400} color="soft" className="mt-2 mb-6">
-        کد یک‌بارمصرف شش‌رقمی را وارد کنید.
+        کد ۶ رقمی{' '}
+        {maskedMobile ? (
+          <>
+            که به شمارهٔ <bdi dir="ltr">{maskedMobile}</bdi> ارسال شده
+          </>
+        ) : (
+          'ارسال‌شده'
+        )}{' '}
+        را وارد کنید.
       </Typography>
       <Form
         onFinish={() => {
@@ -47,9 +67,26 @@ export const OtpStep = ({ onSubmit, onBack }: OtpStepProps) => {
           length={OTP_LENGTH}
           className="mb-5 grid w-full grid-cols-6"
           autoFocus
-          disabled={isPending}
+          disabled={busy}
           onInput={(digits) => setCode(digits.join(''))}
         />
+        <div className="mb-4">
+          {remaining > 0 ? (
+            <span role="timer" dir="ltr">
+              {Math.floor(remaining / 60)}:{String(remaining % 60).padStart(2, '0')}
+            </span>
+          ) : (
+            <Button
+              variant="text"
+              icon={<ReloadOutlined />}
+              disabled={busy}
+              loading={resend.isPending}
+              onClick={() => resend.mutate()}
+            >
+              ارسال مجدد
+            </Button>
+          )}
+        </div>
         <Button htmlType="submit" size="large" block loading={isPending} disabled={!canVerify}>
           تأیید و ورود
         </Button>
@@ -57,7 +94,7 @@ export const OtpStep = ({ onSubmit, onBack }: OtpStepProps) => {
           variant="text"
           icon={<ArrowRightOutlined />}
           className="mt-3"
-          disabled={isPending}
+          disabled={busy}
           onClick={onBack}
         >
           بازگشت به ورود

@@ -1,4 +1,4 @@
-import { type PanelProfileDto } from '@/api/generated/admin/adminApi.schemas';
+import { type PanelProfileDto } from '@/features/auth/profile';
 
 export interface MockUser {
   username: string;
@@ -15,7 +15,7 @@ export const MOCK_USERS: MockUser[] = [
   {
     username: 'admin',
     password: 'admin',
-    mustChangePassword: import.meta.env.VITE_VERCEL_ENV === 'preview',
+    mustChangePassword: true,
     token: 'mock-token-admin',
     profile: {
       panelUserId: 1,

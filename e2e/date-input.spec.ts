@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test';
 
-import { completeMockOtp } from './helpers/auth';
+import { changeInitialAdminPassword, completeMockOtp } from './helpers/auth';
 
 test('hire-date pickers in loan allocation keep the month the user navigated to', async ({
   page,
@@ -10,6 +10,7 @@ test('hire-date pickers in loan allocation keep the month the user navigated to'
   await page.getByLabel('رمز عبور').fill('admin');
   await page.getByLabel('کد امنیتی').fill('24125');
   await page.getByRole('button', { name: /ورود/ }).click();
+  await changeInitialAdminPassword(page);
   await completeMockOtp(page);
   await expect(page.getByRole('navigation')).toBeVisible();
   await page.goto('/credit?companyId=1&date=2026-11-03');
@@ -38,6 +39,7 @@ test('credit base date can be changed within the backend range', async ({ page }
   await page.getByLabel('رمز عبور').fill('admin');
   await page.getByLabel('کد امنیتی').fill('24125');
   await page.getByRole('button', { name: /ورود/ }).click();
+  await changeInitialAdminPassword(page);
   await completeMockOtp(page);
   await expect(page.getByRole('navigation')).toBeVisible();
   await page.goto('/credit?companyId=1&date=2026-11-03');

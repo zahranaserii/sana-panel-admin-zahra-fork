@@ -1,6 +1,6 @@
 import { expect, test, type Page } from '@playwright/test';
 
-import { completeMockOtp } from './helpers/auth';
+import { changeInitialAdminPassword, completeMockOtp } from './helpers/auth';
 
 /** بدنه درخواست‌های پیش‌نمایش (ماک داخل صفحه با Request ساخته می‌شود و به شبکه نمی‌رسد) */
 const recordPreviews = `(() => {
@@ -26,6 +26,7 @@ const openCredit = async (page: Page) => {
   await page.getByLabel('رمز عبور').fill('admin');
   await page.getByLabel('کد امنیتی').fill('24125');
   await page.getByRole('button', { name: /ورود/ }).click();
+  await changeInitialAdminPassword(page);
   await completeMockOtp(page);
   await expect(page.getByRole('navigation')).toBeVisible();
   // ۱۴۰۵/۰۸/۱۲: روز مجاز انتقال اعتبار شرکت ۱ در ماک

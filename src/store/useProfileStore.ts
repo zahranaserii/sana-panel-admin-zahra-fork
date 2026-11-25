@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 
-import { type PanelProfileDto } from '@/api/generated/admin/adminApi.schemas';
+import { type PanelProfileDto } from '@/features/auth/profile';
 
 import { registerReset } from './resettable';
 

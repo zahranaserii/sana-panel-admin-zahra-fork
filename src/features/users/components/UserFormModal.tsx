@@ -60,8 +60,11 @@ export const UserFormModal = ({ open, userId, onClose }: UserFormModalProps) => 
   });
 
   const { mutateAsync } = useMutation({
-    mutationFn: (values: UserPayload) =>
-      userId ? updateUser(userId, values, SAVE_CONFIG) : createUser(values, SAVE_CONFIG),
+    mutationFn: async (values: UserPayload) => {
+      if (!userId) return createUser(values, SAVE_CONFIG);
+      if (!detail) throw new Error('اطلاعات کاربر دریافت نشد.');
+      return updateUser(detail, values, SAVE_CONFIG);
+    },
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: QUERY_KEYS.USERS.ALL });
     },

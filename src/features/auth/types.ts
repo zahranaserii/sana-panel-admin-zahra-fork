@@ -9,39 +9,33 @@ export interface LoginRequest {
 export type LoginFormValues = Omit<LoginRequest, 'captchaToken'>;
 
 export interface CaptchaResponse {
-  captchaToken: string;
-  image: string;
+  token: string;
+  base64Image: string;
 }
 
 export interface AuthSessionResponse {
   token: string;
 }
 
-export interface OtpChallenge {
-  challengeId: string;
+export interface LoginResponse {
+  token: string | null;
+  otpTracker: string | null;
+  otpExpireTime: string | null;
+  mustChangePassword: boolean;
+  maskedMobile: string | null;
 }
-
-export interface PasswordChangeRequired {
-  mustChangePassword: true;
-  otpTracker: string;
-}
-
-export type LoginResponse =
-  | PasswordChangeRequired
-  | ((AuthSessionResponse | OtpChallenge | { otpTracker: string }) & {
-      mustChangePassword?: false;
-      otpTracker?: string;
-    });
 
 export interface ChangePasswordFormValues {
   newPassword: string;
   confirmNewPassword: string;
 }
 
-export interface ChangePasswordRequest extends ChangePasswordFormValues {
+export interface ChangePasswordRequest {
+  newPassword: string;
   otpTracker: string;
 }
 
-export interface VerifyOtpRequest extends OtpChallenge {
+export interface VerifyOtpRequest {
+  otpTracker: string;
   code: string;
 }

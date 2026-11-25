@@ -22,7 +22,11 @@ import type {
 
 import type {
   AuthenticationLogoutGetParams,
-  LoginQuery
+  ChangeOwnPasswordRequest,
+  LoginChangePasswordCommand,
+  LoginOtpQuery,
+  LoginQuery,
+  ResendLoginOtpCommand
 } from '../adminApi.schemas';
 
 import { apiClient } from '../../../../services/http/apiClient';
@@ -48,68 +52,7 @@ const withQueryKey = <T extends object, K>(query: T, queryKey: K): T & { queryKe
   return result;
 };
 
-export const authenticationLoginPost = (
-    loginQuery?: BodyType<LoginQuery>,
- options?: SecondParameter<typeof apiClient>,signal?: AbortSignal
-) => {
-
-
-      return apiClient<void>(
-      {url: `/identity/Authentication/Login`, method: 'POST',
-      headers: {'Content-Type': 'application/json; x-api-version=2', },
-      data: loginQuery, signal
-    },
-      options);
-    }
-
-
-
-
-export const getAuthenticationLoginPostMutationKey = () => ['authenticationLoginPost'] as const;
-
-export const getAuthenticationLoginPostMutationOptions = <TError = ErrorType<unknown>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof authenticationLoginPost>>, TError,AuthenticationLoginPostMutationVariables, TContext>, request?: SecondParameter<typeof apiClient>}
-): UseMutationOptions<Awaited<ReturnType<typeof authenticationLoginPost>>, TError,AuthenticationLoginPostMutationVariables, TContext> => {
-
-const mutationKey = getAuthenticationLoginPostMutationKey();
-const {mutation: mutationOptions, request: requestOptions} = options ?
-      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
-      options
-      : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }, request: undefined};
-
-
-
-
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof authenticationLoginPost>>, AuthenticationLoginPostMutationVariables> = (props) => {
-          const {data} = props ?? {};
-
-          return  authenticationLoginPost(data,requestOptions)
-        }
-
-
-
-
-
-
-  return  { mutationFn, ...mutationOptions }}
-
-    export type AuthenticationLoginPostMutationResult = NonNullable<Awaited<ReturnType<typeof authenticationLoginPost>>>
-    export type AuthenticationLoginPostMutationBody = BodyType<LoginQuery> | undefined
-    export type AuthenticationLoginPostMutationError = ErrorType<unknown>
-    export type AuthenticationLoginPostMutationVariables = {data?: BodyType<LoginQuery>}
-
-    export const useAuthenticationLoginPost = <TError = ErrorType<unknown>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof authenticationLoginPost>>, TError,AuthenticationLoginPostMutationVariables, TContext>, request?: SecondParameter<typeof apiClient>}
- , queryClient?: QueryClient): UseMutationResult<
-        Awaited<ReturnType<typeof authenticationLoginPost>>,
-        TError,
-        AuthenticationLoginPostMutationVariables,
-        TContext
-      > => {
-      return useMutation(getAuthenticationLoginPostMutationOptions(options), queryClient);
-    }
-    export const authenticationGenerateGet = (
+export const authenticationGenerateGet = (
 
  options?: SecondParameter<typeof apiClient>,signal?: AbortSignal
 ) => {
@@ -340,4 +283,309 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
         TContext
       > => {
       return useMutation(getAuthenticationLogoutGetMutationOptions(options), queryClient);
+    }
+    export const authenticationMyPasswordPost = (
+    changeOwnPasswordRequest?: BodyType<ChangeOwnPasswordRequest>,
+ options?: SecondParameter<typeof apiClient>,signal?: AbortSignal
+) => {
+
+
+      return apiClient<void>(
+      {url: `/identity/Authentication/MyPassword`, method: 'POST',
+      headers: {'Content-Type': 'application/json; x-api-version=2', },
+      data: changeOwnPasswordRequest, signal
+    },
+      options);
+    }
+
+
+
+
+export const getAuthenticationMyPasswordPostMutationKey = () => ['authenticationMyPasswordPost'] as const;
+
+export const getAuthenticationMyPasswordPostMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof authenticationMyPasswordPost>>, TError,AuthenticationMyPasswordPostMutationVariables, TContext>, request?: SecondParameter<typeof apiClient>}
+): UseMutationOptions<Awaited<ReturnType<typeof authenticationMyPasswordPost>>, TError,AuthenticationMyPasswordPostMutationVariables, TContext> => {
+
+const mutationKey = getAuthenticationMyPasswordPostMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof authenticationMyPasswordPost>>, AuthenticationMyPasswordPostMutationVariables> = (props) => {
+          const {data} = props ?? {};
+
+          return  authenticationMyPasswordPost(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type AuthenticationMyPasswordPostMutationResult = NonNullable<Awaited<ReturnType<typeof authenticationMyPasswordPost>>>
+    export type AuthenticationMyPasswordPostMutationBody = BodyType<ChangeOwnPasswordRequest> | undefined
+    export type AuthenticationMyPasswordPostMutationError = ErrorType<unknown>
+    export type AuthenticationMyPasswordPostMutationVariables = {data?: BodyType<ChangeOwnPasswordRequest>}
+
+    export const useAuthenticationMyPasswordPost = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof authenticationMyPasswordPost>>, TError,AuthenticationMyPasswordPostMutationVariables, TContext>, request?: SecondParameter<typeof apiClient>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof authenticationMyPasswordPost>>,
+        TError,
+        AuthenticationMyPasswordPostMutationVariables,
+        TContext
+      > => {
+      return useMutation(getAuthenticationMyPasswordPostMutationOptions(options), queryClient);
+    }
+    export const authenticationLoginPost = (
+    loginQuery?: BodyType<LoginQuery>,
+ options?: SecondParameter<typeof apiClient>,signal?: AbortSignal
+) => {
+
+
+      return apiClient<void>(
+      {url: `/identity/Authentication/Login`, method: 'POST',
+      headers: {'Content-Type': 'application/json; x-api-version=2', },
+      data: loginQuery, signal
+    },
+      options);
+    }
+
+
+
+
+export const getAuthenticationLoginPostMutationKey = () => ['authenticationLoginPost'] as const;
+
+export const getAuthenticationLoginPostMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof authenticationLoginPost>>, TError,AuthenticationLoginPostMutationVariables, TContext>, request?: SecondParameter<typeof apiClient>}
+): UseMutationOptions<Awaited<ReturnType<typeof authenticationLoginPost>>, TError,AuthenticationLoginPostMutationVariables, TContext> => {
+
+const mutationKey = getAuthenticationLoginPostMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof authenticationLoginPost>>, AuthenticationLoginPostMutationVariables> = (props) => {
+          const {data} = props ?? {};
+
+          return  authenticationLoginPost(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type AuthenticationLoginPostMutationResult = NonNullable<Awaited<ReturnType<typeof authenticationLoginPost>>>
+    export type AuthenticationLoginPostMutationBody = BodyType<LoginQuery> | undefined
+    export type AuthenticationLoginPostMutationError = ErrorType<unknown>
+    export type AuthenticationLoginPostMutationVariables = {data?: BodyType<LoginQuery>}
+
+    export const useAuthenticationLoginPost = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof authenticationLoginPost>>, TError,AuthenticationLoginPostMutationVariables, TContext>, request?: SecondParameter<typeof apiClient>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof authenticationLoginPost>>,
+        TError,
+        AuthenticationLoginPostMutationVariables,
+        TContext
+      > => {
+      return useMutation(getAuthenticationLoginPostMutationOptions(options), queryClient);
+    }
+    export const authenticationLoginOtpPost = (
+    loginOtpQuery?: BodyType<LoginOtpQuery>,
+ options?: SecondParameter<typeof apiClient>,signal?: AbortSignal
+) => {
+
+
+      return apiClient<void>(
+      {url: `/identity/Authentication/LoginOtp`, method: 'POST',
+      headers: {'Content-Type': 'application/json; x-api-version=2', },
+      data: loginOtpQuery, signal
+    },
+      options);
+    }
+
+
+
+
+export const getAuthenticationLoginOtpPostMutationKey = () => ['authenticationLoginOtpPost'] as const;
+
+export const getAuthenticationLoginOtpPostMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof authenticationLoginOtpPost>>, TError,AuthenticationLoginOtpPostMutationVariables, TContext>, request?: SecondParameter<typeof apiClient>}
+): UseMutationOptions<Awaited<ReturnType<typeof authenticationLoginOtpPost>>, TError,AuthenticationLoginOtpPostMutationVariables, TContext> => {
+
+const mutationKey = getAuthenticationLoginOtpPostMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof authenticationLoginOtpPost>>, AuthenticationLoginOtpPostMutationVariables> = (props) => {
+          const {data} = props ?? {};
+
+          return  authenticationLoginOtpPost(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type AuthenticationLoginOtpPostMutationResult = NonNullable<Awaited<ReturnType<typeof authenticationLoginOtpPost>>>
+    export type AuthenticationLoginOtpPostMutationBody = BodyType<LoginOtpQuery> | undefined
+    export type AuthenticationLoginOtpPostMutationError = ErrorType<unknown>
+    export type AuthenticationLoginOtpPostMutationVariables = {data?: BodyType<LoginOtpQuery>}
+
+    export const useAuthenticationLoginOtpPost = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof authenticationLoginOtpPost>>, TError,AuthenticationLoginOtpPostMutationVariables, TContext>, request?: SecondParameter<typeof apiClient>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof authenticationLoginOtpPost>>,
+        TError,
+        AuthenticationLoginOtpPostMutationVariables,
+        TContext
+      > => {
+      return useMutation(getAuthenticationLoginOtpPostMutationOptions(options), queryClient);
+    }
+    export const authenticationLoginOtpResendPost = (
+    resendLoginOtpCommand?: BodyType<ResendLoginOtpCommand>,
+ options?: SecondParameter<typeof apiClient>,signal?: AbortSignal
+) => {
+
+
+      return apiClient<void>(
+      {url: `/identity/Authentication/LoginOtp/Resend`, method: 'POST',
+      headers: {'Content-Type': 'application/json; x-api-version=2', },
+      data: resendLoginOtpCommand, signal
+    },
+      options);
+    }
+
+
+
+
+export const getAuthenticationLoginOtpResendPostMutationKey = () => ['authenticationLoginOtpResendPost'] as const;
+
+export const getAuthenticationLoginOtpResendPostMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof authenticationLoginOtpResendPost>>, TError,AuthenticationLoginOtpResendPostMutationVariables, TContext>, request?: SecondParameter<typeof apiClient>}
+): UseMutationOptions<Awaited<ReturnType<typeof authenticationLoginOtpResendPost>>, TError,AuthenticationLoginOtpResendPostMutationVariables, TContext> => {
+
+const mutationKey = getAuthenticationLoginOtpResendPostMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof authenticationLoginOtpResendPost>>, AuthenticationLoginOtpResendPostMutationVariables> = (props) => {
+          const {data} = props ?? {};
+
+          return  authenticationLoginOtpResendPost(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type AuthenticationLoginOtpResendPostMutationResult = NonNullable<Awaited<ReturnType<typeof authenticationLoginOtpResendPost>>>
+    export type AuthenticationLoginOtpResendPostMutationBody = BodyType<ResendLoginOtpCommand> | undefined
+    export type AuthenticationLoginOtpResendPostMutationError = ErrorType<unknown>
+    export type AuthenticationLoginOtpResendPostMutationVariables = {data?: BodyType<ResendLoginOtpCommand>}
+
+    export const useAuthenticationLoginOtpResendPost = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof authenticationLoginOtpResendPost>>, TError,AuthenticationLoginOtpResendPostMutationVariables, TContext>, request?: SecondParameter<typeof apiClient>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof authenticationLoginOtpResendPost>>,
+        TError,
+        AuthenticationLoginOtpResendPostMutationVariables,
+        TContext
+      > => {
+      return useMutation(getAuthenticationLoginOtpResendPostMutationOptions(options), queryClient);
+    }
+    export const authenticationLoginChangePasswordPost = (
+    loginChangePasswordCommand?: BodyType<LoginChangePasswordCommand>,
+ options?: SecondParameter<typeof apiClient>,signal?: AbortSignal
+) => {
+
+
+      return apiClient<void>(
+      {url: `/identity/Authentication/LoginChangePassword`, method: 'POST',
+      headers: {'Content-Type': 'application/json; x-api-version=2', },
+      data: loginChangePasswordCommand, signal
+    },
+      options);
+    }
+
+
+
+
+export const getAuthenticationLoginChangePasswordPostMutationKey = () => ['authenticationLoginChangePasswordPost'] as const;
+
+export const getAuthenticationLoginChangePasswordPostMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof authenticationLoginChangePasswordPost>>, TError,AuthenticationLoginChangePasswordPostMutationVariables, TContext>, request?: SecondParameter<typeof apiClient>}
+): UseMutationOptions<Awaited<ReturnType<typeof authenticationLoginChangePasswordPost>>, TError,AuthenticationLoginChangePasswordPostMutationVariables, TContext> => {
+
+const mutationKey = getAuthenticationLoginChangePasswordPostMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof authenticationLoginChangePasswordPost>>, AuthenticationLoginChangePasswordPostMutationVariables> = (props) => {
+          const {data} = props ?? {};
+
+          return  authenticationLoginChangePasswordPost(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type AuthenticationLoginChangePasswordPostMutationResult = NonNullable<Awaited<ReturnType<typeof authenticationLoginChangePasswordPost>>>
+    export type AuthenticationLoginChangePasswordPostMutationBody = BodyType<LoginChangePasswordCommand> | undefined
+    export type AuthenticationLoginChangePasswordPostMutationError = ErrorType<unknown>
+    export type AuthenticationLoginChangePasswordPostMutationVariables = {data?: BodyType<LoginChangePasswordCommand>}
+
+    export const useAuthenticationLoginChangePasswordPost = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof authenticationLoginChangePasswordPost>>, TError,AuthenticationLoginChangePasswordPostMutationVariables, TContext>, request?: SecondParameter<typeof apiClient>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof authenticationLoginChangePasswordPost>>,
+        TError,
+        AuthenticationLoginChangePasswordPostMutationVariables,
+        TContext
+      > => {
+      return useMutation(getAuthenticationLoginChangePasswordPostMutationOptions(options), queryClient);
     }

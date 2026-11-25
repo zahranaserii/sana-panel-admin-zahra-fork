@@ -142,8 +142,38 @@ export const getUserManagementPanelUsersGetMockHandler = (overrideResponse?: voi
   }, options)
 }
 
+export const getUserManagementPanelUsersPostMockHandler = (overrideResponse?: void | ((info: Parameters<Parameters<typeof http.post>[1]>[0]) => Promise<void> | void), options?: RequestHandlerOptions) => {
+  return http.post('*/identity/UserManagement/PanelUsers', async (info: Parameters<Parameters<typeof http.post>[1]>[0]) => {await delay(250);
+  if (typeof overrideResponse === 'function') {await overrideResponse(info); }
+
+    return new HttpResponse(null,
+      { status: 200
+      })
+  }, options)
+}
+
 export const getUserManagementPanelUsersByIdGetMockHandler = (overrideResponse?: void | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<void> | void), options?: RequestHandlerOptions) => {
   return http.get('*/identity/UserManagement/PanelUsers/:id', async (info: Parameters<Parameters<typeof http.get>[1]>[0]) => {await delay(250);
+  if (typeof overrideResponse === 'function') {await overrideResponse(info); }
+
+    return new HttpResponse(null,
+      { status: 200
+      })
+  }, options)
+}
+
+export const getUserManagementPanelUsersByIdPutMockHandler = (overrideResponse?: void | ((info: Parameters<Parameters<typeof http.put>[1]>[0]) => Promise<void> | void), options?: RequestHandlerOptions) => {
+  return http.put('*/identity/UserManagement/PanelUsers/:id', async (info: Parameters<Parameters<typeof http.put>[1]>[0]) => {await delay(250);
+  if (typeof overrideResponse === 'function') {await overrideResponse(info); }
+
+    return new HttpResponse(null,
+      { status: 200
+      })
+  }, options)
+}
+
+export const getUserManagementPanelUsersByIdDeleteMockHandler = (overrideResponse?: void | ((info: Parameters<Parameters<typeof http.delete>[1]>[0]) => Promise<void> | void), options?: RequestHandlerOptions) => {
+  return http.delete('*/identity/UserManagement/PanelUsers/:id', async (info: Parameters<Parameters<typeof http.delete>[1]>[0]) => {await delay(250);
   if (typeof overrideResponse === 'function') {await overrideResponse(info); }
 
     return new HttpResponse(null,
@@ -171,6 +201,26 @@ export const getUserManagementAccessMatrixGetMockHandler = (overrideResponse?: v
       })
   }, options)
 }
+
+export const getUserManagementPanelUsersByIdRolesPutMockHandler = (overrideResponse?: void | ((info: Parameters<Parameters<typeof http.put>[1]>[0]) => Promise<void> | void), options?: RequestHandlerOptions) => {
+  return http.put('*/identity/UserManagement/PanelUsers/:id/Roles', async (info: Parameters<Parameters<typeof http.put>[1]>[0]) => {await delay(250);
+  if (typeof overrideResponse === 'function') {await overrideResponse(info); }
+
+    return new HttpResponse(null,
+      { status: 200
+      })
+  }, options)
+}
+
+export const getUserManagementPanelUsersByIdResetPasswordPostMockHandler = (overrideResponse?: void | ((info: Parameters<Parameters<typeof http.post>[1]>[0]) => Promise<void> | void), options?: RequestHandlerOptions) => {
+  return http.post('*/identity/UserManagement/PanelUsers/:id/ResetPassword', async (info: Parameters<Parameters<typeof http.post>[1]>[0]) => {await delay(250);
+  if (typeof overrideResponse === 'function') {await overrideResponse(info); }
+
+    return new HttpResponse(null,
+      { status: 200
+      })
+  }, options)
+}
 export const getUserManagementMock = () => [
   getUserManagementAccessesGetMockHandler(),
   getUserManagementAccessesPostMockHandler(),
@@ -185,7 +235,12 @@ export const getUserManagementMock = () => [
   getUserManagementGroupsByIdGetMockHandler(),
   getUserManagementGroupsByIdPutMockHandler(),
   getUserManagementPanelUsersGetMockHandler(),
+  getUserManagementPanelUsersPostMockHandler(),
   getUserManagementPanelUsersByIdGetMockHandler(),
+  getUserManagementPanelUsersByIdPutMockHandler(),
+  getUserManagementPanelUsersByIdDeleteMockHandler(),
   getUserManagementPanelUsersByIdActivePutMockHandler(),
-  getUserManagementAccessMatrixGetMockHandler()
+  getUserManagementAccessMatrixGetMockHandler(),
+  getUserManagementPanelUsersByIdRolesPutMockHandler(),
+  getUserManagementPanelUsersByIdResetPasswordPostMockHandler()
 ]

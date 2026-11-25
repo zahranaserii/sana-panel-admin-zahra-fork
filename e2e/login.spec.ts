@@ -1,8 +1,9 @@
 import { expect, test } from '@playwright/test';
 
-import { completeMockOtp, otpInputs } from './helpers/auth';
+import { changeInitialAdminPassword, completeMockOtp, otpInputs } from './helpers/auth';
 
 test('OTP replaces the form inside the login frame before entering the panel', async ({ page }) => {
+  await page.clock.install();
   await page.goto('/');
   await expect(page).toHaveURL(/\/login$/);
 
@@ -14,11 +15,19 @@ test('OTP replaces the form inside the login frame before entering the panel', a
   await page.getByLabel('نام کاربری').fill('admin');
   await page.getByLabel('رمز عبور').fill('admin');
   await expect(page.getByRole('img', { name: 'تصویر کپچا' })).toBeVisible();
+  await expect
+    .poll(() =>
+      page
+        .getByRole('img', { name: 'تصویر کپچا' })
+        .evaluate((image) => (image as { naturalWidth: number }).naturalWidth),
+    )
+    .toBe(96);
   await expect(page.getByRole('button', { name: /ورود/ })).toBeDisabled();
   await page.getByLabel('کد امنیتی').fill('   ');
   await expect(page.getByRole('button', { name: /ورود/ })).toBeDisabled();
   await page.getByLabel('کد امنیتی').fill('24125');
   await page.getByRole('button', { name: /ورود/ }).click();
+  await changeInitialAdminPassword(page);
   await expect(otpStep.getByRole('heading', { name: 'تأیید ورود' })).toBeVisible();
   await expect(logo).toBeVisible();
   await expect(loginFrame.getByRole('heading', { name: 'ورود به سامانه' })).toHaveCount(0);
@@ -27,6 +36,10 @@ test('OTP replaces the form inside the login frame before entering the panel', a
   await expect(page).toHaveURL(/\/login$/);
   await expect(page.getByRole('button', { name: 'تأیید و ورود' })).toBeDisabled();
   expect((await page.context().cookies()).map((cookie) => cookie.name)).not.toContain('sana_token');
+  await expect(otpStep.getByText('0912****001', { exact: true })).toBeVisible();
+  await page.clock.fastForward(121_000);
+  await page.getByRole('button', { name: 'ارسال مجدد' }).click();
+  await expect(page.getByRole('timer')).toBeVisible();
   await completeMockOtp(page, '۱۲۳۴۵۶');
 
   await expect(page.getByRole('navigation')).toBeVisible();
@@ -77,6 +90,7 @@ test('a wrong OTP keeps the user on login and back returns to the credentials fo
   await page.getByLabel('رمز عبور').fill('admin');
   await page.getByLabel('کد امنیتی').fill('24125');
   await page.getByRole('button', { name: /ورود/ }).click();
+  await changeInitialAdminPassword(page);
   await completeMockOtp(page, '123455');
 
   await expect(page.getByText('کد یک‌بارمصرف اشتباه است.')).toBeVisible();
@@ -118,7 +132,7 @@ test('mandatory password change requires signing in again with the new password'
   await expect(dialog.getByText('تکرار رمز عبور با رمز جدید یکسان نیست.')).toBeVisible();
   await dialog.getByLabel('تکرار رمز عبور جدید', { exact: true }).fill('new-branch-password');
   await page.evaluate(() =>
-    localStorage.setItem('mock-fail-once', 'Authentication/ChangePassword'),
+    localStorage.setItem('mock-fail-once', 'Authentication/LoginChangePassword'),
   );
   await submit.click();
   await expect(page.locator('[data-sonner-toast]')).toBeVisible();

@@ -35,14 +35,13 @@ const toRoles = (roleId: number | null) =>
   }));
 
 /** کدها با ارقام انگلیسی ذخیره می‌شوند */
-const normalize = ({ roleId, ...body }: UserPayload) => ({
+const normalize = (body: Omit<UserPayload, 'roleId'>) => ({
   ...body,
   userName: body.userName.trim(),
   userCode: toEnglishDigits(body.userCode),
   branchCode: toEnglishDigits(body.branchCode),
   mobileNumber: toEnglishDigits(body.mobileNumber ?? ''),
   nationalCode: toEnglishDigits(body.nationalCode ?? ''),
-  roles: toRoles(roleId),
 });
 
 const validateUserNumbers = (body: Pick<UserPayload, 'mobileNumber' | 'nationalCode'>) => {
@@ -90,7 +89,10 @@ export const userHandlers = [
 
   http.post(api(ENDPOINTS.USER_MANAGEMENT.USERS), async ({ request }) => {
     await delay(300);
-    const body = normalize((await request.json()) as UserPayload);
+    const { roleIds, ...fields } = (await request.json()) as Omit<UserPayload, 'roleId'> & {
+      roleIds: number[];
+    };
+    const body = normalize(fields);
     if (!body.password) {
       return json({ message: 'رمز عبور الزامی است.' }, { status: 422 });
     }
@@ -99,6 +101,7 @@ export const userHandlers = [
     if (isTaken(body.userName)) return duplicate();
     const user = {
       ...body,
+      roles: toRoles(roleIds?.[0] ?? null),
       id: Math.max(0, ...db.users.map((item) => item.id)) + 1,
       password: body.password,
       email: null,
@@ -129,6 +132,30 @@ export const userHandlers = [
     });
     return json(withoutPassword(user));
   }),
+
+  http.put(api(ENDPOINTS.USER_MANAGEMENT.USER(':id') + '/Roles'), async ({ params, request }) => {
+    const user = db.users.find((item) => item.id === Number(params.id));
+    if (!user) return notFound();
+    const { roleIds } = (await request.json()) as { roleIds: number[] };
+    user.roles = toRoles(roleIds?.[0] ?? null);
+    return json(true);
+  }),
+  http.post(
+    api(ENDPOINTS.USER_MANAGEMENT.USER(':id') + '/ResetPassword'),
+    async ({ params, request }) => {
+      const user = db.users.find((item) => item.id === Number(params.id));
+      if (!user) return notFound();
+      const { newPassword } = (await request.json()) as { newPassword: string };
+      if (!newPassword) return json({ message: 'رمز جدید الزامی است.' }, { status: 422 });
+      user.password = newPassword;
+      const auth = db.authUsers.find((item) => item.profile.panelUserId === user.id);
+      if (auth) {
+        auth.password = newPassword;
+        auth.mustChangePassword = true;
+      }
+      return json(true);
+    },
+  ),
 
   http.delete(api(ENDPOINTS.USER_MANAGEMENT.USER(':id')), async ({ params, request }) => {
     await delay(250);

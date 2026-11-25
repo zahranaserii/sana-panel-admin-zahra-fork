@@ -5,8 +5,9 @@ export const FACILITY = '/facility-management';
 export const ENDPOINTS = {
   AUTH: {
     LOGIN: '/identity/Authentication/Login',
-    CHANGE_PASSWORD: '/mock/Authentication/ChangePassword',
-    VERIFY_OTP: '/mock/Authentication/VerifyOtp',
+    CHANGE_PASSWORD: '/identity/Authentication/LoginChangePassword',
+    VERIFY_OTP: '/identity/Authentication/LoginOtp',
+    RESEND_OTP: '/identity/Authentication/LoginOtp/Resend',
     LOGOUT: '/identity/Authentication/Logout',
     /** ساخت کپچا — فعلاً به‌خاطر ایراد زیرساختی بک‌اند استفاده نمی‌شود */
     CAPTCHA: '/identity/Authentication/Generate',

@@ -1,7 +1,9 @@
 import { useEffect, type ReactNode } from 'react';
 import { Navigate, useLocation } from 'react-router';
 
-import { usePanelProfileGet } from '@/api/generated/admin';
+import { useQuery } from '@tanstack/react-query';
+import { getProfile } from '@/features/auth/api';
+import { getPanelProfileGetQueryKey } from '@/api/generated/admin';
 
 import { FullPageLoading } from '@/component/loading';
 import { ROUTES } from '@/constant/routes';
@@ -15,8 +17,10 @@ export const ProtectedRoute = ({ children }: { children: ReactNode }) => {
   const setProfile = useProfileStore((state) => state.setProfile);
   const location = useLocation();
 
-  const { data, isPending } = usePanelProfileGet({
-    query: { enabled: isAuthenticated && !profile },
+  const { data, isPending } = useQuery({
+    queryKey: getPanelProfileGetQueryKey(),
+    queryFn: ({ signal }) => getProfile(signal),
+    enabled: isAuthenticated && !profile,
   });
 
   useEffect(() => {

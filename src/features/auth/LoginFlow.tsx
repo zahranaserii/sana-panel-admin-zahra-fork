@@ -2,14 +2,12 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router';
 import { toast } from 'sonner';
 
-import { panelProfileGet } from '@/api/generated/admin';
-
 import { AuthLayout } from '@/component/layout';
 import { ROUTES } from '@/constant/routes';
 import { useAuthStore } from '@/store/useAuthStore';
 import { useProfileStore } from '@/store/useProfileStore';
 
-import { changePassword, login, verifyOtp } from './api';
+import { changePassword, getProfile, login, resendOtp, verifyOtp } from './api';
 import { ChangePasswordModal } from './components/ChangePasswordModal';
 import { OtpStep } from './components/OtpStep';
 import { LoginPage } from './pages/LoginPage';
@@ -18,7 +16,16 @@ import { type AuthSessionResponse, type LoginRequest } from './types';
 type LoginStep =
   | { kind: 'login'; username: string }
   | { kind: 'changePassword'; username: string; otpTracker: string }
-  | { kind: 'otp'; username: string; challengeId: string };
+  | {
+      kind: 'otp';
+      username: string;
+      otpTracker: string;
+      expiresAt: number;
+      maskedMobile: string | null;
+    };
+
+const otpDeadline = (expiry?: string | null) =>
+  expiry === null || expiry === undefined ? Date.now() + 120_000 : Date.parse(expiry);
 
 export const LoginFlow = () => {
   const [step, setStep] = useState<LoginStep>({ kind: 'login', username: '' });
@@ -30,7 +37,7 @@ export const LoginFlow = () => {
 
   const completeLogin = async ({ token }: AuthSessionResponse) => {
     setToken(token);
-    const profile = await panelProfileGet();
+    const profile = await getProfile();
     setProfile(profile);
     toast.success(`${profile.fullName ?? ''} خوش آمدید`);
     void navigate(ROUTES.HOME, { replace: true });
@@ -49,21 +56,34 @@ export const LoginFlow = () => {
       });
       return;
     }
-    if ('token' in response) {
-      await completeLogin(response);
-      return;
-    }
-    const challengeId = 'challengeId' in response ? response.challengeId : response.otpTracker;
-    if (!challengeId) throw new Error('شناسه تأیید ورود دریافت نشد. دوباره وارد شوید.');
-    setStep({ kind: 'otp', username: values.username, challengeId });
+    if (!response.otpTracker) throw new Error('شناسه تأیید ورود دریافت نشد.');
+    setStep({
+      kind: 'otp',
+      username: values.username,
+      otpTracker: response.otpTracker,
+      maskedMobile: response.maskedMobile,
+      expiresAt: otpDeadline(response.otpExpireTime),
+    });
   };
 
   return (
     <AuthLayout>
       {step.kind === 'otp' ? (
         <OtpStep
+          key={step.otpTracker + step.expiresAt}
+          expiresAt={step.expiresAt}
+          maskedMobile={step.maskedMobile}
+          onResend={async () => {
+            const next = await resendOtp(step.otpTracker);
+            setStep({
+              ...step,
+              otpTracker: next?.otpTracker ?? step.otpTracker,
+              maskedMobile: next?.maskedMobile ?? step.maskedMobile,
+              expiresAt: otpDeadline(next?.otpExpireTime),
+            });
+          }}
           onSubmit={async (code) =>
-            completeLogin(await verifyOtp({ challengeId: step.challengeId, code }))
+            completeLogin(await verifyOtp({ otpTracker: step.otpTracker, code }))
           }
           onBack={backToLogin}
         />
@@ -74,7 +94,7 @@ export const LoginFlow = () => {
         <ChangePasswordModal
           onSubmit={async (values) => {
             await changePassword({
-              ...values,
+              newPassword: values.newPassword,
               otpTracker: step.otpTracker,
             });
             backToLogin();
