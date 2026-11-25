@@ -45,6 +45,10 @@ export const LoginPage = ({ username, onSubmit }: LoginPageProps) => {
       if (!isAxiosError(error)) toast.error(error.message);
     },
   });
+  const regenerateCaptcha = () => {
+    form.setFieldValue('captchaValue', '');
+    void captcha.refetch();
+  };
   const invalidCredentials = isAxiosError(error) && error.response?.status === 401;
 
   return (
@@ -74,7 +78,7 @@ export const LoginPage = ({ username, onSubmit }: LoginPageProps) => {
             placeholder="کد امنیتی"
             disabled={!captchaReady}
             suffix={
-              <span className="flex h-8 w-24 items-center justify-center">
+              <span className="flex h-8 items-center justify-center">
                 {captcha.isFetching && <Spinner />}
                 {captchaReady && (
                   <img
@@ -83,13 +87,16 @@ export const LoginPage = ({ username, onSubmit }: LoginPageProps) => {
                     className="h-8 w-24 rounded object-contain"
                   />
                 )}
-                {captcha.isError && !captcha.isFetching && (
+                {!captcha.isFetching && (captchaReady || captcha.isError) && (
                   <Button
                     variant="text"
                     size="small"
                     icon={<ReloadOutlined />}
-                    aria-label="تلاش مجدد برای دریافت کپچا"
-                    onClick={() => void captcha.refetch()}
+                    aria-label={
+                      captcha.isError ? 'تلاش مجدد برای دریافت کپچا' : 'دریافت کپچای جدید'
+                    }
+                    disabled={isPending}
+                    onClick={regenerateCaptcha}
                   />
                 )}
               </span>

@@ -17,7 +17,7 @@ import { api, json } from '../utils';
 const unauthorized = () => json({ message: 'ابتدا وارد سامانه شوید.' }, { status: 401 });
 
 const CAPTCHA_VALUE = '24125';
-const CAPTCHA_TOKEN = '43d735fd-7fac-4e87-9148-3c6ca0eab8c6';
+let currentCaptchaToken: string | null = null;
 const OTP_CODE = '123456';
 const pendingOtpChallenges = new Map<string, { otpTracker: string; expiresAt: number }>();
 const passwordChangeTrackers = new Map<string, string>();
@@ -37,8 +37,9 @@ const captchaPng =
 export const authHandlers = [
   http.get(api(ENDPOINTS.AUTH.CAPTCHA), async () => {
     await delay(300);
+    currentCaptchaToken = newTracker();
     return json({
-      token: CAPTCHA_TOKEN,
+      token: currentCaptchaToken,
       base64Image: captchaPng,
     } satisfies CaptchaResponse);
   }),
@@ -46,7 +47,11 @@ export const authHandlers = [
   http.post(api(ENDPOINTS.AUTH.LOGIN), async ({ request }) => {
     await delay(400);
     const body = (await request.json()) as LoginRequest;
-    if (body.captchaToken !== CAPTCHA_TOKEN || body.captchaValue !== CAPTCHA_VALUE) {
+    if (
+      !currentCaptchaToken ||
+      body.captchaToken !== currentCaptchaToken ||
+      body.captchaValue !== CAPTCHA_VALUE
+    ) {
       return json({ message: 'کد امنیتی اشتباه است.' }, { status: 400 });
     }
     const user = db.authUsers.find(

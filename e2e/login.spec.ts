@@ -80,6 +80,10 @@ test('login stays disabled when the captcha request fails and until a code is en
 
   await page.getByLabel('کد امنیتی').fill('24125');
   await expect(submit).toBeEnabled();
+  await page.getByRole('button', { name: 'دریافت کپچای جدید' }).click();
+  await expect(image).toBeVisible();
+  await expect(page.getByLabel('کد امنیتی')).toHaveValue('');
+  await expect(submit).toBeDisabled();
 });
 
 test('a wrong OTP keeps the user on login and back returns to the credentials form', async ({
