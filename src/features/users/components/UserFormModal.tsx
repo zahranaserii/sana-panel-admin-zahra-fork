@@ -6,12 +6,13 @@ import { Form, FormItem } from '@/component/form';
 import { PasswordInput, SelectInput, TextInput } from '@/component/input';
 import { FormModal } from '@/component/modal';
 import { QUERY_KEYS } from '@/constant/queryKeys';
+import { nationalCodeRule, newPasswordRule } from '@/utils/validation';
 import { type ApiErrorBody } from '@/types/common';
 import { toEnglishDigits } from '@/utils/date';
 
 import { createUser, getRoles, getUser, updateUser } from '../api';
 import { type User, type UserPayload } from '../types';
-import { getNationalCodeError, mobileNumberRule } from '../validation';
+import { mobileNumberRule } from '../validation';
 
 interface UserFormModalProps {
   open: boolean;
@@ -102,6 +103,7 @@ export const UserFormModal = ({ open, userId, onClose }: UserFormModalProps) => 
         name="password"
         label="رمز عبور"
         required={!isEdit}
+        rules={[newPasswordRule()]}
         extra={isEdit ? 'برای تغییر نکردن رمز، این فیلد را خالی بگذارید.' : undefined}
       >
         <PasswordInput
@@ -129,14 +131,7 @@ export const UserFormModal = ({ open, userId, onClose }: UserFormModalProps) => 
         label="کد ملی"
         required
         normalize={toEnglishDigits}
-        rules={[
-          {
-            validator: async (_, value: string) => {
-              const error = getNationalCodeError(value);
-              if (error) throw new Error(error);
-            },
-          },
-        ]}
+        rules={[nationalCodeRule]}
       >
         <TextInput dir="ltr" inputMode="numeric" maxLength={10} />
       </FormItem>

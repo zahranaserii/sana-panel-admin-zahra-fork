@@ -1,4 +1,5 @@
 import {
+  KeyOutlined,
   LogoutOutlined,
   MenuOutlined,
   MoonOutlined,
@@ -9,6 +10,7 @@ import { App, Tooltip } from 'antd';
 import { useState } from 'react';
 
 import logoOmid from '@/assets/images/logo-omid.png';
+import { ChangePasswordModal } from '@/features/auth/components/ChangePasswordModal';
 import { useMediaQuery } from '@/hooks/useMediaQuery';
 import { useAuthStore } from '@/store/useAuthStore';
 import { useProfileStore } from '@/store/useProfileStore';
@@ -31,13 +33,19 @@ export interface HeaderProps {
 interface HeaderActionsProps {
   /** چیدمان عمودی داخل دراور موبایل */
   vertical?: boolean;
+  onChangePassword: () => void;
   /** قبل از نمایش مودال خروج صدا زده می‌شود (در دراور: بستن دراور) */
   onBeforeLogout?: () => void;
   onLogout: () => void;
 }
 
 /** تاریخ امروز، تغییر تم، خروج و لوگو؛ در دسکتاپ داخل هدر و در موبایل داخل دراور سمت چپ */
-const HeaderActions = ({ vertical, onBeforeLogout, onLogout }: HeaderActionsProps) => {
+const HeaderActions = ({
+  vertical,
+  onBeforeLogout,
+  onLogout,
+  onChangePassword,
+}: HeaderActionsProps) => {
   const { modal } = App.useApp();
   const fullName = useProfileStore((state) => state.profile?.fullName);
   const mode = useThemeStore((state) => state.mode);
@@ -77,6 +85,9 @@ const HeaderActions = ({ vertical, onBeforeLogout, onLogout }: HeaderActionsProp
           {vertical && (mode === 'dark' ? 'تم روشن' : 'تم تیره')}
         </Button>
       </Tooltip>
+      <Button variant="outline" size="small" icon={<KeyOutlined />} onClick={onChangePassword}>
+        تغییر رمز عبور
+      </Button>
       <Button variant="secondary" size="small" icon={<LogoutOutlined />} onClick={confirmLogout}>
         خروج
       </Button>
@@ -87,6 +98,11 @@ const HeaderActions = ({ vertical, onBeforeLogout, onLogout }: HeaderActionsProp
 
 export const Header = ({ title, onLogout, onOpenMenu, menuOpen }: HeaderProps) => {
   const [actionsOpen, setActionsOpen] = useState(false);
+  const [passwordOpen, setPasswordOpen] = useState(false);
+  const openPassword = () => {
+    setActionsOpen(false);
+    setPasswordOpen(true);
+  };
   const isMobile = useMediaQuery(MOBILE_QUERY);
 
   const sessionExpired = useAuthStore((state) => state.sessionExpired);
@@ -109,7 +125,7 @@ export const Header = ({ title, onLogout, onOpenMenu, menuOpen }: HeaderProps) =
       </div>
 
       <div className="max-[960px]:hidden">
-        <HeaderActions onLogout={onLogout} />
+        <HeaderActions onChangePassword={openPassword} onLogout={onLogout} />
       </div>
       <Button
         variant="text"
@@ -128,8 +144,16 @@ export const Header = ({ title, onLogout, onOpenMenu, menuOpen }: HeaderProps) =
         onClose={() => setActionsOpen(false)}
       >
         {/* خروج: اول دراور بسته می‌شود، بعد مودال خروج نمایش داده می‌شود */}
-        <HeaderActions vertical onBeforeLogout={() => setActionsOpen(false)} onLogout={onLogout} />
+        <HeaderActions
+          onChangePassword={openPassword}
+          vertical
+          onBeforeLogout={() => setActionsOpen(false)}
+          onLogout={onLogout}
+        />
       </LayoutDrawer>
+      {passwordOpen && !sessionExpired && (
+        <ChangePasswordModal mode="account" onCancel={() => setPasswordOpen(false)} />
+      )}
     </header>
   );
 };

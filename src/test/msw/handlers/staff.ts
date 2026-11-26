@@ -1,3 +1,4 @@
+import { getNationalCodeError } from '@/utils/validation';
 import ExcelJS from 'exceljs';
 import { delay, http } from 'msw';
 
@@ -26,7 +27,7 @@ const SAMPLE_HEADERS = [
   'تاریخ استخدام',
   'اولویت تخصیص',
 ];
-const SAMPLE_ROW = ['علی محمدی', '0012345678', '09121234567', '101', '1403/02/15', 1];
+const SAMPLE_ROW = ['علی محمدی', '0012345679', '09121234567', '101', '1403/02/15', 1];
 
 /** نتیجه بارگذاری‌های گروهی بر اساس شناسه دسته */
 const imports = new Map<number, ReadModelsPersonnelImportResultDto>();
@@ -124,7 +125,8 @@ const lastPriority = (companyId: number) =>
   );
 
 const invalidStaff = (body: CreatePersonnelCommand, companyId: number, id?: number) => {
-  if (!/^\d{10}$/.test(body.nationalCode)) return 'کد ملی باید ۱۰ رقم باشد.';
+  const nationalCodeError = getNationalCodeError(body.nationalCode);
+  if (nationalCodeError) return nationalCodeError;
   if (!/^09\d{9}$/.test(body.mobile)) return 'شماره موبایل معتبر نیست.';
   if (!body.personnelCode || body.personnelCode.length > 10) {
     return 'کد پرسنلی باید ۱ تا ۱۰ کاراکتر باشد.';

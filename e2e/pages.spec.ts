@@ -67,7 +67,12 @@ test('main pages work on the backend models (mock) without errors', async ({ pag
     .getByRole('row', { name: /سارا نوری/ })
     .getByRole('button', { name: /ویرایش/ })
     .click();
-  await expect(page.getByRole('dialog').getByLabel('کد ملی')).toHaveValue('0056789012');
+  const nationalCode = page.getByRole('dialog').getByLabel('کد ملی');
+  await expect(nationalCode).toHaveValue('0056789017');
+  await nationalCode.fill('0056789012');
+  await expect(page.getByText('کد ملی معتبر نیست')).toBeVisible();
+  await nationalCode.fill('۰۰۵۶۷۸۹۰۱۷');
+  await expect(nationalCode).toHaveValue('0056789017');
   await page.getByRole('button', { name: 'ذخیره تغییرات' }).click();
   await expect(page.getByText(/ویرایش شد/)).toBeVisible();
 

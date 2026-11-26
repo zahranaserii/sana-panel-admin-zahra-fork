@@ -11,6 +11,8 @@ import {
   type VerifyOtpRequest,
 } from '@/features/auth/types';
 
+import { getNewPasswordError } from '@/utils/validation';
+
 import { db, findUserByToken } from '../db';
 import { api, json } from '../utils';
 
@@ -88,9 +90,8 @@ export const authHandlers = [
         passwordChangeTrackers.get(item.username) === otpTracker,
     );
     if (!user) return json({ message: 'درخواست تغییر رمز نامعتبر است.' }, { status: 400 });
-    if (!newPassword) {
-      return json({ message: 'رمز جدید الزامی است.' }, { status: 422 });
-    }
+    const error = getNewPasswordError(newPassword, user.password);
+    if (error) return json({ message: error }, { status: 422 });
     user.password = newPassword;
     user.mustChangePassword = false;
     passwordChangeTrackers.delete(user.username);
@@ -131,8 +132,10 @@ export const authHandlers = [
       currentPassword: string;
       newPassword: string;
     };
-    if (!newPassword || currentPassword !== user.password)
+    if (currentPassword !== user.password)
       return json({ message: 'رمز عبور نامعتبر است.' }, { status: 400 });
+    const error = getNewPasswordError(newPassword, user.password);
+    if (error) return json({ message: error }, { status: 422 });
     user.password = newPassword;
     return json(true);
   }),

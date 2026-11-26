@@ -2,20 +2,34 @@ import { useMutation } from '@tanstack/react-query';
 import { isAxiosError } from 'axios';
 import { toast } from 'sonner';
 
+import { authenticationMyPasswordPost } from '@/api/generated/admin';
 import { FormItem } from '@/component/form';
 import { PasswordInput } from '@/component/input';
 import { FormModal } from '@/component/modal';
 
+import { newPasswordRule } from '@/utils/validation';
+
 import { type ChangePasswordFormValues } from '../types';
 
-interface ChangePasswordModalProps {
-  onSubmit: (values: ChangePasswordFormValues) => Promise<void>;
+type ChangePasswordModalProps = {
   onCancel: () => void;
-}
+} & (
+  | { mode?: 'login'; onSubmit: (values: ChangePasswordFormValues) => Promise<void> }
+  | { mode: 'account' }
+);
 
-export const ChangePasswordModal = ({ onSubmit, onCancel }: ChangePasswordModalProps) => {
+export const ChangePasswordModal = (props: ChangePasswordModalProps) => {
+  const isAccount = props.mode === 'account';
   const { mutateAsync, isPending } = useMutation({
-    mutationFn: onSubmit,
+    mutationFn: async (values: ChangePasswordFormValues & { currentPassword?: string }) => {
+      if (props.mode !== 'account') return props.onSubmit(values);
+      await authenticationMyPasswordPost({
+        currentPassword: values.currentPassword,
+        newPassword: values.newPassword,
+      });
+      toast.success('رمز عبور شما تغییر کرد.');
+      props.onCancel();
+    },
     onError: (error) => {
       if (!isAxiosError(error)) toast.error(error.message);
     },
@@ -26,15 +40,29 @@ export const ChangePasswordModal = ({ onSubmit, onCancel }: ChangePasswordModalP
       open
       title="تغییر رمز عبور"
       okText="ثبت رمز جدید"
-      cancelText="بازگشت به ورود"
+      cancelText={isAccount ? 'انصراف' : 'بازگشت به ورود'}
       closable={!isPending}
       keyboard={!isPending}
       cancelButtonProps={{ disabled: isPending }}
       closeOnSuccess={false}
-      onCancel={onCancel}
+      onCancel={props.onCancel}
       onSubmit={mutateAsync}
     >
-      <FormItem name="newPassword" label="رمز عبور جدید" required>
+      {isAccount && (
+        <FormItem name="currentPassword" label="رمز عبور فعلی" required>
+          <PasswordInput autoComplete="current-password" />
+        </FormItem>
+      )}
+      <FormItem
+        name="newPassword"
+        label="رمز عبور جدید"
+        required
+        dependencies={isAccount ? ['currentPassword'] : undefined}
+        rules={[
+          ({ getFieldValue }) =>
+            newPasswordRule(isAccount ? getFieldValue('currentPassword') : undefined),
+        ]}
+      >
         <PasswordInput autoComplete="new-password" />
       </FormItem>
       <FormItem

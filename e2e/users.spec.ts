@@ -42,7 +42,7 @@ test('mobile number and national code are required and appear in the new user ro
   const dialog = page.getByRole('dialog', { name: 'افزودن کاربر' });
   const submit = dialog.getByRole('button', { name: 'ثبت کاربر' });
   await dialog.getByLabel('نام کاربری').fill('new-user');
-  await dialog.getByLabel('رمز عبور').fill('test-password');
+  await dialog.getByLabel('رمز عبور').fill('test-password1');
   await dialog.getByLabel('نام و نام خانوادگی کاربر').fill('کاربر آزمایشی');
   await dialog.getByLabel('کد کاربر').fill('400');
   await dialog.getByLabel('نام شعبه').fill('شعبه تست');

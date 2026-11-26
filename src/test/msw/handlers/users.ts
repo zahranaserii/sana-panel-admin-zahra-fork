@@ -3,7 +3,8 @@ import { delay, http } from 'msw';
 import { ENDPOINTS } from '@/constant/endpoints';
 import { MOCK_ROLES, type MockManagedUser } from '@/constant/mock';
 import { type UserPayload } from '@/features/users/types';
-import { getNationalCodeError, mobileNumberRule } from '@/features/users/validation';
+import { getNationalCodeError, getNewPasswordError } from '@/utils/validation';
+import { mobileNumberRule } from '@/features/users/validation';
 import { toEnglishDigits } from '@/utils/date';
 
 import { db } from '../db';
@@ -96,6 +97,8 @@ export const userHandlers = [
     if (!body.password) {
       return json({ message: 'رمز عبور الزامی است.' }, { status: 422 });
     }
+    const passwordError = getNewPasswordError(body.password);
+    if (passwordError) return json({ message: passwordError }, { status: 422 });
     const invalidNumbers = validateUserNumbers(body);
     if (invalidNumbers) return invalidNumbers;
     if (isTaken(body.userName)) return duplicate();
@@ -120,6 +123,11 @@ export const userHandlers = [
     const user = db.users.find((item) => item.id === Number(params.id));
     if (!user) return notFound();
     const { password, ...body } = normalize((await request.json()) as UserPayload);
+    if (password) {
+      const auth = db.authUsers.find((item) => item.profile.panelUserId === user.id);
+      const error = getNewPasswordError(password, auth?.password ?? user.password);
+      if (error) return json({ message: error }, { status: 422 });
+    }
     const invalidNumbers = validateUserNumbers(body);
     if (invalidNumbers) return invalidNumbers;
     if (isTaken(body.userName, user.id)) return duplicate();
@@ -146,9 +154,10 @@ export const userHandlers = [
       const user = db.users.find((item) => item.id === Number(params.id));
       if (!user) return notFound();
       const { newPassword } = (await request.json()) as { newPassword: string };
-      if (!newPassword) return json({ message: 'رمز جدید الزامی است.' }, { status: 422 });
-      user.password = newPassword;
       const auth = db.authUsers.find((item) => item.profile.panelUserId === user.id);
+      const error = getNewPasswordError(newPassword, auth?.password ?? user.password);
+      if (error) return json({ message: error }, { status: 422 });
+      user.password = newPassword;
       if (auth) {
         auth.password = newPassword;
         auth.mustChangePassword = true;

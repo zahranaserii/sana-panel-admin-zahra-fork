@@ -83,3 +83,24 @@ test('session-expired modal (401) closes open drawers and stays on top', async (
   await modal.getByRole('button', { name: 'متوجه شدم' }).click();
   await expect(page).toHaveURL(/\/login$/);
 });
+
+test('signed-in user changes their own password from the actions drawer', async ({ page }) => {
+  await login(page);
+  await page.getByRole('button', { name: 'سایر گزینه‌ها' }).click();
+  await actionsDrawer(page)
+    .getByRole('button', { name: /تغییر رمز عبور/ })
+    .click();
+  const dialog = page.getByRole('dialog', { name: 'تغییر رمز عبور' });
+  await dialog.getByLabel('رمز عبور فعلی').fill('updated-admin-password1');
+  await dialog.getByLabel('رمز عبور جدید', { exact: true }).fill('updated-admin-password1');
+  await expect(dialog.getByText('رمز عبور جدید باید با رمز فعلی متفاوت باشد.')).toBeVisible();
+  await dialog.getByLabel('رمز عبور فعلی').fill('wrong');
+  await dialog.getByLabel('رمز عبور جدید', { exact: true }).fill('second-admin-password1');
+  await dialog.getByLabel('تکرار رمز عبور جدید').fill('second-admin-password1');
+  await dialog.getByRole('button', { name: 'ثبت رمز جدید' }).click();
+  await expect(page.getByText('رمز عبور نامعتبر است.')).toBeVisible();
+  await dialog.getByLabel('رمز عبور فعلی').fill('updated-admin-password1');
+  await dialog.getByRole('button', { name: 'ثبت رمز جدید' }).click();
+  await expect(dialog).toBeHidden();
+  await expect(page.getByText('رمز عبور شما تغییر کرد.')).toBeVisible();
+});

@@ -12,6 +12,9 @@ import { FormItem } from '@/component/form';
 import { DateInput, NumberInput, TextInput } from '@/component/input';
 import { FormModal } from '@/component/modal';
 
+import { nationalCodeRule } from '@/utils/validation';
+import { toEnglishDigits } from '@/utils/date';
+
 import { type StaffDetail, type StaffFormValues } from '../types';
 
 /** کد پرسنلی: فقط طول محدود است (رشته؛ نوع کاراکتر چک نمی‌شود) */
@@ -27,7 +30,7 @@ interface StaffFormModalProps {
 
 const toFormValues = (staff: StaffDetail): StaffFormValues => ({
   fullName: staff.fullName ?? '',
-  nationalCode: staff.nationalCode ?? '',
+  nationalCode: toEnglishDigits(staff.nationalCode ?? ''),
   mobile: staff.mobile ?? '',
   personnelCode: staff.personnelCode ?? '',
   hireDate: staff.hireDate ?? '',
@@ -84,7 +87,8 @@ export const StaffFormModal = ({ open, companyId, staffId, onClose }: StaffFormM
         name="nationalCode"
         label="کد ملی"
         required
-        rules={[{ pattern: /^\d{10}$/, message: 'کد ملی باید ۱۰ رقم باشد.' }]}
+        normalize={toEnglishDigits}
+        rules={[nationalCodeRule]}
       >
         <TextInput inputMode="numeric" maxLength={10} />
       </FormItem>

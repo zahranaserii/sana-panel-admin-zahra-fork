@@ -130,11 +130,11 @@ test('mandatory password change requires signing in again with the new password'
   const submit = dialog.getByRole('button', { name: 'ثبت رمز جدید' });
   await submit.click();
   await expect(dialog.getByText('رمز عبور جدید الزامی است.', { exact: true })).toBeVisible();
-  await dialog.getByLabel('رمز عبور جدید', { exact: true }).fill('new-branch-password');
+  await dialog.getByLabel('رمز عبور جدید', { exact: true }).fill('new-branch-password1');
   await dialog.getByLabel('تکرار رمز عبور جدید', { exact: true }).fill('different-password');
   await submit.click();
   await expect(dialog.getByText('تکرار رمز عبور با رمز جدید یکسان نیست.')).toBeVisible();
-  await dialog.getByLabel('تکرار رمز عبور جدید', { exact: true }).fill('new-branch-password');
+  await dialog.getByLabel('تکرار رمز عبور جدید', { exact: true }).fill('new-branch-password1');
   await page.evaluate(() =>
     localStorage.setItem('mock-fail-once', 'Authentication/LoginChangePassword'),
   );
@@ -152,7 +152,7 @@ test('mandatory password change requires signing in again with the new password'
   await page.getByLabel('کد امنیتی').fill('24125');
   await loginButton.click();
   await expect(page.getByText('نام کاربری یا رمز عبور اشتباه است.').first()).toBeVisible();
-  await page.getByLabel('رمز عبور').fill('new-branch-password');
+  await page.getByLabel('رمز عبور').fill('new-branch-password1');
   await loginButton.click();
   await expect(otpInputs(page)).toHaveCount(6);
   expect((await page.context().cookies()).map((cookie) => cookie.name)).not.toContain('sana_token');
