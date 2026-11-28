@@ -1,3 +1,4 @@
+import { descriptionHint, descriptionRule, normalizeLetters } from '@/utils/inputRules';
 import { FormItem } from '@/component/form';
 import { FileInput, SelectInput, TextAreaInput } from '@/component/input';
 import { FormModal } from '@/component/modal';
@@ -52,8 +53,14 @@ export const AverageDocModal = ({
       >
         <FileInput />
       </FormItem>
-      <FormItem name="description" label="توضیحات (اختیاری)">
-        <TextAreaInput maxLength={500} />
+      <FormItem
+        name="description"
+        rules={[descriptionRule]}
+        normalize={normalizeLetters}
+        extra={descriptionHint}
+        label="توضیحات (اختیاری)"
+      >
+        <TextAreaInput maxLength={300} />
       </FormItem>
     </FormModal>
   );

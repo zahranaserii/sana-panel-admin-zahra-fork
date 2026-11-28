@@ -74,7 +74,7 @@ export const MainLayout = () => {
           title={pageTitle}
           menuOpen={drawerOpen}
           onOpenMenu={() => setMenuOpen(true)}
-          onLogout={() => void handleLogout()}
+          onLogout={handleLogout}
         />
         <main className="flex-1 px-7 pt-6 pb-2 max-[960px]:p-4">
           {/* اسکلتون تا زمان دانلود کد صفحه (lazy) */}

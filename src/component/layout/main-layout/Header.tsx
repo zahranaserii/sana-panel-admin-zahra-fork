@@ -23,7 +23,7 @@ import { LayoutDrawer, MOBILE_QUERY } from './LayoutDrawer';
 
 export interface HeaderProps {
   title: string;
-  onLogout: () => void;
+  onLogout: () => Promise<void>;
   /** باز کردن دراور منو (فقط موبایل) */
   onOpenMenu: () => void;
   /** وضعیت دراور منو برای aria-expanded دکمه همبرگری */
@@ -36,7 +36,7 @@ interface HeaderActionsProps {
   onChangePassword: () => void;
   /** قبل از نمایش مودال خروج صدا زده می‌شود (در دراور: بستن دراور) */
   onBeforeLogout?: () => void;
-  onLogout: () => void;
+  onLogout: () => Promise<void>;
 }
 
 /** تاریخ امروز، تغییر تم، خروج و لوگو؛ در دسکتاپ داخل هدر و در موبایل داخل دراور سمت چپ */
@@ -152,7 +152,11 @@ export const Header = ({ title, onLogout, onOpenMenu, menuOpen }: HeaderProps) =
         />
       </LayoutDrawer>
       {passwordOpen && !sessionExpired && (
-        <ChangePasswordModal mode="account" onCancel={() => setPasswordOpen(false)} />
+        <ChangePasswordModal
+          mode="account"
+          onPasswordChanged={onLogout}
+          onCancel={() => setPasswordOpen(false)}
+        />
       )}
     </header>
   );

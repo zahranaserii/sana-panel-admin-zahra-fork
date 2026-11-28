@@ -1,3 +1,4 @@
+import { normalizeText, searchRule } from '@/utils/inputRules';
 import { useCompaniesLookup } from '@/api/generated/facility';
 import { type LoanRequestStatus } from '@/api/generated/facility/facilityPanelAPI.schemas';
 import { SelectInput, TextInput } from '@/component/input';
@@ -35,14 +36,21 @@ export const ApprovalFilters = ({
 
   return (
     <>
-      <TextInput
-        size="small"
-        style={{ width: 200 }}
-        placeholder="جستجوی نام یا کد پرسنلی"
-        maxLength={50}
-        value={term}
-        onChange={(event) => onTermChange(event.target.value)}
-      />
+      <div>
+        <TextInput
+          size="small"
+          style={{ width: 200 }}
+          placeholder="جستجوی نام یا کد پرسنلی"
+          maxLength={30}
+          value={term}
+          onChange={(event) => onTermChange(normalizeText(event.target.value))}
+        />
+        {!searchRule.pattern.test(term) && (
+          <div role="alert" className="text-xs text-red-600">
+            {searchRule.message}
+          </div>
+        )}
+      </div>
       <SelectInput
         size="small"
         allowClear={false}

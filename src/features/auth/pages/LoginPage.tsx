@@ -1,3 +1,4 @@
+import { captchaRule, usernameRule } from '@/utils/inputRules';
 import { LoginOutlined, ReloadOutlined, UserOutlined } from '@ant-design/icons';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { isAxiosError } from 'axios';
@@ -22,7 +23,7 @@ interface LoginPageProps {
 
 export const LoginPage = ({ username, onSubmit }: LoginPageProps) => {
   const [form] = Form.useForm<LoginFormValues>();
-  const captchaValue = Form.useWatch('captchaValue', form)?.trim();
+  const captchaValue = Form.useWatch('captchaValue', form) ?? '';
   const captcha = useQuery({
     queryKey: QUERY_KEYS.CAPTCHA,
     queryFn: ({ signal }) => getCaptcha(signal),
@@ -67,14 +68,26 @@ export const LoginPage = ({ username, onSubmit }: LoginPageProps) => {
         }}
         requiredMark={false}
       >
-        <FormItem name="username" label="نام کاربری" required>
-          <TextInput prefix={<UserOutlined />} placeholder="نام کاربری" autoComplete="username" />
+        <FormItem
+          name="username"
+          rules={[usernameRule]}
+          extra={usernameRule.message}
+          label="نام کاربری"
+          required
+        >
+          <TextInput
+            maxLength={20}
+            prefix={<UserOutlined />}
+            placeholder="نام کاربری"
+            autoComplete="username"
+          />
         </FormItem>
         <FormItem name="password" label="رمز عبور" required>
           <PasswordInput />
         </FormItem>
-        <FormItem name="captchaValue" label="کد امنیتی" required>
+        <FormItem name="captchaValue" rules={[captchaRule]} label="کد امنیتی" required>
           <TextInput
+            maxLength={10}
             placeholder="کد امنیتی"
             disabled={!captchaReady}
             suffix={
@@ -113,7 +126,7 @@ export const LoginPage = ({ username, onSubmit }: LoginPageProps) => {
           block
           icon={<LoginOutlined />}
           loading={isPending}
-          disabled={!captchaReady || !captchaValue || isPending}
+          disabled={!captchaReady || !captchaRule.pattern.test(captchaValue) || isPending}
         >
           ورود
         </Button>

@@ -1,3 +1,9 @@
+import {
+  normalizeLetters,
+  normalizeText,
+  personnelCodeRule,
+  fullNameRule,
+} from '@/utils/inputRules';
 import { useQueryClient } from '@tanstack/react-query';
 import { useMemo } from 'react';
 import { toast } from 'sonner';
@@ -8,7 +14,7 @@ import {
   usePersonnelGet,
   usePersonnelUpdate,
 } from '@/api/generated/facility';
-import { FormItem } from '@/component/form';
+import { Form, FormItem } from '@/component/form';
 import { DateInput, NumberInput, TextInput } from '@/component/input';
 import { FormModal } from '@/component/modal';
 
@@ -17,7 +23,6 @@ import { toEnglishDigits } from '@/utils/date';
 
 import { type StaffDetail, type StaffFormValues } from '../types';
 
-/** کد پرسنلی: فقط طول محدود است (رشته؛ نوع کاراکتر چک نمی‌شود) */
 const PERSONNEL_CODE_MAX = 10;
 
 interface StaffFormModalProps {
@@ -29,15 +34,17 @@ interface StaffFormModalProps {
 }
 
 const toFormValues = (staff: StaffDetail): StaffFormValues => ({
-  fullName: staff.fullName ?? '',
+  fullName: normalizeLetters(staff.fullName ?? ''),
   nationalCode: toEnglishDigits(staff.nationalCode ?? ''),
-  mobile: staff.mobile ?? '',
-  personnelCode: staff.personnelCode ?? '',
+  mobile: normalizeText(staff.mobile ?? ''),
+  personnelCode: normalizeText(staff.personnelCode ?? ''),
   hireDate: staff.hireDate ?? '',
   priority: staff.priority,
 });
 
 export const StaffFormModal = ({ open, companyId, staffId, onClose }: StaffFormModalProps) => {
+  const [form] = Form.useForm<StaffFormValues>();
+  const fullName = Form.useWatch('fullName', form);
   const queryClient = useQueryClient();
   const isEdit = Boolean(staffId);
 
@@ -70,6 +77,8 @@ export const StaffFormModal = ({ open, companyId, staffId, onClose }: StaffFormM
 
   return (
     <FormModal<StaffFormValues>
+      form={form}
+      okButtonProps={{ disabled: Boolean(fullName && !fullNameRule.pattern.test(fullName)) }}
       title={isEdit ? 'ویرایش پرسنل' : 'افزودن پرسنل'}
       okText={isEdit ? 'ذخیره تغییرات' : 'ثبت پرسنل'}
       open={open}
@@ -80,8 +89,14 @@ export const StaffFormModal = ({ open, companyId, staffId, onClose }: StaffFormM
       onCancel={onClose}
       onSubmit={submit}
     >
-      <FormItem name="fullName" label="نام و نام خانوادگی" required>
-        <TextInput />
+      <FormItem
+        name="fullName"
+        normalize={normalizeLetters}
+        rules={[fullNameRule]}
+        label="نام و نام خانوادگی"
+        required
+      >
+        <TextInput maxLength={51} />
       </FormItem>
       <FormItem
         name="nationalCode"
@@ -94,6 +109,7 @@ export const StaffFormModal = ({ open, companyId, staffId, onClose }: StaffFormM
       </FormItem>
       <FormItem
         name="mobile"
+        normalize={toEnglishDigits}
         label="شماره موبایل"
         required
         rules={[{ pattern: /^09\d{9}$/, message: 'شماره موبایل معتبر نیست (مثل ۰۹۱۲۱۲۳۴۵۶۷).' }]}
@@ -102,9 +118,13 @@ export const StaffFormModal = ({ open, companyId, staffId, onClose }: StaffFormM
       </FormItem>
       <FormItem
         name="personnelCode"
+        normalize={normalizeText}
         label="کد پرسنلی (حداکثر ۱۰ کاراکتر)"
         required
-        rules={[{ max: PERSONNEL_CODE_MAX, message: 'کد پرسنلی حداکثر ۱۰ کاراکتر است.' }]}
+        rules={[
+          personnelCodeRule,
+          { max: PERSONNEL_CODE_MAX, message: 'کد پرسنلی حداکثر ۱۰ کاراکتر است.' },
+        ]}
       >
         <TextInput maxLength={PERSONNEL_CODE_MAX} />
       </FormItem>
@@ -112,7 +132,7 @@ export const StaffFormModal = ({ open, companyId, staffId, onClose }: StaffFormM
         <DateInput />
       </FormItem>
       <FormItem name="priority" label="اولویت تخصیص (اختیاری؛ عدد کوچک‌تر = اولویت بالاتر)">
-        <NumberInput min={1} placeholder="خالی = آخرین اولویت" />
+        <NumberInput precision={0} min={1} placeholder="خالی = آخرین اولویت" />
       </FormItem>
     </FormModal>
   );

@@ -1,3 +1,4 @@
+import { descriptionHint, descriptionRule, normalizeLetters } from '@/utils/inputRules';
 import { useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 
@@ -56,11 +57,13 @@ export const CancelLoanModal = ({ request, onClose }: CancelLoanModalProps) => {
       </FormItem>
       <FormItem
         name="description"
+        normalize={normalizeLetters}
+        extra={descriptionHint}
         label="توضیحات"
         required
-        rules={[{ min: 5, message: 'توضیحات باید حداقل ۵ نویسه باشد.' }]}
+        rules={[descriptionRule, { min: 5, message: 'توضیحات باید حداقل ۵ نویسه باشد.' }]}
       >
-        <TextAreaInput maxLength={500} />
+        <TextAreaInput maxLength={300} />
       </FormItem>
     </FormModal>
   );

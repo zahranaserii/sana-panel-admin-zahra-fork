@@ -1,3 +1,4 @@
+import { descriptionRule, normalizeLetters, titleRule } from '@/utils/inputRules';
 import { DeleteOutlined, PlusOutlined } from '@ant-design/icons';
 import { Form } from 'antd';
 
@@ -37,8 +38,16 @@ export const TextListFields = ({
                 <span className="mt-1.5 w-6 shrink-0 text-center text-[12px] text-ink-soft">
                   {toPersianDigits(index + 1)}
                 </span>
-                <FormItem name={field.name} className="mb-2 flex-1">
-                  <TextInput placeholder={placeholder} />
+                <FormItem
+                  name={field.name}
+                  normalize={normalizeLetters}
+                  rules={[name === 'documentTypes' ? titleRule : descriptionRule]}
+                  className="mb-2 flex-1"
+                >
+                  <TextInput
+                    maxLength={name === 'documentTypes' ? 50 : 300}
+                    placeholder={placeholder}
+                  />
                 </FormItem>
                 {fields.length > 1 && (
                   <Button

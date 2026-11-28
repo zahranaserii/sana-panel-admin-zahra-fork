@@ -5,7 +5,12 @@ import { usePersonnelSearch } from '@/api/generated/facility';
 import { FormItem } from '@/component/form';
 import { AmountInput, NumberInput } from '@/component/input';
 import { Table } from '@/component/table';
-import { type Staff, type StaffFilters, toSearchParams } from '@/features/staff/types';
+import {
+  type Staff,
+  type StaffFilters,
+  toSearchParams,
+  validStaffFilters,
+} from '@/features/staff/types';
 import { toPersianDigits } from '@/utils/date';
 
 interface StaffPickTableProps {
@@ -31,10 +36,14 @@ export const StaffPickTable = ({
   selectedIds,
   onSelect,
 }: StaffPickTableProps) => {
-  const { data, isFetching, isError, refetch } = usePersonnelSearch(companyId, {
-    ...toSearchParams(filters),
-    ...ALL,
-  });
+  const { data, isFetching, isError, refetch } = usePersonnelSearch(
+    companyId,
+    {
+      ...toSearchParams(filters),
+      ...ALL,
+    },
+    { query: { enabled: validStaffFilters(filters) } },
+  );
 
   const columns: ColumnsType<Staff> = [
     {
@@ -50,7 +59,7 @@ export const StaffPickTable = ({
       key: 'paymentOrder',
       render: (_value, row, index) => (
         <FormItem name={['rows', String(row.id), 'paymentOrder']} initialValue={index + 1} noStyle>
-          <NumberInput min={1} style={{ width: 80 }} />
+          <NumberInput precision={0} min={1} style={{ width: 80 }} />
         </FormItem>
       ),
     },

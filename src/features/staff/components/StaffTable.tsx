@@ -16,7 +16,7 @@ import { Table, usePaging } from '@/component/table';
 import { useEnums } from '@/services/enums';
 import { formatJalali, toPersianDigits } from '@/utils/date';
 
-import { type Staff, type StaffFilters, toSearchParams } from '../types';
+import { type Staff, type StaffFilters, toSearchParams, validStaffFilters } from '../types';
 
 interface StaffTableProps {
   companyId: number;
@@ -37,11 +37,15 @@ export const StaffTable = ({ companyId, filters, onEdit, loadingEditId }: StaffT
   const queryClient = useQueryClient();
   const enums = useEnums();
 
-  const { data, isFetching, isError, refetch } = usePersonnelSearch(companyId, {
-    ...toSearchParams(filters),
-    Page: page,
-    PageSize: pageSize,
-  });
+  const { data, isFetching, isError, refetch } = usePersonnelSearch(
+    companyId,
+    {
+      ...toSearchParams(filters),
+      Page: page,
+      PageSize: pageSize,
+    },
+    { query: { enabled: validStaffFilters(filters) } },
+  );
 
   const { mutateAsync: deleteStaff } = usePersonnelDelete({
     mutation: {

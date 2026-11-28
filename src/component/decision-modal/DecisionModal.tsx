@@ -1,3 +1,4 @@
+import { descriptionHint, descriptionRule, normalizeLetters } from '@/utils/inputRules';
 import { type ReactNode } from 'react';
 
 import { type PostApprovalStage } from '@/api/generated/facility/facilityPanelAPI.schemas';
@@ -103,15 +104,18 @@ export const DecisionModal = ({
       {!isReject && approveFields}
       <FormItem
         name="description"
+        normalize={normalizeLetters}
+        extra={descriptionHint}
         label={noteRequired ? 'توضیحات' : 'توضیحات (اختیاری)'}
         required={noteRequired}
         requiredMessage="توضیحات رد الزامی است."
         rules={[
+          descriptionRule,
           { whitespace: true, message: 'توضیحات رد الزامی است.' },
           ...(noteRequired ? [{ min: 5, message: 'توضیحات باید حداقل ۵ نویسه باشد.' }] : []),
         ]}
       >
-        <TextAreaInput maxLength={500} />
+        <TextAreaInput maxLength={300} />
       </FormItem>
       {allowFile && (
         <FormItem name="file" label="الصاق مستندات (اختیاری)">

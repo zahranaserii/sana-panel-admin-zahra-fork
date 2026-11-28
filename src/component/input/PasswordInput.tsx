@@ -10,5 +10,11 @@ export const PasswordInput = ({
   placeholder = 'رمز عبور',
   ...rest
 }: PasswordInputProps) => (
-  <Input.Password prefix={prefix} autoComplete={autoComplete} placeholder={placeholder} {...rest} />
+  <Input.Password
+    maxLength={30}
+    prefix={prefix}
+    autoComplete={autoComplete}
+    placeholder={placeholder}
+    {...rest}
+  />
 );

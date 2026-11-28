@@ -128,7 +128,7 @@ export const UsersTable = () => {
         pagination={{
           current: page,
           pageSize: pageSize,
-          total: data?.totalCount ?? 0,
+          total: data?.total,
           onChange: onPageChange,
         }}
       />

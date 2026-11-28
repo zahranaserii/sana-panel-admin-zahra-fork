@@ -43,7 +43,7 @@ export const NumberListFields = ({
                   requiredMessage="مقدار را وارد کنید."
                   className="flex-1"
                 >
-                  <NumberInput min={0} step={step} />
+                  <NumberInput precision={step === 1 ? 0 : undefined} min={0} step={step} />
                 </FormItem>
                 {fields.length > 1 && (
                   <Button

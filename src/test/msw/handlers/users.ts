@@ -79,7 +79,8 @@ export const userHandlers = [
 
   http.get(api(ENDPOINTS.USER_MANAGEMENT.USERS), async ({ request }) => {
     await delay(250);
-    return json(paginate(db.users.map(withoutPassword), request));
+    const { totalCount, ...page } = paginate(db.users.map(withoutPassword), request);
+    return json({ ...page, total: totalCount });
   }),
 
   http.get(api(ENDPOINTS.USER_MANAGEMENT.USER(':id')), async ({ params }) => {

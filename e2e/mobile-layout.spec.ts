@@ -102,5 +102,8 @@ test('signed-in user changes their own password from the actions drawer', async 
   await dialog.getByLabel('رمز عبور فعلی').fill('updated-admin-password1');
   await dialog.getByRole('button', { name: 'ثبت رمز جدید' }).click();
   await expect(dialog).toBeHidden();
-  await expect(page.getByText('رمز عبور شما تغییر کرد.')).toBeVisible();
+  await expect(page).toHaveURL(/\/login$/);
+  expect((await page.context().cookies()).some(({ name }) => name === 'sana_token')).toBe(false);
+  await page.goto('/users');
+  await expect(page).toHaveURL(/\/login$/);
 });

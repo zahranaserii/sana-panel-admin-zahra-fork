@@ -1,3 +1,4 @@
+import { searchRule } from '@/utils/inputRules';
 import { CheckOutlined, CloseOutlined } from '@ant-design/icons';
 import { useQueryClient } from '@tanstack/react-query';
 import { App } from 'antd';
@@ -53,19 +54,22 @@ export const PendingRequestsTable = ({ companyId, onCompanyChange }: PendingRequ
   const [term, setTerm] = useState('');
   const [selected, setSelected] = useState<PendingRequest[]>([]);
   const [target, setTarget] = useState<DecisionTarget | null>(null);
-  const debouncedTerm = useDebouncedValue(term.trim());
+  const debouncedTerm = useDebouncedValue(term);
   const isPending = status === LOAN_STATUS.PENDING_MANAGER;
 
   const queryClient = useQueryClient();
   const { modal } = App.useApp();
 
-  const { data, isFetching, isError, refetch } = useApprovalsManagerQueue({
-    CompanyId: companyId ? Number(companyId) : undefined,
-    Status: isPending ? undefined : status,
-    Term: debouncedTerm || undefined,
-    Page: page,
-    PageSize: pageSize,
-  });
+  const { data, isFetching, isError, refetch } = useApprovalsManagerQueue(
+    {
+      CompanyId: companyId ? Number(companyId) : undefined,
+      Status: isPending ? undefined : status,
+      Term: debouncedTerm.trim() || undefined,
+      Page: page,
+      PageSize: pageSize,
+    },
+    { query: { enabled: searchRule.pattern.test(term) && searchRule.pattern.test(debouncedTerm) } },
+  );
   // تعداد کل در انتظار (همه شرکت‌های دامنه کاربر)؛ خطا پیام نشان نمی‌دهد
   const { data: counts } = useApprovalsPendingCounts({ request: { silent: true } });
 

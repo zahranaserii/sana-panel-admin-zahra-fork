@@ -1,3 +1,9 @@
+import {
+  agreementRule,
+  normalizeLetters,
+  normalizeText,
+  organizationNameRule,
+} from '@/utils/inputRules';
 import { useQueryClient } from '@tanstack/react-query';
 import { Form } from 'antd';
 import { useMemo } from 'react';
@@ -30,8 +36,6 @@ interface CompanyFormModalProps {
 }
 
 /** قواعد اعتبارسنجی بک‌اند (CreateCompanyCommand / Company) */
-const NAME_PATTERN = /^[\u0600-\u06FF\u200C\s0-9]+$/;
-const AGREEMENT_PATTERN = /^[\p{L}0-9/\-.]+$/u;
 const MIN_CONTRACT_DATE = dayjs.fromJalali(1400, 1, 1).toDate();
 const MIN_ACCOUNT_OPENING_DATE = dayjs.fromJalali(1380, 1, 1).toDate();
 const MAX_DATE = dayjs.fromJalali(1450, 12, 29).toDate();
@@ -40,10 +44,10 @@ const EMPTY_VALUES: Partial<CompanyFormValues> = { salaryFromSepah: false, planI
 
 const toFormValues = (detail: CompanyDetail): CompanyFormValues => ({
   schemeId: detail.schemeId,
-  name: detail.name ?? '',
-  nationalId: detail.nationalId ?? '',
-  agreementNumber: detail.agreementNumber ?? '',
-  accountNumber: detail.accountNumber ?? '',
+  name: normalizeLetters(detail.name ?? ''),
+  nationalId: normalizeText(detail.nationalId ?? ''),
+  agreementNumber: normalizeText(detail.agreementNumber ?? ''),
+  accountNumber: normalizeText(detail.accountNumber ?? ''),
   contractDate: detail.contractDate ?? '',
   accountOpeningDate: detail.accountOpeningDate ?? '',
   salaryFromSepah: Boolean(detail.salaryFromSepah),
@@ -149,17 +153,19 @@ export const CompanyFormModal = ({ open, companyId, onClose }: CompanyFormModalP
       </FormItem>
       <FormItem
         name="name"
+        normalize={normalizeLetters}
         label="نام شرکت"
         required
         rules={[
           { min: 3, max: 100, message: 'نام شرکت باید ۳ تا ۱۰۰ نویسه باشد.' },
-          { pattern: NAME_PATTERN, message: 'نام شرکت فقط حروف فارسی، فاصله و عدد.' },
+          organizationNameRule,
         ]}
       >
         <TextInput maxLength={100} />
       </FormItem>
       <FormItem
         name="nationalId"
+        normalize={normalizeText}
         label="شناسه ملی شرکت"
         required
         rules={[{ pattern: /^\d{11}$/, message: 'شناسه ملی شرکت باید ۱۱ رقم باشد.' }]}
@@ -169,17 +175,19 @@ export const CompanyFormModal = ({ open, companyId, onClose }: CompanyFormModalP
       </FormItem>
       <FormItem
         name="agreementNumber"
+        normalize={normalizeText}
         label="شماره تفاهم‌نامه منعقده"
         required
         rules={[
           { min: 3, max: 50, message: 'شماره تفاهم‌نامه باید ۳ تا ۵۰ نویسه باشد.' },
-          { pattern: AGREEMENT_PATTERN, message: 'شماره تفاهم‌نامه فقط حرف، عدد و / - .' },
+          agreementRule,
         ]}
       >
         <TextInput maxLength={50} />
       </FormItem>
       <FormItem
         name="accountNumber"
+        normalize={normalizeText}
         label="شماره حساب شرکت"
         required
         rules={[{ pattern: /^\d{8,24}$/, message: 'شماره حساب باید ۸ تا ۲۴ رقم باشد.' }]}

@@ -1,3 +1,4 @@
+import { descriptionHint, descriptionRule, normalizeLetters } from '@/utils/inputRules';
 import { useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 
@@ -41,8 +42,15 @@ export const RestoreModal = ({ log, onClose }: RestoreModalProps) => {
       }
     >
       <p className="mt-0 mb-4 text-[12.5px] text-ink-soft">{log?.details}</p>
-      <FormItem name="description" label="توضیح بازگردانی" required>
-        <TextAreaInput rows={3} />
+      <FormItem
+        name="description"
+        rules={[descriptionRule]}
+        normalize={normalizeLetters}
+        extra={descriptionHint}
+        label="توضیح بازگردانی"
+        required
+      >
+        <TextAreaInput rows={3} maxLength={300} />
       </FormItem>
     </FormModal>
   );

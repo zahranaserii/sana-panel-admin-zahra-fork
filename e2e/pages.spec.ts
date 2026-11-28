@@ -111,3 +111,27 @@ test('main pages work on the backend models (mock) without errors', async ({ pag
 
   expect(errors).toEqual([]);
 });
+
+test('invalid personnel search is blocked for a direct URL and a submitted form', async ({
+  page,
+  context,
+  baseURL,
+}) => {
+  await context.addCookies([
+    { name: 'sana_token', value: 'mock-token-admin', url: new URL('/staff', baseURL).origin },
+  ]);
+  const endpoint = 'Companies/1/Personnel';
+  await page.addInitScript((path) => localStorage.setItem('mock-fail-once', path), endpoint);
+  await page.goto('/staff?companyId=1&q=bad%3C');
+  const search = page.getByPlaceholder('جستجو...');
+  await expect(page.getByText(/جستجو حداکثر ۳۰ کاراکتر است/)).toBeVisible();
+  await search.fill('bad>');
+  await page.getByRole('button', { name: /^(?:search )?جستجو$/ }).click();
+  await expect(page).toHaveURL(/q=bad%3C/i);
+  expect(await page.evaluate(() => localStorage.getItem('mock-fail-once'))).toBe(endpoint);
+  await search.fill('۱۰۱');
+  await page.getByRole('button', { name: /^(?:search )?جستجو$/ }).click();
+  await expect(page).toHaveURL(/q=101/);
+  await page.getByRole('button', { name: /تلاش مجدد/ }).click();
+  await expect(page.getByRole('cell', { name: '101', exact: true })).toBeVisible();
+});

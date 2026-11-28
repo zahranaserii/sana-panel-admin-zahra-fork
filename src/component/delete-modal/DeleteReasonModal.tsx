@@ -1,3 +1,4 @@
+import { descriptionHint, descriptionRule, normalizeLetters } from '@/utils/inputRules';
 import { FormItem } from '../form';
 import { FileInput, TextAreaInput } from '../input';
 import { FormModal } from '../modal';
@@ -38,14 +39,17 @@ export const DeleteReasonModal = ({
     {message && <p className="mt-0 mb-4 text-[12.5px] text-ink-soft">{message}</p>}
     <FormItem
       name="description"
+      normalize={normalizeLetters}
+      extra={descriptionHint}
       label="توضیحات حذف"
       required
       rules={[
+        descriptionRule,
         { whitespace: true, message: 'توضیحات حذف الزامی است.' },
         { min: 5, message: 'توضیحات حذف باید حداقل ۵ نویسه باشد.' },
       ]}
     >
-      <TextAreaInput rows={3} maxLength={500} />
+      <TextAreaInput rows={3} maxLength={300} />
     </FormItem>
     {requireFile && (
       <FormItem

@@ -15,7 +15,7 @@ type ChangePasswordModalProps = {
   onCancel: () => void;
 } & (
   | { mode?: 'login'; onSubmit: (values: ChangePasswordFormValues) => Promise<void> }
-  | { mode: 'account' }
+  | { mode: 'account'; onPasswordChanged: () => Promise<void> }
 );
 
 export const ChangePasswordModal = (props: ChangePasswordModalProps) => {
@@ -28,7 +28,7 @@ export const ChangePasswordModal = (props: ChangePasswordModalProps) => {
         newPassword: values.newPassword,
       });
       toast.success('رمز عبور شما تغییر کرد.');
-      props.onCancel();
+      await props.onPasswordChanged();
     },
     onError: (error) => {
       if (!isAxiosError(error)) toast.error(error.message);
